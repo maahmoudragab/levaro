@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { login } from "@/app/admin/actionsLogs";
+import { login } from "@/app/admin/login/actionsLogs";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -8,7 +10,20 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // لو الأدمن مسجل بالفعل، مفيش داعي يشوف Login
+  if (user) {
+    redirect("/admin");
+  }
+
+
   const params = await searchParams;
+
 
   const hasError = params.error === "invalid_credentials";
 
