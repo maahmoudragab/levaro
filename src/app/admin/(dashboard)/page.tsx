@@ -1,5 +1,9 @@
+import { getOverviewStats } from "@/app/services/admin/overview";
 import Overview from "@/components/dashboard/Overview";
 
 export default async function AdminPage() {
-  return <Overview />;
+  const overviewStats = await getOverviewStats();
+
+
+  return <Overview overviewStats={overviewStats} />;
 }

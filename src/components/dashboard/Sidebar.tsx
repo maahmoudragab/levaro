@@ -22,7 +22,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Sidebar Mobile */}
-      <header className="flex items-center justify-between border-b border-gray-200/80 bg-[#f7f8f9] px-4 py-4 lg:hidden">
+      <header className="flex items-center justify-between bg-[#f7f8f9] p-4 lg:hidden">
         <h1 className="font-bodoni text-2xl font-extrabold text-primary">
           LÉVARO
         </h1>
@@ -41,7 +41,7 @@ export default function Sidebar() {
 
       {/* Sidebar Desktop*/}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-64 flex-col justify-between bg-[#f7f8f9] p-6 shadow-xl transition-transform duration-300 lg:static lg:z-auto lg:w-64 lg:translate-x-0 lg:border-r lg:border-gray-200/80 lg:shadow-none lg:min-h-[calc(100vh-80px)] ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col justify-between bg-[#f7f8f9] p-4 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:overflow-y-auto ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -101,9 +101,6 @@ export default function Sidebar() {
               <IoMdHelpCircleOutline className="text-lg" />
               <span className="text-sm">Support</span>
             </div>
-            {pathname === "/admin/support" && (
-              <div className="h-6 w-1 rounded-full bg-[#084d38]" />
-            )}
           </Link>
 
           <button
