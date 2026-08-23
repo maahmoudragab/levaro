@@ -28,7 +28,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const hasError = params.error === "invalid_credentials";
 
   return (
-    <main className="flex min-h-screen flex-1 flex-col items-center justify-center bg-zinc-200 font-sans">
+    <main className="flex min-h-screen flex-1 flex-col items-center justify-center bg-zinc-200">
       <form
         action={login}
         className="flex w-full max-w-xl flex-col gap-4 rounded-lg bg-white p-6 shadow-md"

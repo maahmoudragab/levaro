@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans ">
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 ">
       <div className="flex flex-col items-center justify-center gap-4">
         <Image
           src="/logo.png"

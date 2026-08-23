@@ -1,18 +1,27 @@
 "use client";
 
-import { logout } from "@/app/admin/login/actionsLogs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { HiCog, HiCube, HiViewGrid, HiMenu, HiX } from "react-icons/hi";
-import { IoMdHelpCircleOutline } from "react-icons/io";
-import { MdCategory, MdLogout } from "react-icons/md";
+import { logout } from "@/app/admin/login/actionsLogs";
+
+import {
+  Settings,
+  Package,
+  LayoutGrid,
+  Menu,
+  X,
+  CircleHelp,
+  Tags,
+  LogOut,
+} from "lucide-react";
+
 
 const navItems = [
-  { label: "Overview", href: "/admin", icon: HiViewGrid },
-  { label: "Products", href: "/admin/products", icon: HiCube },
-  { label: "Categories", href: "/admin/categories", icon: MdCategory },
-  { label: "Settings", href: "/admin/settings", icon: HiCog },
+  { label: "Overview", href: "/admin", icon: LayoutGrid },
+  { label: "Products", href: "/admin/products", icon: Package },
+  { label: "Categories", href: "/admin/categories", icon: Tags },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export default function Sidebar() {
@@ -27,7 +36,7 @@ export default function Sidebar() {
           LÉVARO
         </h1>
         <button onClick={() => setIsOpen(true)}>
-          <HiMenu className="text-2xl text-[#334155]" />
+          <Menu className="text-2xl text-[#334155]" />
         </button>
       </header>
 
@@ -56,7 +65,7 @@ export default function Sidebar() {
               </p>
             </div>
             <button onClick={() => setIsOpen(false)} className="lg:hidden">
-              <HiX className="text-2xl text-[#334155]" />
+              <X className="text-2xl text-[#334155]" />
             </button>
           </div>
 
@@ -79,7 +88,7 @@ export default function Sidebar() {
                     <span className="text-sm">{label}</span>
                   </div>
                   {isActive && (
-                    <div className="h-7 w-[5px] rounded-full bg-primary" />
+                    <div className="h-7 w-1.25 rounded-full bg-primary" />
                   )}
                 </Link>
               );
@@ -98,7 +107,7 @@ export default function Sidebar() {
             }`}
           >
             <div className="flex items-center gap-3">
-              <IoMdHelpCircleOutline className="text-lg" />
+              <CircleHelp className="text-lg" />
               <span className="text-sm">Support</span>
             </div>
           </Link>
@@ -107,7 +116,7 @@ export default function Sidebar() {
             onClick={() => logout()}
             className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-[#c52828] hover:text-red-700"
           >
-            <MdLogout className="text-lg" />
+            <LogOut className="text-lg" />
             <span className="text-sm">Logout</span>
           </button>
         </div>
