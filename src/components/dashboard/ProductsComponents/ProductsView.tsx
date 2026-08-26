@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import Image from "next/image";
@@ -14,9 +13,7 @@ import {
   Table2,
   Trash2,
 } from "lucide-react";
-
 import type { Product } from "@/app/services/admin/products";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,7 +26,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
 import {
   Pagination,
   PaginationContent,
@@ -38,9 +34,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-
 import {
   Table,
   TableBody,
@@ -49,14 +43,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
 import {
+  compareSizes,
   getStockInfo,
   PRODUCTS_PER_PAGE,
 } from "@/components/dashboard/ProductsComponents/product-utils";
+import { PriceTag } from "@/components/dashboard/ProductsComponents/PriceTag";
+
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
 
 type ViewMode = "table" | "grid";
 
@@ -71,48 +69,12 @@ type ProductViewProps = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
+/* Sub-Component: Status Indicator Dot                                        */
 /* -------------------------------------------------------------------------- */
 
-function compareSizes(a: string, b: string) {
-  const sizeOrder = [
-    "XXXS",
-    "XXS",
-    "XS",
-    "S",
-    "M",
-    "L",
-    "XL",
-    "XXL",
-    "XXXL",
-    "XXXXL",
-  ];
-
-  const normalizedA = a.trim().toUpperCase();
-  const normalizedB = b.trim().toUpperCase();
-
-  const indexA = sizeOrder.indexOf(normalizedA);
-  const indexB = sizeOrder.indexOf(normalizedB);
-
-  if (indexA !== -1 || indexB !== -1) {
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  }
-
-  const numberA = Number(normalizedA);
-  const numberB = Number(normalizedB);
-
-  if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) {
-    return numberA - numberB;
-  }
-
-  return normalizedA.localeCompare(normalizedB, undefined, {
-    numeric: true,
-    sensitivity: "base",
-  });
-}
-
+/**
+ * Visual green/gray active status indicator with label.
+ */
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span
@@ -127,38 +89,18 @@ function StatusDot({ active }: { active: boolean }) {
           active ? "bg-primary" : "bg-black/20",
         )}
       />
-
       {active ? "Active" : "Inactive"}
     </span>
   );
 }
 
-function PriceTag({ product }: { product: Product }) {
-  if (product.sale_price !== null) {
-    return (
-      <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-        <span className="font-semibold text-primary">
-          ${product.sale_price}
-        </span>
-
-        <span className="text-[11px] text-black/35 line-through">
-          ${product.price}
-        </span>
-      </span>
-    );
-  }
-
-  return (
-    <span className="whitespace-nowrap font-semibold text-black/65">
-      ${product.price}
-    </span>
-  );
-}
-
 /* -------------------------------------------------------------------------- */
-/* View switcher                                                              */
+/* Sub-Component: Table / Grid View Switcher                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Toggle button group allowing the user to switch between Table and Grid catalog layouts.
+ */
 function ViewSwitcher({
   viewMode,
   onChange,
@@ -181,7 +123,6 @@ function ViewSwitcher({
         )}
       >
         <Table2 className="h-3 w-3" />
-
         <span className="hidden sm:inline">Table</span>
       </Button>
 
@@ -198,7 +139,6 @@ function ViewSwitcher({
         )}
       >
         <Grid2X2 className="h-3 w-3" />
-
         <span className="hidden sm:inline">Grid</span>
       </Button>
     </div>
@@ -206,21 +146,27 @@ function ViewSwitcher({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Empty state                                                                */
+/* Sub-Component: Empty Results State                                         */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Displayed when no catalog products match the active filters or search terms.
+ */
 function EmptyProducts() {
   return (
     <div className="rounded-xl border border-black/10 bg-white py-14 text-center text-sm text-black/40">
-      No products match your search.
+      No products match your search or filters.
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* Product table                                                              */
+/* Sub-Component: Product Table Layout                                        */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * High-density tabular layout for products with responsive mobile card fallback.
+ */
 function ProductTable({
   products,
   currentPage,
@@ -236,7 +182,7 @@ function ProductTable({
 
   return (
     <>
-      {/* Mobile */}
+      {/* Mobile Card List */}
       <div className="flex flex-col gap-2 sm:hidden">
         {products.map((product, index) => (
           <Button
@@ -244,13 +190,13 @@ function ProductTable({
             type="button"
             variant="ghost"
             onClick={() => onSelectProduct(product)}
-            className="h-auto w-full justify-start gap-3 rounded-xl border border-black/10 bg-white p-3 text-left "
+            className="h-auto w-full justify-start gap-2 rounded-xl border border-black/10 bg-white p-3 text-left"
           >
-            <span className="w-4 shrink-0 font-mono text-[11px] text-black/30">
+            <span className="w-4 shrink-0   text-[11px] text-black/30">
               {(currentPage - 1) * PRODUCTS_PER_PAGE + index + 1}
             </span>
 
-            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-black/10 ">
+            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-black/10">
               {product.image && (
                 <Image
                   src={product.image}
@@ -258,6 +204,7 @@ function ProductTable({
                   fill
                   sizes="44px"
                   className="object-cover"
+                  unoptimized
                 />
               )}
             </div>
@@ -267,7 +214,6 @@ function ProductTable({
                 <p className="truncate text-base font-semibold text-black">
                   {product.name}
                 </p>
-
                 <PriceTag product={product} />
               </div>
 
@@ -275,8 +221,6 @@ function ProductTable({
                 <p className="truncate text-[11px] text-black/45">
                   {product.category_name ?? "Uncategorized"}
                 </p>
-
-                {/* <StockBadge product={product} /> */}
               </div>
 
               <StatusDot active={product.is_active} />
@@ -285,7 +229,7 @@ function ProductTable({
         ))}
       </div>
 
-      {/* Desktop */}
+      {/* Desktop Table View */}
       <div className="hidden overflow-x-auto rounded-xl border border-black/10 bg-white sm:block">
         <Table>
           <TableHeader>
@@ -293,19 +237,12 @@ function ProductTable({
               <TableHead className="w-10 px-2 text-center text-[11px]">
                 #
               </TableHead>
-
               <TableHead className="px-4 text-[11px]">Product</TableHead>
-
               <TableHead className="px-4 text-[11px]">Category</TableHead>
-
               <TableHead className="px-4 text-[11px]">Price</TableHead>
-
               <TableHead className="px-4 text-[11px]">Stock</TableHead>
-
               <TableHead className="px-4 text-[11px]">Status</TableHead>
-
               <TableHead className="px-4 text-[11px]">Featured</TableHead>
-
               <TableHead className="px-4 text-right text-[11px]">
                 Action
               </TableHead>
@@ -316,17 +253,18 @@ function ProductTable({
             {products.map((product, index) => {
               const rowIndex =
                 (currentPage - 1) * PRODUCTS_PER_PAGE + index + 1;
+              const stockInfo = getStockInfo(product);
 
               return (
                 <TableRow key={product.id} className="border-black/10">
                   <TableCell className="px-2 py-2 text-center">
-                    <span className="font-mono text-[11px] text-black/30">
+                    <span className="  text-[11px] text-black/30">
                       {rowIndex}
                     </span>
                   </TableCell>
 
                   <TableCell className="px-4 py-2.5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-black/10">
                         {product.image && (
                           <Image
@@ -335,6 +273,7 @@ function ProductTable({
                             fill
                             sizes="40px"
                             className="object-cover"
+                            unoptimized
                           />
                         )}
                       </div>
@@ -343,8 +282,7 @@ function ProductTable({
                         <p className="truncate text-[11px] font-semibold text-black">
                           {product.name}
                         </p>
-
-                        <p className="mt-0.5 font-mono text-[11px] text-black/40">
+                        <p className="mt-0.5   text-[11px] text-black/40">
                           {product.sku ?? "No SKU"}
                         </p>
                       </div>
@@ -362,21 +300,21 @@ function ProductTable({
                   <TableCell className="px-4 py-2.5">
                     <Badge
                       variant={
-                        getStockInfo(product).label === "Out of stock"
+                        stockInfo.label === "Out of stock"
                           ? "outOfStock"
-                          : getStockInfo(product).label.includes("Low stock")
+                          : stockInfo.label.includes("Low stock")
                             ? "lowStock"
                             : "inStock"
                       }
                     >
-                      {getStockInfo(product).label}
+                      {stockInfo.label}
                     </Badge>
                   </TableCell>
 
                   <TableCell className="px-4 py-2.5">
                     <Badge variant={product.is_active ? "active" : "inactive"}>
                       {product.is_active ? "Active" : "Inactive"}
-                    </Badge>{" "}
+                    </Badge>
                   </TableCell>
 
                   <TableCell className="px-4 py-2.5">
@@ -384,7 +322,7 @@ function ProductTable({
                       variant={product.is_featured ? "featured" : "notFeatured"}
                     >
                       {product.is_featured ? "Featured" : "Not Featured"}
-                    </Badge>{" "}
+                    </Badge>
                   </TableCell>
 
                   <TableCell className="px-4 py-2.5 text-right">
@@ -410,9 +348,12 @@ function ProductTable({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Product grid                                                               */
+/* Sub-Component: Product Grid Layout                                         */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Visual grid card layout emphasizing product photography.
+ */
 function ProductGrid({
   products,
   onSelectProduct,
@@ -425,85 +366,96 @@ function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-5">
-      {products.map((product) => (
-        <Card
-          key={product.id}
-          className="group cursor-pointer gap-0 rounded-xl border-black/10 bg-white p-2 shadow-none transition hover:border-primary/30"
-          onClick={() => onSelectProduct(product)}
-        >
-          <div className="relative">
-            <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-black/10 ">
-              {product.image && (
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  className="object-cover"
-                />
-              )}
-            </div>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-5">
+      {products.map((product) => {
+        const stockInfo = getStockInfo(product);
 
-            <div className="absolute left-2 top-2">
-              <Badge
-                variant={
-                  getStockInfo(product).label === "Out of stock"
-                    ? "outOfStock"
-                    : getStockInfo(product).label.includes("Low stock")
-                      ? "lowStock"
-                      : "inStock"
-                }
-              >
-                {getStockInfo(product).label}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="mt-2.5 space-y-1.5">
-            <h3 className="truncate text-base font-semibold text-black">
-              {product.name}
-            </h3>
-            <div className="flex items-center justify-between gap-2">
-              <p className="truncate text-[11px] text-black/40">
-                {product.category_name ?? "Uncategorized"}
-              </p>
-              <PriceTag product={product} />
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Badge variant={product.is_active ? "active" : "inactive"}>
-                {product.is_active ? "Active" : "Inactive"}
-              </Badge>
-              <Badge variant={product.is_featured ? "featured" : "notFeatured"}>
-                {product.is_featured ? "Featured" : "Not Featured"}
-              </Badge>
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              onSelectProduct(product);
-            }}
-            className="mt-2 h-8 w-full rounded-lg border-black/10 text-[11px] font-semibold text-primary hover:border-primary/40 hover:bg-primary/5"
+        return (
+          <Card
+            key={product.id}
+            className="group cursor-pointer gap-0 rounded-xl border-black/10 bg-white p-2 shadow-none transition hover:border-primary/30"
+            onClick={() => onSelectProduct(product)}
           >
-            <Eye className="h-3.5 w-3.5" />
-            Manage
-          </Button>
-        </Card>
-      ))}
+            <div className="relative">
+              <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-black/10">
+                {product.image && (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    className="object-cover"
+                    unoptimized
+                  />
+                )}
+              </div>
+
+              <div className="absolute left-2 top-2">
+                <Badge
+                  variant={
+                    stockInfo.label === "Out of stock"
+                      ? "outOfStock"
+                      : stockInfo.label.includes("Low stock")
+                        ? "lowStock"
+                        : "inStock"
+                  }
+                >
+                  {stockInfo.label}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mt-2.5 space-y-1.5">
+              <h3 className="truncate text-base font-semibold text-black">
+                {product.name}
+              </h3>
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-[11px] text-black/40">
+                  {product.category_name ?? "Uncategorized"}
+                </p>
+                <PriceTag product={product} />
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Badge variant={product.is_active ? "active" : "inactive"}>
+                  {product.is_active ? "Active" : "Inactive"}
+                </Badge>
+                <Badge
+                  variant={product.is_featured ? "featured" : "notFeatured"}
+                >
+                  {product.is_featured ? "Featured" : "Not Featured"}
+                </Badge>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelectProduct(product);
+              }}
+              className="mt-2 h-8 w-full rounded-lg border-black/10 text-[11px] font-semibold text-primary hover:border-primary/40 hover:bg-primary/5"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Manage
+            </Button>
+          </Card>
+        );
+      })}
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* Product details                                                            */
+/* Sub-Component: Product Quick Manage Sheet                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Slide-out drawer displaying comprehensive product details, stock breakdown by size,
+ * quick activation toggle, edit link, and delete action.
+ */
 function ProductDetailsSheet({
   product,
   open,
@@ -568,14 +520,13 @@ function ProductDetailsSheet({
         side="right"
         className="flex w-full max-w-none flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-md"
       >
-        {/* Header */}
+        {/* Sheet Top Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-black/[0.07] p-2 pr-12">
           <div>
             <SheetTitle className="text-base font-semibold text-black">
               Product details
             </SheetTitle>
-
-            <p className="mt-0.5 font-mono text-[11px] text-black/30">
+            <p className="mt-0.5   text-[11px] text-black/30">
               {product.sku ?? product.id}
             </p>
           </div>
@@ -585,12 +536,12 @@ function ProductDetailsSheet({
           </Badge>
         </div>
 
-        {/* Content */}
+        {/* Sheet Scrollable Body */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-2">
-            {/* Product header */}
-            <div className="flex gap-3">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg ">
+            {/* Overview Summary */}
+            <div className="flex gap-2">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
                 {product.image ? (
                   <Image
                     src={product.image}
@@ -598,6 +549,7 @@ function ProductDetailsSheet({
                     fill
                     sizes="96px"
                     className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-[11px] text-black/25">
@@ -610,11 +562,9 @@ function ProductDetailsSheet({
                 <p className="text-[11px] text-black/35">
                   {product.category_name ?? "Uncategorized"}
                 </p>
-
                 <h2 className="mt-1 text-base font-semibold leading-5 text-black">
                   {product.name}
                 </h2>
-
                 <div className="mt-2">
                   <PriceTag product={product} />
                 </div>
@@ -627,7 +577,7 @@ function ProductDetailsSheet({
               </div>
             </div>
 
-            {/* Live product */}
+            {/* Live Storefront Link */}
             <Link
               href={`/products/${product.slug}`}
               target="_blank"
@@ -638,11 +588,10 @@ function ProductDetailsSheet({
               View live product
             </Link>
 
-            {/* Inventory */}
+            {/* Inventory Breakdown by Size */}
             <div className="mt-6">
               <div className="flex items-baseline justify-between">
                 <p className="text-base font-semibold text-black">Inventory</p>
-
                 <span className="text-[11px] text-black/35">
                   {totalStock} total
                 </span>
@@ -653,13 +602,13 @@ function ProductDetailsSheet({
                   {stockBySize.map(([size, quantity]) => (
                     <div
                       key={size}
-                      className="flex items-center gap-3 rounded-lg border  px-3 py-2"
+                      className="flex items-center gap-2 rounded-lg border px-3 py-2"
                     >
                       <span className="min-w-10 text-[11px] font-semibold text-black/70">
                         {size}
                       </span>
 
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full ">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all",
@@ -695,19 +644,18 @@ function ProductDetailsSheet({
               )}
             </div>
 
-            {/* Details */}
+            {/* Attribute Details List */}
             {details.length > 0 && (
               <div className="mt-6">
                 <p className="text-base font-semibold text-black">Details</p>
 
-                <div className="mt-3 divide-y ">
+                <div className="mt-3 divide-y">
                   {details.map(([label, value]) => (
                     <div
                       key={label}
                       className="flex items-center justify-between gap-4 py-2"
                     >
                       <span className="text-[11px] text-black/35">{label}</span>
-
                       <span className="truncate text-right text-[11px] font-medium text-black">
                         {value}
                       </span>
@@ -721,7 +669,6 @@ function ProductDetailsSheet({
             {(product.tags ?? []).length > 0 && (
               <div className="mt-6">
                 <p className="text-[11px] text-black/35">Tags</p>
-
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {product.tags?.map((tag) => (
                     <span
@@ -735,11 +682,10 @@ function ProductDetailsSheet({
               </div>
             )}
 
-            {/* Description */}
+            {/* Full Description */}
             {product.description && (
               <div className="mt-6">
                 <p className="text-[11px] text-black/35">Description</p>
-
                 <p className="mt-2 whitespace-pre-line text-[11px] leading-5 text-black/50">
                   {product.description}
                 </p>
@@ -748,8 +694,8 @@ function ProductDetailsSheet({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="shrink-0 border-t  bg-white p-2">
+        {/* Sheet Footer Action Controls */}
+        <div className="shrink-0 border-t bg-white p-2">
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
@@ -759,7 +705,6 @@ function ProductDetailsSheet({
               className="h-8 rounded-md border-primary/20 text-[11px] text-primary hover:bg-primary/5"
             >
               <ShieldCheck className="h-3 w-3" />
-
               {product.is_active ? "Deactivate" : "Activate"}
             </Button>
 
@@ -773,7 +718,6 @@ function ProductDetailsSheet({
               <Star
                 className={cn("h-3 w-3", product.is_featured && "fill-current")}
               />
-
               {product.is_featured ? "Unfeature" : "Feature"}
             </Button>
           </div>
@@ -782,7 +726,7 @@ function ProductDetailsSheet({
             asChild
             className="mt-2 h-8 w-full rounded-md bg-primary text-[11px] font-medium text-white hover:bg-primary/90"
           >
-            <Link href={`/dashboard/products/edit/${product.id}`}>
+            <Link href={`/admin/products/edit/${product.slug || product.id}`}>
               <Pencil className="h-3 w-3" />
               Edit product
             </Link>
@@ -793,7 +737,7 @@ function ProductDetailsSheet({
             variant="destructive"
             disabled={isLoading}
             onClick={() => onDeleteProduct(product.id)}
-            className=" mt-1 h-8 w-full text-white text-[11px] font-medium bg-rose-800 hover:bg-rose-700"
+            className="mt-1 h-8 w-full text-white text-[11px] font-medium bg-rose-800 hover:bg-rose-700"
           >
             <Trash2 className="h-3 w-3" />
             Delete product
@@ -805,9 +749,13 @@ function ProductDetailsSheet({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Main                                                                       */
+/* Main Component: Products View Container                                    */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Main products catalog presentation layer with Table/Grid switcher,
+ * client-side pagination, details drawer, and delete dialog.
+ */
 export default function ProductView({
   products,
   onToggleActive,
@@ -836,9 +784,7 @@ export default function ProductView({
     }
   };
 
-  const safeProducts = products ?? [];
-
-  const [] = useState<Product[]>(() => [...safeProducts]);
+  const safeProducts = useMemo(() => products ?? [], [products]);
 
   const totalPages = Math.max(
     1,
@@ -864,7 +810,6 @@ export default function ProductView({
     if (!deleteProductId) return;
 
     await onDeleteProduct(deleteProductId);
-
     setDeleteProductId(null);
     setSelectedProduct(null);
   };
@@ -882,8 +827,8 @@ export default function ProductView({
   return (
     <>
       <section className="rounded-xl border bg-[#f7f8f9] p-2.5 sm:p-3">
-        {/* Toolbar */}
-        <div className="mb-2.5 flex items-center justify-between gap-3 px-0.5">
+        {/* 1. Header Toolbar */}
+        <div className="mb-2.5 flex items-center justify-between gap-2 px-0.5">
           <p className="text-[11px] text-black/45">
             Showing{" "}
             <span className="font-semibold text-black/75">
@@ -899,7 +844,7 @@ export default function ProductView({
           <ViewSwitcher viewMode={viewMode} onChange={setViewMode} />
         </div>
 
-        {/* Products */}
+        {/* 2. Products List (Table or Grid) */}
         {viewMode === "table" ? (
           <ProductTable
             products={paginatedProducts}
@@ -913,7 +858,7 @@ export default function ProductView({
           />
         )}
 
-        {/* Pagination */}
+        {/* 3. Pagination Controls */}
         <div className="flex-col flex items-center justify-between border-t border-black/10 pt-2.5">
           <Pagination className="mx-0 w-auto">
             <PaginationContent className="gap-1.5">
@@ -945,9 +890,9 @@ export default function ProductView({
                     }}
                     size="icon"
                     className={cn(
-                      "flex  items-center justify-center rounded-xl border text-[10px] transition-colors",
+                      "flex items-center justify-center rounded-xl border text-[10px] transition-colors",
                       safeCurrentPage === page
-                        ? "border-black/20 bg-black/5 text-black font-semibold"
+                        ? "border-black/20  text-black font-semibold"
                         : "border-transparent bg-transparent text-black/60 hover:bg-black/5 hover:text-black",
                     )}
                   >
@@ -975,6 +920,7 @@ export default function ProductView({
               </PaginationItem>
             </PaginationContent>
           </Pagination>
+
           <p className="text-[11px] text-black/45">
             Page{" "}
             <span className="font-semibold text-black/70">
@@ -985,7 +931,7 @@ export default function ProductView({
         </div>
       </section>
 
-      {/* Product details */}
+      {/* 4. Product Details Drawer */}
       <ProductDetailsSheet
         product={selectedProduct}
         open={Boolean(selectedProduct)}
@@ -1000,7 +946,7 @@ export default function ProductView({
         isLoading={isLoading}
       />
 
-      {/* Delete confirmation */}
+      {/* 5. Delete Confirmation Dialog */}
       <AlertDialog
         open={Boolean(deleteProductId)}
         onOpenChange={(open) => {
@@ -1012,7 +958,6 @@ export default function ProductView({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete product?</AlertDialogTitle>
-
             <AlertDialogDescription>
               {deleteTarget
                 ? `This will permanently delete "${deleteTarget.name}" and its product images.`
@@ -1022,7 +967,6 @@ export default function ProductView({
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-
             <AlertDialogAction
               disabled={isLoading}
               onClick={(event) => {

@@ -1,8 +1,12 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
+/**
+ * Creates a server-side Supabase client for Server Components, Server Actions, and Route Handlers.
+ * Manages cookie synchronization seamlessly across requests.
+ */
 export async function createClient() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,19 +14,19 @@ export async function createClient() {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+              cookieStore.set(name, value, options),
+            );
           } catch {
-            // بيحصل لو اتنادى من Server Component عادي (read-only)
-            // الـ proxy هو اللي بيعمل refresh فعليًا، فمفيش مشكلة
+            // Ignored when called from Server Components where cookies are read-only;
+            // middleware handles session refresh.
           }
         },
       },
-    }
-  )
+    },
+  );
 }

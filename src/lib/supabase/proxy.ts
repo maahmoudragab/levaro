@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/**
+ * Updates the user session and protects admin routes.
+ * Redirects unauthenticated users to `/admin/login` and logged-in admins to `/admin`.
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -25,24 +29,21 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // تشيك سريع محلي — بدون network request لسوبابيز
+  // Fast local claims check without redundant network requests
   const { data: claims } = await supabase.auth.getClaims();
 
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === "/admin/login";
   const isAdminRoute = pathname.startsWith("/admin");
 
+  // Protect admin routes from unauthenticated access
   if (isAdminRoute && !isLoginPage && !claims) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
   }
 
-  if (isLoginPage && claims) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin";
-    return NextResponse.redirect(url);
-  }
+  // Redirect authenticated admin users away from login page
   if (isLoginPage && claims) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";

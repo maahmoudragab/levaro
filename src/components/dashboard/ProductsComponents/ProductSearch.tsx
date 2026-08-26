@@ -8,12 +8,14 @@ type ProductSearchProps = {
   onClear: () => void;
 };
 
+/**
+ * Product search input bar with quick clear trigger.
+ */
 export default function ProductSearch({
   search,
   onSearchChange,
   onClear,
 }: ProductSearchProps) {
-  // Search input
   return (
     <div className="relative flex-1">
       <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />

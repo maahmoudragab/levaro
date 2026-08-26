@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/admin/login/actionsLogs";
-
 import {
   Settings,
   Package,
@@ -16,6 +15,9 @@ import {
   LogOut,
 } from "lucide-react";
 
+/* -------------------------------------------------------------------------- */
+/* Navigation Configuration                                                   */
+/* -------------------------------------------------------------------------- */
 
 const navItems = [
   { label: "Overview", href: "/admin", icon: LayoutGrid },
@@ -24,23 +26,35 @@ const navItems = [
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
+/**
+ * Responsive Admin Dashboard Sidebar.
+ * Supports mobile drawer toggle and sticky desktop navigation.
+ */
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Sidebar Mobile */}
-      <header className="flex items-center justify-between bg-[#f7f8f9] p-4 lg:hidden">
+      {/* -------------------------------------------------------------------- */}
+      {/* Mobile Top Bar Header                                                */}
+      {/* -------------------------------------------------------------------- */}
+      <header className="flex items-center justify-between bg-[#f7f8f9] p-4 lg:hidden border-b border-black/5">
         <h1 className="font-bodoni text-2xl font-extrabold text-primary">
           LÉVARO
         </h1>
-        <button onClick={() => setIsOpen(true)}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          aria-label="Open mobile menu"
+        >
           <Menu className="text-2xl text-[#334155]" />
         </button>
       </header>
 
-      {/* overlay */}
+      {/* -------------------------------------------------------------------- */}
+      {/* Mobile Drawer Overlay                                                */}
+      {/* -------------------------------------------------------------------- */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
@@ -48,13 +62,16 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar Desktop*/}
+      {/* -------------------------------------------------------------------- */}
+      {/* Sidebar (Desktop Sticky + Mobile Drawer)                              */}
+      {/* -------------------------------------------------------------------- */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col justify-between bg-[#f7f8f9] p-4 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:overflow-y-auto ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="space-y-8">
+          {/* Logo & Close Button */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-bodoni text-4xl font-extrabold text-primary">
@@ -64,11 +81,17 @@ export default function Sidebar() {
                 Admin Dashboard
               </p>
             </div>
-            <button onClick={() => setIsOpen(false)} className="lg:hidden">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden"
+              aria-label="Close mobile menu"
+            >
               <X className="text-2xl text-[#334155]" />
             </button>
           </div>
 
+          {/* Navigation Links */}
           <nav className="space-y-2">
             {navItems.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href;
@@ -96,7 +119,8 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="mt-12 space-y-3 pt-6">
+        {/* Footer Links (Support & Logout) */}
+        <div className="mt-12 space-y-3 pt-6 border-t border-black/5">
           <Link
             href="/admin/support"
             onClick={() => setIsOpen(false)}
@@ -113,8 +137,9 @@ export default function Sidebar() {
           </Link>
 
           <button
+            type="button"
             onClick={() => logout()}
-            className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-[#c52828] hover:text-red-700"
+            className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-[#c52828] hover:text-red-700 transition-colors"
           >
             <LogOut className="text-lg" />
             <span className="text-sm">Logout</span>
