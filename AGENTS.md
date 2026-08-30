@@ -258,6 +258,14 @@ If there are multiple reasonable approaches, prefer the simplest and most mainta
 
 When something is unclear, ask before making a major assumption.
 
+---
+
+## Design Guidelines & UI/UX Standards
+
+When designing, reviewing, or implementing UI/UX components:
+* Adhere to the design system and audit rules in `.agents/skills/apple-design/SKILL.md`.
+* Refer to `.agents/skills/apple-design/references/hig-lookup.md` and related reference documents in `.agents/skills/apple-design/references/hig/` for specific guidelines (Typography, Color, Spacing, Accessibility, Motion, etc.).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

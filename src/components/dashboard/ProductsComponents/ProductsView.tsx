@@ -79,14 +79,14 @@ function StatusDot({ active }: { active: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-medium",
-        active ? "text-black/65" : "text-black/35",
+        "inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium",
+        active ? "text-emerald-700" : "text-zinc-500",
       )}
     >
       <span
         className={cn(
-          "h-1.5 w-1.5 rounded-full",
-          active ? "bg-primary" : "bg-black/20",
+          "h-2 w-2 rounded-full",
+          active ? "bg-emerald-500" : "bg-zinc-300",
         )}
       />
       {active ? "Active" : "Inactive"}
@@ -99,7 +99,8 @@ function StatusDot({ active }: { active: boolean }) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Toggle button group allowing the user to switch between Table and Grid catalog layouts.
+ * Apple HIG Segmented Control for switching between Table and Grid catalog layouts.
+ * Styled with Lévaro luxury brand aesthetics.
  */
 function ViewSwitcher({
   viewMode,
@@ -109,38 +110,46 @@ function ViewSwitcher({
   onChange: (mode: ViewMode) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-lg border border-black/10 bg-white p-1">
-      <Button
+    <div className="inline-flex items-center gap-1 rounded-xl border border-zinc-200/80 bg-zinc-100/90 p-1 shadow-inner">
+      <button
         type="button"
-        variant={viewMode === "table" ? "default" : "ghost"}
-        size="sm"
         onClick={() => onChange("table")}
+        aria-label="Table view"
         className={cn(
-          "h-7 rounded-md px-2 text-[11px]",
+          "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-all duration-200 active:scale-[0.97]",
           viewMode === "table"
-            ? "bg-primary text-white hover:bg-primary/90"
-            : "text-black/45 hover:text-black",
+            ? "bg-primary text-white font-semibold shadow-xs"
+            : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50",
         )}
       >
-        <Table2 className="h-3 w-3" />
+        <Table2
+          className={cn(
+            "size-3.5 transition-colors",
+            viewMode === "table" ? "text-white" : "text-zinc-400",
+          )}
+        />
         <span className="hidden sm:inline">Table</span>
-      </Button>
+      </button>
 
-      <Button
+      <button
         type="button"
-        variant={viewMode === "grid" ? "default" : "ghost"}
-        size="sm"
         onClick={() => onChange("grid")}
+        aria-label="Grid view"
         className={cn(
-          "h-7 rounded-md px-2 text-[11px]",
+          "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-all duration-200 active:scale-[0.97]",
           viewMode === "grid"
-            ? "bg-primary text-white hover:bg-primary/90"
-            : "text-black/45 hover:text-black",
+            ? "bg-primary text-white font-semibold shadow-xs"
+            : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50",
         )}
       >
-        <Grid2X2 className="h-3 w-3" />
+        <Grid2X2
+          className={cn(
+            "size-3.5 transition-colors",
+            viewMode === "grid" ? "text-white" : "text-zinc-400",
+          )}
+        />
         <span className="hidden sm:inline">Grid</span>
-      </Button>
+      </button>
     </div>
   );
 }
@@ -154,7 +163,7 @@ function ViewSwitcher({
  */
 function EmptyProducts() {
   return (
-    <div className="rounded-xl border border-black/10 bg-white py-14 text-center text-sm text-black/40">
+    <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/50 py-16 text-center text-xs sm:text-sm font-medium text-zinc-500">
       No products match your search or filters.
     </div>
   );
@@ -183,26 +192,26 @@ function ProductTable({
   return (
     <>
       {/* Mobile Card List */}
-      <div className="flex flex-col gap-2 sm:hidden">
+      <div className="flex flex-col gap-2.5 sm:hidden">
         {products.map((product, index) => (
           <Button
             key={product.id}
             type="button"
             variant="ghost"
             onClick={() => onSelectProduct(product)}
-            className="h-auto w-full justify-start gap-2 rounded-xl border border-black/10 bg-white p-3 text-left"
+            className="h-auto w-full justify-start gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3.5 text-left shadow-2xs transition-all hover:border-zinc-300"
           >
-            <span className="w-4 shrink-0   text-[11px] text-black/30">
+            <span className="w-4 shrink-0 text-xs font-medium text-zinc-400 tabular-nums">
               {(currentPage - 1) * PRODUCTS_PER_PAGE + index + 1}
             </span>
 
-            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-black/10">
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-zinc-100">
               {product.image && (
                 <Image
                   src={product.image}
                   alt={product.name}
                   fill
-                  sizes="44px"
+                  sizes="48px"
                   className="object-cover"
                   unoptimized
                 />
@@ -211,14 +220,14 @@ function ProductTable({
 
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-start justify-between gap-2">
-                <p className="truncate text-base font-semibold text-black">
+                <p className="truncate text-sm font-semibold text-zinc-900">
                   {product.name}
                 </p>
-                <PriceTag product={product} />
+                <PriceTag product={product} size="sm" />
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-[11px] text-black/45">
+                <p className="truncate text-xs text-zinc-500">
                   {product.category_name ?? "Uncategorized"}
                 </p>
               </div>
@@ -230,20 +239,20 @@ function ProductTable({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden overflow-x-auto rounded-xl border border-black/10 bg-white sm:block">
+      <div className="hidden overflow-x-auto rounded-2xl border border-zinc-200/80 bg-white shadow-2xs sm:block">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-10 px-2 text-center text-[11px]">
+            <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+              <TableHead className="w-12 px-3 text-center text-xs font-semibold text-zinc-500">
                 #
               </TableHead>
-              <TableHead className="px-4 text-[11px]">Product</TableHead>
-              <TableHead className="px-4 text-[11px]">Category</TableHead>
-              <TableHead className="px-4 text-[11px]">Price</TableHead>
-              <TableHead className="px-4 text-[11px]">Stock</TableHead>
-              <TableHead className="px-4 text-[11px]">Status</TableHead>
-              <TableHead className="px-4 text-[11px]">Featured</TableHead>
-              <TableHead className="px-4 text-right text-[11px]">
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Product</TableHead>
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Category</TableHead>
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Price</TableHead>
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Stock</TableHead>
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Status</TableHead>
+              <TableHead className="px-4 text-xs font-semibold text-zinc-500">Featured</TableHead>
+              <TableHead className="px-4 text-right text-xs font-semibold text-zinc-500">
                 Action
               </TableHead>
             </TableRow>
@@ -256,48 +265,48 @@ function ProductTable({
               const stockInfo = getStockInfo(product);
 
               return (
-                <TableRow key={product.id} className="border-black/10">
-                  <TableCell className="px-2 py-2 text-center">
-                    <span className="  text-[11px] text-black/30">
+                <TableRow key={product.id} className="border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/60">
+                  <TableCell className="px-3 py-3 text-center">
+                    <span className="text-xs font-medium text-zinc-400 tabular-nums">
                       {rowIndex}
                     </span>
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-black/10">
+                  <TableCell className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-zinc-100">
                         {product.image && (
                           <Image
                             src={product.image}
                             alt={product.name}
                             fill
-                            sizes="40px"
+                            sizes="44px"
                             className="object-cover"
                             unoptimized
                           />
                         )}
                       </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-[11px] font-semibold text-black">
+                      <div className="min-w-0 space-y-0.5">
+                        <p className="truncate text-xs sm:text-sm font-semibold text-zinc-900">
                           {product.name}
                         </p>
-                        <p className="mt-0.5   text-[11px] text-black/40">
+                        <p className="text-xs font-medium text-zinc-400 tabular-nums">
                           {product.sku ?? "No SKU"}
                         </p>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5 text-[11px] text-black/55">
+                  <TableCell className="px-4 py-3 text-xs font-medium text-zinc-600">
                     {product.category_name ?? "Uncategorized"}
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5 text-[11px]">
+                  <TableCell className="px-4 py-3">
                     <PriceTag product={product} />
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5">
+                  <TableCell className="px-4 py-3">
                     <Badge
                       variant={
                         stockInfo.label === "Out of stock"
@@ -311,13 +320,13 @@ function ProductTable({
                     </Badge>
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5">
+                  <TableCell className="px-4 py-3">
                     <Badge variant={product.is_active ? "active" : "inactive"}>
                       {product.is_active ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5">
+                  <TableCell className="px-4 py-3">
                     <Badge
                       variant={product.is_featured ? "featured" : "notFeatured"}
                     >
@@ -325,15 +334,15 @@ function ProductTable({
                     </Badge>
                   </TableCell>
 
-                  <TableCell className="px-4 py-2.5 text-right">
+                  <TableCell className="px-4 py-3 text-right">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => onSelectProduct(product)}
-                      className="h-7 rounded-md border-black/10 px-2.5 text-[11px] font-medium text-primary hover:border-primary/30 hover:bg-primary/5"
+                      className="h-8 rounded-lg border-zinc-200 bg-white px-3 text-xs font-medium text-primary hover:border-primary/40 hover:bg-primary/5"
                     >
-                      <Eye className="h-3 w-3" />
+                      <Eye className="mr-1.5 h-3.5 w-3.5 text-primary" />
                       Manage
                     </Button>
                   </TableCell>
@@ -366,31 +375,31 @@ function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {products.map((product) => {
         const stockInfo = getStockInfo(product);
 
         return (
           <Card
             key={product.id}
-            className="group cursor-pointer gap-0 rounded-xl border-black/10 bg-white p-2 shadow-none transition hover:border-primary/30"
+            className="group cursor-pointer gap-0 rounded-2xl border-zinc-200/80 bg-white p-3 shadow-2xs transition-all hover:border-zinc-300 hover:shadow-xs"
             onClick={() => onSelectProduct(product)}
           >
             <div className="relative">
-              <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-black/10">
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-black/5 bg-zinc-100">
                 {product.image && (
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                     unoptimized
                   />
                 )}
               </div>
 
-              <div className="absolute left-2 top-2">
+              <div className="absolute left-2.5 top-2.5">
                 <Badge
                   variant={
                     stockInfo.label === "Out of stock"
@@ -405,18 +414,18 @@ function ProductGrid({
               </div>
             </div>
 
-            <div className="mt-2.5 space-y-1.5">
-              <h3 className="truncate text-base font-semibold text-black">
+            <div className="mt-3 space-y-1.5">
+              <h3 className="truncate text-xs sm:text-sm font-semibold text-zinc-900">
                 {product.name}
               </h3>
               <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-[11px] text-black/40">
+                <p className="truncate text-xs text-zinc-500">
                   {product.category_name ?? "Uncategorized"}
                 </p>
-                <PriceTag product={product} />
+                <PriceTag product={product} size="sm" />
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 pt-0.5">
                 <Badge variant={product.is_active ? "active" : "inactive"}>
                   {product.is_active ? "Active" : "Inactive"}
                 </Badge>
@@ -436,9 +445,9 @@ function ProductGrid({
                 event.stopPropagation();
                 onSelectProduct(product);
               }}
-              className="mt-2 h-8 w-full rounded-lg border-black/10 text-[11px] font-semibold text-primary hover:border-primary/40 hover:bg-primary/5"
+              className="mt-3 h-8.5 w-full rounded-xl border-zinc-200 bg-white text-xs font-medium text-primary hover:border-primary/40 hover:bg-primary/5"
             >
-              <Eye className="h-3.5 w-3.5" />
+              <Eye className="mr-1.5 h-3.5 w-3.5 text-primary" />
               Manage
             </Button>
           </Card>
@@ -456,7 +465,7 @@ function ProductGrid({
  * Slide-out drawer displaying comprehensive product details, stock breakdown by size,
  * quick activation toggle, edit link, and delete action.
  */
-function ProductDetailsSheet({
+export function ProductDetailsSheet({
   product,
   open,
   onOpenChange,
@@ -521,12 +530,12 @@ function ProductDetailsSheet({
         className="flex w-full max-w-none flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-md"
       >
         {/* Sheet Top Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-black/[0.07] p-2 pr-12">
+        <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 p-4 pr-12">
           <div>
-            <SheetTitle className="text-base font-semibold text-black">
-              Product details
+            <SheetTitle className="text-base font-semibold text-zinc-900">
+              Product Details
             </SheetTitle>
-            <p className="mt-0.5   text-[11px] text-black/30">
+            <p className="mt-0.5 text-xs text-zinc-400 font-mono">
               {product.sku ?? product.id}
             </p>
           </div>
@@ -538,39 +547,39 @@ function ProductDetailsSheet({
 
         {/* Sheet Scrollable Body */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-2">
+          <div className="p-4 sm:p-5 space-y-6">
             {/* Overview Summary */}
-            <div className="flex gap-2">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
+            <div className="flex gap-3 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-3">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-zinc-100 border border-black/5">
                 {product.image ? (
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    sizes="96px"
+                    sizes="80px"
                     className="object-cover"
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[11px] text-black/25">
+                  <div className="flex h-full items-center justify-center text-xs text-zinc-400">
                     No image
                   </div>
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-black/35">
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-xs text-zinc-500">
                   {product.category_name ?? "Uncategorized"}
                 </p>
-                <h2 className="mt-1 text-base font-semibold leading-5 text-black">
+                <h2 className="text-sm font-semibold leading-tight text-zinc-900">
                   {product.name}
                 </h2>
-                <div className="mt-2">
+                <div className="mt-1">
                   <PriceTag product={product} />
                 </div>
 
                 {product.short_description && (
-                  <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-black/45">
+                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-zinc-500">
                     {product.short_description}
                   </p>
                 )}
@@ -582,33 +591,33 @@ function ProductDetailsSheet({
               href={`/products/${product.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 flex h-8 w-full items-center justify-center gap-2 rounded-md border border-primary/20 text-[11px] font-medium text-primary transition-colors hover:bg-primary/5"
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-zinc-200/90 bg-white text-xs font-medium text-primary shadow-2xs transition-colors hover:bg-primary/5 hover:border-primary/30"
             >
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-3.5 w-3.5" />
               View live product
             </Link>
 
             {/* Inventory Breakdown by Size */}
-            <div className="mt-6">
+            <div>
               <div className="flex items-baseline justify-between">
-                <p className="text-base font-semibold text-black">Inventory</p>
-                <span className="text-[11px] text-black/35">
-                  {totalStock} total
+                <p className="text-xs sm:text-sm font-semibold text-zinc-900">Inventory by Size</p>
+                <span className="text-xs text-zinc-500 tabular-nums">
+                  {totalStock} total units
                 </span>
               </div>
 
               {stockBySize.length > 0 ? (
-                <div className="mt-3 max-h-72 space-y-1.5 overflow-y-auto pr-1">
+                <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
                   {stockBySize.map(([size, quantity]) => (
                     <div
                       key={size}
-                      className="flex items-center gap-2 rounded-lg border px-3 py-2"
+                      className="flex items-center gap-3 rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5 shadow-2xs"
                     >
-                      <span className="min-w-10 text-[11px] font-semibold text-black/70">
+                      <span className="min-w-10 text-xs font-semibold text-zinc-800">
                         {size}
                       </span>
 
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full">
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-100">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all",
@@ -628,8 +637,8 @@ function ProductDetailsSheet({
 
                       <span
                         className={cn(
-                          "min-w-20 text-right text-[11px] font-semibold",
-                          quantity > 0 ? "text-primary" : "text-rose-500",
+                          "min-w-20 text-right text-xs font-medium tabular-nums",
+                          quantity > 0 ? "text-primary font-semibold" : "text-rose-600",
                         )}
                       >
                         {quantity > 0 ? `${quantity} in stock` : "Out of stock"}
@@ -638,7 +647,7 @@ function ProductDetailsSheet({
                   ))}
                 </div>
               ) : (
-                <p className="mt-3 text-[11px] text-black/35">
+                <p className="mt-3 text-xs text-zinc-400">
                   No inventory configured.
                 </p>
               )}
@@ -646,17 +655,17 @@ function ProductDetailsSheet({
 
             {/* Attribute Details List */}
             {details.length > 0 && (
-              <div className="mt-6">
-                <p className="text-base font-semibold text-black">Details</p>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-zinc-900">Product Attributes</p>
 
-                <div className="mt-3 divide-y">
+                <div className="mt-3 divide-y divide-zinc-100 rounded-2xl border border-zinc-200/80 bg-zinc-50/40 px-3.5">
                   {details.map(([label, value]) => (
                     <div
                       key={label}
-                      className="flex items-center justify-between gap-4 py-2"
+                      className="flex items-center justify-between gap-4 py-2.5"
                     >
-                      <span className="text-[11px] text-black/35">{label}</span>
-                      <span className="truncate text-right text-[11px] font-medium text-black">
+                      <span className="text-xs text-zinc-500">{label}</span>
+                      <span className="truncate text-right text-xs font-medium text-zinc-800">
                         {value}
                       </span>
                     </div>
@@ -667,13 +676,13 @@ function ProductDetailsSheet({
 
             {/* Tags */}
             {(product.tags ?? []).length > 0 && (
-              <div className="mt-6">
-                <p className="text-[11px] text-black/35">Tags</p>
+              <div>
+                <p className="text-xs font-semibold text-zinc-900">Tags</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {product.tags?.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-md bg-primary/5 px-2 py-1 text-[11px] text-primary"
+                      className="rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary"
                     >
                       #{tag}
                     </span>
@@ -684,9 +693,9 @@ function ProductDetailsSheet({
 
             {/* Full Description */}
             {product.description && (
-              <div className="mt-6">
-                <p className="text-[11px] text-black/35">Description</p>
-                <p className="mt-2 whitespace-pre-line text-[11px] leading-5 text-black/50">
+              <div>
+                <p className="text-xs font-semibold text-zinc-900">Description</p>
+                <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-zinc-600">
                   {product.description}
                 </p>
               </div>
@@ -695,16 +704,16 @@ function ProductDetailsSheet({
         </div>
 
         {/* Sheet Footer Action Controls */}
-        <div className="shrink-0 border-t bg-white p-2">
+        <div className="shrink-0 space-y-2 border-t border-zinc-100 bg-white p-4">
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               variant="outline"
               disabled={isLoading}
               onClick={() => onToggleActive(product.id)}
-              className="h-8 rounded-md border-primary/20 text-[11px] text-primary hover:bg-primary/5"
+              className="h-9 rounded-xl border-zinc-200 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
             >
-              <ShieldCheck className="h-3 w-3" />
+              <ShieldCheck className="mr-1.5 h-3.5 w-3.5 text-primary" />
               {product.is_active ? "Deactivate" : "Activate"}
             </Button>
 
@@ -713,10 +722,15 @@ function ProductDetailsSheet({
               variant="outline"
               disabled={isLoading}
               onClick={() => onToggleFeatured(product.id)}
-              className="h-8 rounded-md border-primary/20 text-[11px] text-primary hover:bg-primary/5"
+              className="h-9 rounded-xl border-zinc-200 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
             >
               <Star
-                className={cn("h-3 w-3", product.is_featured && "fill-current")}
+                className={cn(
+                  "mr-1.5 h-3.5 w-3.5",
+                  product.is_featured
+                    ? "fill-primary text-primary"
+                    : "text-zinc-400",
+                )}
               />
               {product.is_featured ? "Unfeature" : "Feature"}
             </Button>
@@ -724,22 +738,22 @@ function ProductDetailsSheet({
 
           <Button
             asChild
-            className="mt-2 h-8 w-full rounded-md bg-primary text-[11px] font-medium text-white hover:bg-primary/90"
+            className="h-10 w-full rounded-xl bg-primary text-xs sm:text-sm font-medium text-white shadow-xs hover:bg-primary/90 transition-all active:scale-[0.98]"
           >
             <Link href={`/admin/products/edit/${product.slug || product.id}`}>
-              <Pencil className="h-3 w-3" />
+              <Pencil className="mr-1.5 h-3.5 w-3.5" />
               Edit product
             </Link>
           </Button>
 
           <Button
             type="button"
-            variant="destructive"
+            variant="ghost"
             disabled={isLoading}
             onClick={() => onDeleteProduct(product.id)}
-            className="mt-1 h-8 w-full text-white text-[11px] font-medium bg-rose-800 hover:bg-rose-700"
+            className="h-9 w-full rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
             Delete product
           </Button>
         </div>
@@ -826,16 +840,16 @@ export default function ProductView({
 
   return (
     <>
-      <section className="rounded-xl border bg-[#f7f8f9] p-2.5 sm:p-3">
+      <section className="rounded-2xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs space-y-4">
         {/* 1. Header Toolbar */}
-        <div className="mb-2.5 flex items-center justify-between gap-2 px-0.5">
-          <p className="text-[11px] text-black/45">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs sm:text-sm text-zinc-500">
             Showing{" "}
-            <span className="font-semibold text-black/75">
+            <span className="font-semibold text-zinc-900 tabular-nums">
               {paginatedProducts.length}
             </span>{" "}
             of{" "}
-            <span className="font-semibold text-black/75">
+            <span className="font-semibold text-zinc-900 tabular-nums">
               {safeProducts.length}
             </span>{" "}
             products
@@ -859,8 +873,19 @@ export default function ProductView({
         )}
 
         {/* 3. Pagination Controls */}
-        <div className="flex-col flex items-center justify-between border-t border-black/10 pt-2.5">
-          <Pagination className="mx-0 w-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-zinc-100 pt-4">
+          <p className="text-xs text-zinc-500 order-2 sm:order-1">
+            Page{" "}
+            <span className="font-semibold text-zinc-900 tabular-nums">
+              {safeCurrentPage}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-zinc-900 tabular-nums">
+              {totalPages}
+            </span>
+          </p>
+
+          <Pagination className="mx-0 w-auto order-1 sm:order-2">
             <PaginationContent className="gap-1.5">
               <PaginationItem>
                 <PaginationPrevious
@@ -873,8 +898,8 @@ export default function ProductView({
                     }
                   }}
                   className={cn(
-                    "flex h-8 items-center rounded-xl border border-black/10 bg-white px-3 text-[10px] text-black/60 transition-colors hover:bg-black/5 hover:text-black",
-                    safeCurrentPage === 1 && "pointer-events-none opacity-30",
+                    "flex h-8.5 items-center rounded-xl border border-zinc-200/90 bg-white px-3 text-xs font-medium text-zinc-700 shadow-2xs transition-colors hover:bg-zinc-50 hover:text-zinc-900",
+                    safeCurrentPage === 1 && "pointer-events-none opacity-40",
                   )}
                 />
               </PaginationItem>
@@ -890,10 +915,10 @@ export default function ProductView({
                     }}
                     size="icon"
                     className={cn(
-                      "flex items-center justify-center rounded-xl border text-[10px] transition-colors",
+                      "flex h-8.5 w-8.5 items-center justify-center rounded-xl border text-xs font-medium tabular-nums transition-colors shadow-2xs",
                       safeCurrentPage === page
-                        ? "border-black/20  text-black font-semibold"
-                        : "border-transparent bg-transparent text-black/60 hover:bg-black/5 hover:text-black",
+                        ? "border-primary/40 bg-primary/10 text-primary font-semibold"
+                        : "border-zinc-200/80 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
                     )}
                   >
                     {page}
@@ -912,22 +937,14 @@ export default function ProductView({
                     }
                   }}
                   className={cn(
-                    "flex h-8 items-center rounded-xl border border-black/10 bg-white px-3 text-[10px] text-black/60 transition-colors hover:bg-black/5 hover:text-black",
+                    "flex h-8.5 items-center rounded-xl border border-zinc-200/90 bg-white px-3 text-xs font-medium text-zinc-700 shadow-2xs transition-colors hover:bg-zinc-50 hover:text-zinc-900",
                     safeCurrentPage === totalPages &&
-                      "pointer-events-none opacity-30",
+                      "pointer-events-none opacity-40",
                   )}
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-
-          <p className="text-[11px] text-black/45">
-            Page{" "}
-            <span className="font-semibold text-black/70">
-              {safeCurrentPage}
-            </span>{" "}
-            of <span className="font-semibold text-black/70">{totalPages}</span>
-          </p>
         </div>
       </section>
 
@@ -955,25 +972,32 @@ export default function ProductView({
           }
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl border-zinc-200 p-5 shadow-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-bold text-zinc-900">
+              Delete product?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm text-zinc-500">
               {deleteTarget
-                ? `This will permanently delete "${deleteTarget.name}" and its product images.`
+                ? `This will permanently delete "${deleteTarget.name}" and its product images from the catalog.`
                 : "This action cannot be undone."}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="mt-4 gap-2">
+            <AlertDialogCancel
+              disabled={isLoading}
+              className="h-9 rounded-xl border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={isLoading}
               onClick={(event) => {
                 event.preventDefault();
                 void confirmDelete();
               }}
-              className="bg-rose-700 hover:bg-rose-800"
+              className="h-9 rounded-xl bg-rose-600 text-xs font-medium text-white shadow-xs hover:bg-rose-700"
             >
               {isLoading ? "Deleting..." : "Delete product"}
             </AlertDialogAction>

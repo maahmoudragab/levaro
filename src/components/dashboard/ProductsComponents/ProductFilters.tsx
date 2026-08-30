@@ -88,27 +88,27 @@ function FilterSelect<K extends keyof ProductFilterState>({
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <Label className="text-[10px] font-bold uppercase text-[#6b7280]">
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <Label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
         {label}
       </Label>
 
       <Select value={selectValue} onValueChange={handleChange}>
-        <SelectTrigger className="h-9 w-full rounded-xl border-[#e6e4e1] bg-white px-3 text-xs text-[#1f2937] shadow-none focus-visible:ring-0 focus-visible:ring-offset-0">
+        <SelectTrigger className="h-10 w-full rounded-xl border-zinc-200/90 bg-white px-3 text-xs sm:text-sm text-zinc-800 shadow-2xs transition-all hover:border-zinc-300 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20">
           <SelectValue />
         </SelectTrigger>
 
         <SelectContent
           position="popper"
           align="start"
-          className="z-100 min-w-(--radix-select-trigger-width)"
+          className="z-100 min-w-(--radix-select-trigger-width) rounded-xl border-zinc-200 shadow-md"
         >
-          <SelectItem value={ALL_VALUE} className="text-xs">
+          <SelectItem value={ALL_VALUE} className="text-xs sm:text-sm">
             {allLabel}
           </SelectItem>
 
           {safeOptions.map((option) => (
-            <SelectItem key={option} value={option} className="text-xs">
+            <SelectItem key={option} value={option} className="text-xs sm:text-sm">
               {option}
             </SelectItem>
           ))}
@@ -137,15 +137,15 @@ export function ProductFiltersButton({
       type="button"
       variant="outline"
       onClick={onToggleFilters}
-      className={`h-10 shrink-0 rounded-xl border-[#e6e4e1] bg-white px-3 text-xs font-semibold text-[#1f2937] shadow-none hover:bg-gray-50 ${
-        showFilters ? "bg-[#f7f8f9]" : ""
+      className={`h-10 shrink-0 gap-2 rounded-xl border-zinc-200/90 bg-white px-3.5 text-xs sm:text-sm font-medium text-zinc-800 shadow-2xs transition-all hover:bg-zinc-50 ${
+        showFilters ? "bg-zinc-100/80 border-zinc-300" : ""
       }`}
     >
-      <SlidersHorizontal className="h-4 w-4" />
+      <SlidersHorizontal className="h-4 w-4 text-zinc-500" />
       <span className="hidden sm:inline">Advanced Filters</span>
       <ChevronDown
-        className={`h-4 w-4 transition-transform duration-200 ${
-          showFilters ? "rotate-180" : ""
+        className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
+          showFilters ? "rotate-180 text-zinc-700" : ""
         }`}
       />
     </Button>
@@ -270,10 +270,10 @@ export default function ProductFilters({
       {/* -------------------------------------------------------------------- */}
       {/* 2. Price Range & Quick Reset Row                                     */}
       {/* -------------------------------------------------------------------- */}
-      <div className="flex flex-col gap-2 border-t border-[#e6e4e1]/60 pt-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-t border-zinc-200/80 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
         {/* Min/Max Price Inputs */}
         <div className="flex flex-wrap items-center gap-2">
-          <Label className="text-[10px] font-bold uppercase text-gray-500">
+          <Label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             Price Range:
           </Label>
 
@@ -283,10 +283,10 @@ export default function ProductFilters({
             placeholder="Min $"
             value={filters.minPrice}
             onChange={(event) => onChange("minPrice", event.target.value)}
-            className="h-8 w-20 rounded-lg border-[#e6e4e1] bg-white px-2 text-xs font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-9 w-24 rounded-xl border-zinc-200/90 bg-white px-2.5 text-xs sm:text-sm font-medium tabular-nums shadow-2xs transition-all focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20"
           />
 
-          <span className="text-xs text-gray-400">to</span>
+          <span className="text-xs text-zinc-400">to</span>
 
           <Input
             type="number"
@@ -294,22 +294,22 @@ export default function ProductFilters({
             placeholder="Max $"
             value={filters.maxPrice}
             onChange={(event) => onChange("maxPrice", event.target.value)}
-            className="h-8 w-20 rounded-lg border-[#e6e4e1] bg-white px-2 text-xs font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-9 w-24 rounded-xl border-zinc-200/90 bg-white px-2.5 text-xs sm:text-sm font-medium tabular-nums shadow-2xs transition-all focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20"
           />
         </div>
 
         {/* Sale Checkbox & Reset Trigger */}
         <div className="flex items-center justify-between gap-4 sm:justify-end">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="sale-only"
               checked={filters.saleOnly}
               onCheckedChange={(checked) => onChange("saleOnly", checked === true)}
-              className="h-4 w-4 rounded-lg"
+              className="h-4 w-4 rounded-md border-zinc-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
             />
             <Label
               htmlFor="sale-only"
-              className="cursor-pointer text-xs font-semibold"
+              className="cursor-pointer text-xs sm:text-sm font-medium text-zinc-700 select-none"
             >
               On Sale Only
             </Label>
@@ -319,7 +319,7 @@ export default function ProductFilters({
             type="button"
             variant="ghost"
             onClick={onReset}
-            className="h-auto px-0 text-xs font-semibold text-[#b12d2d] shadow-none hover:bg-transparent hover:text-[#b12d2d] hover:underline"
+            className="h-8 px-2.5 text-xs font-medium text-rose-600 rounded-lg transition-colors hover:bg-rose-50 hover:text-rose-700"
           >
             Reset All Filters
           </Button>

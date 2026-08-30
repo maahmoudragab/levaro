@@ -19,15 +19,24 @@ export function PriceTag({ product, className, size = "md" }: PriceTagProps) {
     return (
       <span
         className={cn(
-          "inline-flex items-baseline gap-1.5 whitespace-nowrap",
-          isSmall && "text-[11px]",
+          "inline-flex items-baseline gap-1.5 whitespace-nowrap tabular-nums",
           className,
         )}
       >
-        <span className="font-semibold text-primary">
+        <span
+          className={cn(
+            "font-semibold text-primary",
+            isSmall ? "text-xs" : "text-sm",
+          )}
+        >
           ${product.sale_price}
         </span>
-        <span className="text-[11px] text-black/35 line-through">
+        <span
+          className={cn(
+            "text-zinc-400 line-through",
+            isSmall ? "text-[11px]" : "text-xs",
+          )}
+        >
           ${product.price}
         </span>
       </span>
@@ -37,8 +46,8 @@ export function PriceTag({ product, className, size = "md" }: PriceTagProps) {
   return (
     <span
       className={cn(
-        "whitespace-nowrap font-semibold text-black/65",
-        isSmall && "text-[11px]",
+        "whitespace-nowrap font-semibold text-zinc-800 tabular-nums",
+        isSmall ? "text-xs" : "text-sm",
         className,
       )}
     >

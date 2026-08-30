@@ -13,6 +13,7 @@ import {
   CircleHelp,
   Tags,
   LogOut,
+  BarChart3,
 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
@@ -21,6 +22,7 @@ import {
 
 const navItems = [
   { label: "Overview", href: "/admin", icon: LayoutGrid },
+  { label: "Inventory", href: "/admin/inventory", icon: BarChart3 },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Categories", href: "/admin/categories", icon: Tags },
   { label: "Settings", href: "/admin/settings", icon: Settings },
@@ -48,7 +50,7 @@ export default function Sidebar() {
           onClick={() => setIsOpen(true)}
           aria-label="Open mobile menu"
         >
-          <Menu className="text-2xl text-[#334155]" />
+          <Menu className="size-6 text-zinc-700" />
         </button>
       </header>
 
@@ -77,7 +79,7 @@ export default function Sidebar() {
               <h1 className="font-bodoni text-4xl font-extrabold text-primary">
                 LÉVARO
               </h1>
-              <p className="mt-1 text-xs font-bold tracking-[0.3em] text-[#334155] uppercase">
+              <p className="mt-1 text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase">
                 Admin Dashboard
               </p>
             </div>
@@ -87,7 +89,7 @@ export default function Sidebar() {
               className="lg:hidden"
               aria-label="Close mobile menu"
             >
-              <X className="text-2xl text-[#334155]" />
+              <X className="size-6 text-zinc-600" />
             </button>
           </div>
 
@@ -102,12 +104,12 @@ export default function Sidebar() {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center justify-between rounded-xl px-4 py-3 transition-all ${
                     isActive
-                      ? "bg-[#e5e5e5a3] text-primary font-semibold"
-                      : "text-[#334155] hover:bg-gray-200/50 hover:text-black font-medium"
+                      ? "bg-zinc-200/60 text-primary font-semibold"
+                      : "text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Icon className="text-lg" />
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`size-5 transition-colors ${isActive ? "text-primary" : "text-zinc-500"}`} />
                     <span className="text-sm">{label}</span>
                   </div>
                   {isActive && (
@@ -126,12 +128,12 @@ export default function Sidebar() {
             onClick={() => setIsOpen(false)}
             className={`flex items-center justify-between rounded-xl px-4 py-2.5 transition-colors ${
               pathname === "/admin/support"
-                ? "bg-[#e5e5e5a3] text-[#084d38] font-semibold"
-                : "text-[#334155] hover:text-black font-medium"
+                ? "bg-zinc-200/60 text-primary font-semibold"
+                : "text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
             }`}
           >
             <div className="flex items-center gap-3">
-              <CircleHelp className="text-lg" />
+              <CircleHelp className={`size-5 transition-colors ${pathname === "/admin/support" ? "text-primary" : "text-zinc-500"}`} />
               <span className="text-sm">Support</span>
             </div>
           </Link>
@@ -139,9 +141,9 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => logout()}
-            className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-[#c52828] hover:text-red-700 transition-colors"
+            className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl transition-colors"
           >
-            <LogOut className="text-lg" />
+            <LogOut className="size-5 text-rose-600" />
             <span className="text-sm">Logout</span>
           </button>
         </div>

@@ -757,29 +757,29 @@ export default function AddProductForm({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-200 p-4 font-sans">
+    <div className="flex flex-col gap-4 p-3 sm:p-4 font-sans w-full">
       {/* -------------------------------------------------------------------- */}
       {/* 1. Header Toolbar                                                    */}
       {/* -------------------------------------------------------------------- */}
-      <header className="mb-6 flex flex-col gap-2 rounded-2xl bg-[#f7f8f9] p-4 sm:flex-row sm:items-center sm:justify-between border border-black/5">
+      <header className="flex flex-col gap-3 rounded-2xl bg-[#f7f8f9] p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between border border-black/5 shadow-2xs">
         <div>
-          <h1 className="font-bodoni text-2xl sm:text-3xl font-bold text-primary">
+          <h1 className="font-bodoni text-2xl sm:text-3xl font-bold tracking-tight text-primary">
             {isEdit ? "Edit Product" : "Add New Product"}
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-black/60">
+          <p className="mt-0.5 text-xs sm:text-sm text-zinc-500 font-normal leading-relaxed">
             {isEdit
-              ? "Modify catalog product details and stock."
-              : "Add a new luxury piece to your catalog."}
+              ? "Modify catalog product details, stock, and photography."
+              : "Add a new luxury fashion piece to your catalog."}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Button
             variant="outline"
             size="sm"
             asChild
             disabled={isPending}
-            className="rounded-xl text-xs"
+            className="h-9.5 rounded-xl border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-all"
           >
             <Link href="/admin/products">Cancel</Link>
           </Button>
@@ -789,16 +789,16 @@ export default function AddProductForm({
             disabled={isPending || (isEdit && !isDirty)}
             onClick={handleSubmit}
             className={cn(
-              "rounded-xl bg-primary text-xs font-medium text-white hover:bg-primary/90 shadow-xs transition-all",
+              "h-9.5 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-xs transition-all hover:bg-primary/90 active:scale-[0.98]",
               isEdit &&
                 !isDirty &&
                 "opacity-40 cursor-not-allowed bg-zinc-400 hover:bg-zinc-400",
             )}
           >
             {isPending ? (
-              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+              <Loader2 className="mr-1.5 size-4 animate-spin" />
             ) : (
-              <Sparkles className="mr-1.5 size-3.5" />
+              <Sparkles className="mr-1.5 size-4" />
             )}
             {isEdit ? "Update Product" : "Publish Product"}
           </Button>
@@ -810,13 +810,13 @@ export default function AddProductForm({
       {/* -------------------------------------------------------------------- */}
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 gap-2 lg:grid-cols-12"
+        className="grid grid-cols-1 gap-4 lg:grid-cols-12"
       >
         {/* Left Column (7 Cols) */}
-        <div className="space-y-2 lg:col-span-7">
+        <div className="space-y-4 lg:col-span-7">
           {/* General Information Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-4">
-            <h2 className="text-sm font-bold text-primary tracking-wide">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+            <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
               General Information
             </h2>
 
@@ -922,8 +922,8 @@ export default function AddProductForm({
           </div>
 
           {/* Attributes & Classification Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-4">
-            <h2 className="text-sm font-bold text-primary tracking-wide">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+            <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
               Attributes & Classification
             </h2>
 
@@ -1088,11 +1088,11 @@ export default function AddProductForm({
           </div>
 
           {/* Tags & Collections Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3.5 shadow-2xs space-y-3">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <Tag className="size-4 text-primary" />
-                <h2 className="text-sm font-bold text-primary tracking-wide">
+                <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
                   Tags & Collections
                 </h2>
               </div>
@@ -1204,14 +1204,14 @@ export default function AddProductForm({
             </div>
           </div>
 
-          {/* Media & Images Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-3">
+          {/* Media & Photography Card */}
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-primary tracking-wide">
-                Media & Images *
+              <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
+                Media & Photography *
               </h2>
-              <span className="text-xs text-primary/80 font-medium">
-                {images.length}/{MAX_IMAGES} images
+              <span className="text-xs text-zinc-500 font-medium tabular-nums">
+                {images.length}/{MAX_IMAGES} uploaded
               </span>
             </div>
 
@@ -1305,13 +1305,13 @@ export default function AddProductForm({
             )}
           </div>
 
-          {/* Sizes & Stock Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-3">
+          {/* Sizes & Inventory Card */}
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-primary tracking-wide">
-                Sizes & Stock *
+              <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
+                Sizes & Inventory *
               </h2>
-              <span className="text-xs text-primary/80 font-medium">
+              <span className="text-xs font-semibold text-primary tabular-nums">
                 {totalStock} Total Units
               </span>
             </div>
@@ -1431,19 +1431,19 @@ export default function AddProductForm({
         </div>
 
         {/* Right Column (5 Cols) */}
-        <div className="space-y-2 lg:col-span-5">
+        <div className="space-y-4 lg:col-span-5">
           {/* Status & Visibility Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-3.5">
-            <h2 className="text-sm font-bold text-primary tracking-wide">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+            <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
               Status & Visibility
             </h2>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-zinc-800">
+                <p className="text-xs sm:text-sm font-semibold text-zinc-800">
                   Active (Visible)
                 </p>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-xs text-zinc-400">
                   Display in customer storefront
                 </p>
               </div>
@@ -1457,10 +1457,10 @@ export default function AddProductForm({
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-zinc-800">
+                <p className="text-xs sm:text-sm font-semibold text-zinc-800">
                   Featured Product
                 </p>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-xs text-zinc-400">
                   Show in featured collections
                 </p>
               </div>
@@ -1472,9 +1472,9 @@ export default function AddProductForm({
 
             <div className="h-px bg-black/5" />
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-zinc-800">
+                <p className="text-xs sm:text-sm font-semibold text-zinc-800">
                   New Arrival Flag
                 </p>
                 <Switch
@@ -1482,16 +1482,15 @@ export default function AddProductForm({
                   onCheckedChange={(v) => updateField("is_new", v)}
                 />
               </div>
-              <p className="text-[10px] text-primary/80 bg-primary/5 p-2 rounded-xl border border-primary/10">
-                Notice: New Arrival items automatically rank first in store
-                catalog.
+              <p className="text-xs text-primary bg-primary/5 p-2.5 rounded-xl border border-primary/10">
+                Notice: New Arrival items automatically rank first in store catalog.
               </p>
             </div>
           </div>
 
           {/* Pricing & Discounts Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-2xs space-y-4">
-            <h2 className="text-sm font-bold text-primary tracking-wide">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+            <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
               Pricing & Discounts
             </h2>
 
@@ -1506,7 +1505,7 @@ export default function AddProductForm({
                 value={form.price}
                 onChange={(e) => updateField("price", e.target.value)}
                 placeholder="0.00"
-                className="rounded-xl bg-[#fbfbfb] font-semibold text-sm focus:border-primary focus:bg-white"
+                className="h-10 rounded-xl border-zinc-200/90 bg-white text-xs sm:text-sm text-zinc-900 font-semibold shadow-2xs focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20"
                 required
               />
             </div>
@@ -1527,10 +1526,10 @@ export default function AddProductForm({
                         setDiscountValue(t === "percentage" ? "20" : "100");
                     }}
                     className={cn(
-                      "rounded-xl border py-1.5 text-xs font-medium transition-all capitalize",
+                      "h-9 rounded-xl border text-xs font-medium transition-all capitalize",
                       discountType === t
-                        ? "border-primary bg-primary text-white font-semibold shadow-2xs"
-                        : "border-black/10 bg-[#fbfbfb] text-zinc-600 hover:bg-white",
+                        ? "border-primary bg-primary text-white font-semibold shadow-xs"
+                        : "border-zinc-200/80 bg-zinc-50/50 text-zinc-600 hover:bg-white",
                     )}
                   >
                     {t === "none"
@@ -1556,27 +1555,27 @@ export default function AddProductForm({
                   max={discountType === "percentage" ? 100 : undefined}
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="rounded-xl bg-[#fbfbfb] text-xs focus:border-primary focus:bg-white"
+                  className="h-10 rounded-xl border-zinc-200/90 bg-white text-xs sm:text-sm shadow-2xs focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </div>
             )}
 
-            <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-3 space-y-1 text-xs">
+            <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-3.5 space-y-1.5 text-xs">
               <div className="flex justify-between text-zinc-500">
                 <span>Original Price:</span>
-                <span className=" ">
+                <span className="font-semibold tabular-nums">
                   {numPrice > 0 ? `${numPrice.toFixed(2)} EGP` : "—"}
                 </span>
               </div>
               {numSale !== null && (
                 <div className="flex justify-between text-primary font-medium">
                   <span>Discount:</span>
-                  <span className=" ">-{discountPercent}%</span>
+                  <span className="font-semibold tabular-nums">-{discountPercent}%</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-zinc-900 pt-1 border-t border-primary/10">
+              <div className="flex justify-between font-bold text-zinc-900 pt-1.5 border-t border-primary/10">
                 <span>Final Price:</span>
-                <span className="  text-primary text-sm">
+                <span className="text-primary text-sm tabular-nums">
                   {numSale !== null
                     ? `${numSale.toFixed(2)} EGP`
                     : numPrice > 0
@@ -1588,13 +1587,13 @@ export default function AddProductForm({
           </div>
 
           {/* Live Storefront Preview Card */}
-          <div className="rounded-2xl border border-black/10 bg-white p-3.5 shadow-2xs space-y-2.5">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
                 <Eye className="size-3.5" />
                 <span>Storefront Live Preview</span>
               </div>
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[9px] font-medium text-zinc-500">
+              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-500">
                 {sku}
               </span>
             </div>
