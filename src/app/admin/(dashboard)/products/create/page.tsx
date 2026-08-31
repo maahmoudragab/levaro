@@ -1,9 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
-import AddProductForm from "@/components/dashboard/ProductsComponents/ProductForm";
+import { ProductForm } from "@/components/dashboard/products/ProductForm";
+
+export const metadata = {
+  title: "Add Product | LÉVARO Admin",
+};
 
 /**
  * Admin Create Product Page (Server Component).
- * Fetches available categories and current product count to pre-generate initial SKU.
+ * Fetches active categories & nested collections and current product count.
  */
 export default async function CreateProductPage() {
   const supabase = await createClient();
@@ -15,7 +19,7 @@ export default async function CreateProductPage() {
   ] = await Promise.all([
     supabase
       .from("categories")
-      .select("id, name, slug")
+      .select("id, name, slug, parent_id, is_active")
       .order("name", { ascending: true }),
     supabase
       .from("products")
@@ -27,7 +31,7 @@ export default async function CreateProductPage() {
   }
 
   return (
-    <AddProductForm
+    <ProductForm
       categories={categories ?? []}
       initialProductCount={productCount ?? 0}
       initialProductId={newProductId}

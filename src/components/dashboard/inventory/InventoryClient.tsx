@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "@/lib/toast";
 import {
   deleteProduct,
@@ -8,74 +8,38 @@ import {
   toggleProductFeatured,
   type Product,
 } from "@/app/services/admin/products";
-import ProductSearch from "@/components/dashboard/ProductsComponents/ProductSearch";
-import ProductFilters, {
-  ProductFiltersButton,
-} from "@/components/dashboard/ProductsComponents/ProductFilters";
-import ProductView from "@/components/dashboard/ProductsComponents/ProductsView";
-import {
-  DEFAULT_PRODUCT_FILTERS,
-  type ProductFilterState,
-  getFilterOptions,
-  filterProducts,
-} from "@/components/dashboard/ProductsComponents/product-utils";
-import TopHeader from "@/components/dashboard/TopHeader";
+import { TopHeader } from "@/components/shared/TopHeader";
+import { ProductDetailsSheet } from "@/components/shared/ProductDetailsSheet";
+import { DeleteProductDialog } from "@/components/shared/DeleteProductDialog";
+import { InventoryMetrics } from "@/components/dashboard/inventory/InventoryMetrics";
+import { StockBySizeWidget } from "@/components/dashboard/inventory/StockBySizeWidget";
+import { StockAlertsWidget } from "@/components/dashboard/inventory/StockAlertsWidget";
+import { RecentlyAddedProductsWidget } from "@/components/dashboard/inventory/RecentlyAddedProductsWidget";
 
-/* -------------------------------------------------------------------------- */
-/* Main Component: Products Client State Manager                              */
-/* -------------------------------------------------------------------------- */
+interface InventoryClientProps {
+  initialProducts: Product[];
+}
 
 /**
- * Client coordinator for the admin products catalog dashboard.
- * Manages search state, filters, pagination, optimistic updates, and CRUD action handlers.
+ * Client coordinator for the admin inventory dashboard.
+ * Manages metrics, stock overview, and quick drawer management for products.
  */
-export default function ProductsClient({
-  initialProducts,
-}: {
-  initialProducts: Product[];
-}) {
+export default function InventoryClient({ initialProducts }: InventoryClientProps) {
   const [productsList, setProductsList] = useState<Product[]>(initialProducts);
   const [prevInitialProducts, setPrevInitialProducts] = useState(initialProducts);
 
-  // Synchronize state when server props update
   if (initialProducts !== prevInitialProducts) {
     setPrevInitialProducts(initialProducts);
     setProductsList(initialProducts);
   }
 
-  const [search, setSearch] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<ProductFilterState>(
-    DEFAULT_PRODUCT_FILTERS,
-  );
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
-  // Compute available filter dropdown options dynamically from dataset
-  const filterOptions = useMemo(
-    () => getFilterOptions(productsList),
-    [productsList],
+  const deleteTarget = productsList.find(
+    (product) => product.id === deleteProductId,
   );
-
-  // Compute filtered & sorted product list
-  const filteredProducts = useMemo(
-    () => filterProducts(productsList, search, filters),
-    [productsList, search, filters],
-  );
-
-  // Handler: Update specific filter key
-  const updateFilter = <K extends keyof ProductFilterState>(
-    key: K,
-    value: ProductFilterState[K],
-  ) => {
-    setFilters((current) => ({ ...current, [key]: value }));
-  };
-
-  // Handler: Reset search and all active filters to default
-  const resetFilters = () => {
-    setSearch("");
-    setFilters(DEFAULT_PRODUCT_FILTERS);
-  };
 
   // Handler: Delete product permanently
   const handleDeleteProduct = async (id: string) => {
@@ -99,6 +63,8 @@ export default function ProductsClient({
       );
     } finally {
       setIsLoading(false);
+      setDeleteProductId(null);
+      setSelectedProduct(null);
     }
   };
 
@@ -186,45 +152,58 @@ export default function ProductsClient({
     <div className="flex flex-col gap-3 p-3 sm:p-4 font-sans">
       {/* 1. Header Toolbar */}
       <TopHeader
-        title="Products"
-        description="Manage your products, update details, and track catalog items."
+        title="Inventory"
+        description="Track stock levels, size allocations, critical alerts, and recent updates."
         buttonName="Add New Product"
         buttonHref="/admin/products/create"
       />
 
-      {/* 2. Search & Filter Bar */}
-      <section className="rounded-xl bg-[#f7f8f9] p-2.5">
-        <div className="flex gap-2">
-          <ProductSearch
-            search={search}
-            onSearchChange={setSearch}
-            onClear={() => setSearch("")}
-          />
+      {/* 2. KPI Summary Cards */}
+      <InventoryMetrics products={productsList} />
 
-          <ProductFiltersButton
-            showFilters={showFilters}
-            onToggleFilters={() => setShowFilters((current) => !current)}
-          />
-        </div>
-
-        <ProductFilters
-          showFilters={showFilters}
-          filters={filters}
-          options={filterOptions}
-          onChange={updateFilter}
-          onReset={resetFilters}
+      {/* 3. Side-by-Side Widgets Grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        <StockBySizeWidget products={productsList} />
+        <StockAlertsWidget
+          products={productsList}
+          onSelectProduct={setSelectedProduct}
         />
-      </section>
+      </div>
 
-      {/* 3. Products Table / Grid View */}
-      <ProductView
-        isLoading={isLoading}
-        products={filteredProducts}
+      {/* 4. Recently Added Products Feed */}
+      <RecentlyAddedProductsWidget
+        products={productsList}
+        onSelectProduct={setSelectedProduct}
+      />
+
+      {/* 5. Product Quick Manage Sheet */}
+      <ProductDetailsSheet
+        product={selectedProduct}
+        open={Boolean(selectedProduct)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedProduct(null);
+          }
+        }}
         onToggleActive={handleToggleActive}
-        onDeleteProduct={handleDeleteProduct}
         onToggleFeatured={handleToggleFeatured}
-        selectedProduct={selectedProduct}
-        onSelectedProductChange={setSelectedProduct}
+        onDeleteProduct={(id) => setDeleteProductId(id)}
+        isLoading={isLoading}
+      />
+
+      {/* 6. Delete Confirmation Dialog */}
+      <DeleteProductDialog
+        product={deleteTarget ?? null}
+        open={Boolean(deleteProductId)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteProductId(null);
+        }}
+        onConfirm={async () => {
+          if (deleteProductId) {
+            await handleDeleteProduct(deleteProductId);
+          }
+        }}
+        isLoading={isLoading}
       />
     </div>
   );

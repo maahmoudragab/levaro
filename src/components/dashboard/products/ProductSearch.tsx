@@ -11,7 +11,7 @@ type ProductSearchProps = {
 /**
  * Product search input bar with quick clear trigger.
  */
-export default function ProductSearch({
+export function ProductSearch({
   search,
   onSearchChange,
   onClear,
@@ -42,3 +42,5 @@ export default function ProductSearch({
     </div>
   );
 }
+
+export default ProductSearch;

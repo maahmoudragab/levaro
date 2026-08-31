@@ -68,7 +68,7 @@ export default function Sidebar() {
       {/* Sidebar (Desktop Sticky + Mobile Drawer)                              */}
       {/* -------------------------------------------------------------------- */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col justify-between bg-[#f7f8f9] p-4 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:overflow-y-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 min-w-72 max-w-72 shrink-0 flex flex-col justify-between bg-[#f7f8f9] p-4 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:overflow-y-auto border-r border-black/5 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -123,20 +123,16 @@ export default function Sidebar() {
 
         {/* Footer Links (Support & Logout) */}
         <div className="mt-12 space-y-3 pt-6 border-t border-black/5">
-          <Link
-            href="/admin/support"
+          <a
+            href="mailto:support@levaro.com?subject=LEVARO%20Admin%20Support"
             onClick={() => setIsOpen(false)}
-            className={`flex items-center justify-between rounded-xl px-4 py-2.5 transition-colors ${
-              pathname === "/admin/support"
-                ? "bg-zinc-200/60 text-primary font-semibold"
-                : "text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
-            }`}
+            className="flex items-center justify-between rounded-xl px-4 py-2.5 transition-colors text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
           >
             <div className="flex items-center gap-3">
-              <CircleHelp className={`size-5 transition-colors ${pathname === "/admin/support" ? "text-primary" : "text-zinc-500"}`} />
-              <span className="text-sm">Support</span>
+              <CircleHelp className="size-5 text-zinc-500" />
+              <span className="text-sm">Support & Help</span>
             </div>
-          </Link>
+          </a>
 
           <button
             type="button"

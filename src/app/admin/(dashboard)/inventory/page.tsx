@@ -1,5 +1,5 @@
-﻿import { getProducts } from "@/app/services/admin/products";
-import InventoryClient from "@/components/dashboard/InventoryComponents/InventoryClient";
+import { getProducts } from "@/app/services/admin/products";
+import InventoryClient from "@/components/dashboard/inventory/InventoryClient";
 
 export const metadata = {
   title: "Inventory | LÉVARO Admin",
@@ -7,7 +7,7 @@ export const metadata = {
 
 /**
  * Admin Inventory Page (Server Component).
- * Fetches the initial product catalog from Supabase and passes it to the inventory client view.
+ * Fetches initial product catalog from Supabase via optimized join and passes to the inventory client.
  */
 export default async function InventoryPage() {
   const products = await getProducts();

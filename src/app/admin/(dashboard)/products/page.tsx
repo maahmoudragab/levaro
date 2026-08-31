@@ -1,12 +1,25 @@
 import { getProducts } from "@/app/services/admin/products";
-import Products from "@/components/dashboard/ProductsComponents/Products";
+import { getActiveCategoriesList } from "@/app/services/admin/categories";
+import ProductsClient from "@/components/dashboard/products/ProductsClient";
+
+export const metadata = {
+  title: "Products | LÉVARO Admin",
+};
 
 /**
- * Admin Products Page (Server Component).
- * Fetches the initial product catalog from Supabase and passes it to the client view.
+ * Admin Products Catalog Page (Server Component).
+ * Fetches product catalog and active category hierarchy via SSR.
  */
 export default async function ProductsPage() {
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getActiveCategoriesList(),
+  ]);
 
-  return <Products initialProducts={products} />;
+  return (
+    <ProductsClient
+      initialProducts={products}
+      categoriesList={categories}
+    />
+  );
 }

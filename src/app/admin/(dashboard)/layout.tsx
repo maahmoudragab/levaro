@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   return (
     <main className="flex min-h-screen flex-col lg:flex-row">
       <Sidebar />
-      <div className="flex-1 bg-zinc-200">{children}</div>
+      <div className="flex-1 min-w-0 bg-zinc-200">{children}</div>
     </main>
   );
 }

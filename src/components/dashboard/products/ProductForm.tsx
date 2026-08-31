@@ -48,124 +48,27 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
+import {
+  GENDERS,
+  BRANDS,
+  PRODUCT_TYPES,
+  FITS,
+  COLORS,
+  MATERIALS,
+  ORIGINS,
+  PRESET_SIZES,
+  PRESET_TAGS,
+  type CategoryOption,
+} from "@/components/dashboard/products/product-utils";
+
 /* -------------------------------------------------------------------------- */
-/* Constants & Preset Options                                                 */
+/* Constants & Limit Configurations                                           */
 /* -------------------------------------------------------------------------- */
 
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 1024 * 1024; // 1 MB limit per image file
 const LOW_STOCK_LIMIT = 10;
 const MAX_TAGS = 6;
-
-const GENDERS = ["Men", "Women", "Kids", "Unisex"];
-
-const BRANDS = [
-  "LÉVARO",
-  "LÉVARO Atelier",
-  "LÉVARO Studio",
-  "LÉVARO Sport",
-  "LÉVARO Noir",
-];
-
-const PRODUCT_TYPES = [
-  "T-Shirt",
-  "Oversized Tee",
-  "Polo Shirt",
-  "Hoodie",
-  "Sweatshirt",
-  "Overshirt",
-  "Button-Up Shirt",
-  "Knitwear",
-  "Jacket",
-  "Blazer",
-  "Trousers",
-  "Denim Jeans",
-  "Shorts",
-  "Suit",
-  "Accessories",
-  "Footwear",
-];
-
-const FITS = [
-  "Regular Fit",
-  "Slim Fit",
-  "Relaxed Fit",
-  "Oversized Fit",
-  "Boxy Fit",
-  "Tailored Fit",
-  "Athletic Fit",
-  "Wide Leg",
-];
-
-const COLORS = [
-  { name: "Black", hex: "#121212" },
-  { name: "Pure White", hex: "#FFFFFF" },
-  { name: "Off-White", hex: "#F5F5F0" },
-  { name: "Charcoal Grey", hex: "#374151" },
-  { name: "Heather Grey", hex: "#9CA3AF" },
-  { name: "Midnight Navy", hex: "#0F172A" },
-  { name: "Forest Green", hex: "#18694F" },
-  { name: "Olive Green", hex: "#556B2F" },
-  { name: "Sage Green", hex: "#9CAF88" },
-  { name: "Beige / Sand", hex: "#D4B996" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Chocolate Brown", hex: "#4A2C11" },
-  { name: "Burgundy", hex: "#800020" },
-  { name: "Rust", hex: "#C85A32" },
-];
-
-const MATERIALS = [
-  "100% Egyptian Cotton",
-  "Heavyweight Cotton (240+ GSM)",
-  "French Terry",
-  "Linen Blend",
-  "100% Pure Linen",
-  "Wool & Cashmere",
-  "Merino Wool",
-  "Raw Denim",
-  "Silk Satin",
-  "Tech Fleece",
-];
-
-const ORIGINS = [
-  "Egypt",
-  "Italy",
-  "Portugal",
-  "Turkey",
-  "France",
-  "Spain",
-  "United Kingdom",
-];
-
-const PRESET_SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
-
-const PRESET_TAGS = [
-  "Summer Collection",
-  "Winter Collection",
-  "Essential",
-  "Minimalist",
-  "Luxury",
-  "Streetwear",
-  "Formal",
-  "Casual",
-  "Oversized",
-  "Organic Cotton",
-  "100% Linen",
-  "Pure Silk",
-  "Limited Edition",
-  "Best Seller",
-  "Trending",
-];
-
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export type CategoryOption = {
-  id: string;
-  name: string;
-  slug?: string | null;
-};
 
 export type ProductFormProps = {
   categories: CategoryOption[];
@@ -211,11 +114,11 @@ const slugify = (text: string) => {
     .normalize("NFKD")
     .toLowerCase()
     .trim()
-    .replace(/[\u0300-\u036f]/g, "") // Remove accent marks
-    .replace(/[^\p{L}\p{N}\s-]/gu, "") // Keep Unicode letters (Arabic, English) and numbers
-    .replace(/[\s_]+/g, "-") // Replace spaces and underscores with hyphens
-    .replace(/-+/g, "-") // Collapse consecutive hyphens
-    .replace(/^-+|-+$/g, ""); // Trim leading/trailing hyphens
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 };
 
 /* -------------------------------------------------------------------------- */
@@ -227,7 +130,7 @@ const slugify = (text: string) => {
  * Handles staging images locally, stock adjustments, pricing calculations,
  * SKU/Slug auto-generation, and deferred upload to Supabase on form submit.
  */
-export default function AddProductForm({
+export function ProductForm({
   categories,
   initialProductCount = 0,
   initialProduct = null,
@@ -241,6 +144,21 @@ export default function AddProductForm({
   const [productId] = useState(
     () => initialProduct?.id ?? initialProductId ?? "prod-000000",
   );
+
+  // Determine initial parent category vs collection
+  const initialCategoryObj = useMemo(() => {
+    return categories.find((c) => c.id === initialProduct?.category_id);
+  }, [categories, initialProduct]);
+
+  const [selectedParentId, setSelectedParentId] = useState<string>(() => {
+    if (!initialCategoryObj) return "";
+    return initialCategoryObj.parent_id || initialCategoryObj.id;
+  });
+
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string>(() => {
+    if (!initialCategoryObj) return "";
+    return initialCategoryObj.parent_id ? initialCategoryObj.id : "";
+  });
 
   // 1. General & Attribute Form Fields State
   const [form, setForm] = useState({
@@ -359,6 +277,35 @@ export default function AddProductForm({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Available parent categories (all categories)
+  const availableParentCategories = useMemo(() => {
+    return categories.filter((c) => !c.parent_id);
+  }, [categories]);
+
+  // Available collections under the selected parent category (all collections, including inactive)
+  const availableCollections = useMemo(() => {
+    if (!selectedParentId) return [];
+    return categories.filter((c) => c.parent_id === selectedParentId);
+  }, [categories, selectedParentId]);
+
+  // Handle parent category selection change
+  const handleParentCategoryChange = (parentId: string) => {
+    setSelectedParentId(parentId);
+    setSelectedCollectionId("");
+    updateField("category_id", parentId);
+  };
+
+  // Handle collection selection change
+  const handleCollectionChange = (collectionId: string) => {
+    if (collectionId === "none") {
+      setSelectedCollectionId("");
+      updateField("category_id", selectedParentId);
+    } else {
+      setSelectedCollectionId(collectionId);
+      updateField("category_id", collectionId);
+    }
+  };
+
   const selectedCategory = categories.find((c) => c.id === form.category_id);
   const selectedCategoryName = selectedCategory?.name;
 
@@ -366,7 +313,6 @@ export default function AddProductForm({
   const categoryCode = useMemo(() => {
     if (!selectedCategory) return "GEN";
 
-    // 1. If category has a Latin slug (e.g. "men", "women", "kids", "accessories")
     if (selectedCategory.slug) {
       const cleanSlug = selectedCategory.slug
         .replace(/[^a-zA-Z]/g, "")
@@ -375,14 +321,12 @@ export default function AddProductForm({
       if (cleanSlug.length >= 2) return cleanSlug;
     }
 
-    // 2. If name contains Latin characters
     const latinName = selectedCategory.name
       .replace(/[^a-zA-Z]/g, "")
       .slice(0, 3)
       .toUpperCase();
     if (latinName.length >= 2) return latinName;
 
-    // 3. If Arabic name, match against common keywords
     const trimmedName = selectedCategory.name.trim();
     for (const [arKey, code] of Object.entries(ARABIC_CAT_MAP)) {
       if (trimmedName.includes(arKey)) {
@@ -403,20 +347,17 @@ export default function AddProductForm({
     [productId],
   );
 
-  // Auto-generate URL slug based on product title + short ID
   const currentSlug = useMemo(() => {
     const cleanName = slugify(form.name);
     return cleanName ? `${cleanName}-${shortId}` : "";
   }, [form.name, shortId]);
 
-  // Handler: Title change also auto-syncs the slug if slug wasn't custom modified
   const handleNameChange = (val: string) => {
     updateField("name", val);
     const clean = slugify(val);
     updateField("slug", clean ? `${clean}-${shortId}` : "");
   };
 
-  // Pricing & final discounted amount computations
   const numPrice = Number(form.price) || 0;
   const numSale = useMemo(() => {
     if (numPrice <= 0 || discountType === "none") return null;
@@ -433,13 +374,6 @@ export default function AddProductForm({
     : 0;
   const totalStock = stock.reduce((acc, cur) => acc + (cur.stock || 0), 0);
 
-  // ---------------------------------------------------------------------------
-  // Stock Handlers
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Adds a new size variant to product stock.
-   */
   const addSize = (sizeName: string, qty = 10) => {
     const s = sizeName.trim();
     if (!s || stock.some((i) => i.size.toLowerCase() === s.toLowerCase()))
@@ -448,9 +382,6 @@ export default function AddProductForm({
     setCustomSize({ name: "", qty: "10" });
   };
 
-  /**
-   * Increments or decrements quantity for a specific size index.
-   */
   const updateQty = (index: number, delta: number) => {
     setStock((prev) =>
       prev.map((item, i) =>
@@ -461,20 +392,10 @@ export default function AddProductForm({
     );
   };
 
-  /**
-   * Removes a size variant from the stock list.
-   */
   const removeSize = (index: number) => {
     setStock((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ---------------------------------------------------------------------------
-  // Media / Gallery Handlers (Staged Locally - No early upload)
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Handles local file upload and generates object URL previews.
-   */
   const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -518,9 +439,6 @@ export default function AddProductForm({
     e.target.value = "";
   };
 
-  /**
-   * Appends remote image URL to gallery list.
-   */
   const addUrlImage = () => {
     const u = imageUrl.trim();
     if (!u || images.length >= MAX_IMAGES) return;
@@ -535,9 +453,6 @@ export default function AddProductForm({
     setImageUrl("");
   };
 
-  /**
-   * Removes an image from gallery and revokes local blob URL memory.
-   */
   const removeImage = (index: number) => {
     const target = images[index];
     if (target?.file && target.url.startsWith("blob:")) {
@@ -546,9 +461,6 @@ export default function AddProductForm({
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /**
-   * Moves chosen image to index 0 to become the primary cover photo.
-   */
   const setAsCover = (index: number) => {
     if (index === 0) return;
     setImages((prev) => {
@@ -557,10 +469,6 @@ export default function AddProductForm({
       return [chosen, ...copy];
     });
   };
-
-  // ---------------------------------------------------------------------------
-  // Dirty-state check for Edit mode
-  // ---------------------------------------------------------------------------
 
   const isDirty = useMemo(() => {
     if (!isEdit || !initialProduct) return true;
@@ -639,10 +547,6 @@ export default function AddProductForm({
     initialTags,
   ]);
 
-  // ---------------------------------------------------------------------------
-  // Form Submission Handler (Deferred Storage Upload + Server Actions)
-  // ---------------------------------------------------------------------------
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -656,7 +560,6 @@ export default function AddProductForm({
       return;
     }
 
-    // Validation checks
     if (!form.name.trim())
       return toast.error("Missing Field", "Product Title is required.");
     const finalSlug = form.slug.trim() || currentSlug;
@@ -688,7 +591,6 @@ export default function AddProductForm({
 
     startTransition(async () => {
       try {
-        // Upload any pending local files to Supabase Storage
         const finalImageUrls: string[] = [];
 
         for (let i = 0; i < images.length; i++) {
@@ -758,9 +660,7 @@ export default function AddProductForm({
 
   return (
     <div className="flex flex-col gap-4 p-3 sm:p-4 font-sans w-full">
-      {/* -------------------------------------------------------------------- */}
-      {/* 1. Header Toolbar                                                    */}
-      {/* -------------------------------------------------------------------- */}
+      {/* 1. Header Toolbar */}
       <header className="flex flex-col gap-3 rounded-2xl bg-[#f7f8f9] p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between border border-black/5 shadow-2xs">
         <div>
           <h1 className="font-bodoni text-2xl sm:text-3xl font-bold tracking-tight text-primary">
@@ -805,9 +705,7 @@ export default function AddProductForm({
         </div>
       </header>
 
-      {/* -------------------------------------------------------------------- */}
-      {/* 2. Main Form Grid                                                    */}
-      {/* -------------------------------------------------------------------- */}
+      {/* 2. Main Form Grid */}
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-4 lg:grid-cols-12"
@@ -930,19 +828,62 @@ export default function AddProductForm({
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-zinc-700">
-                  Category *
+                  Main Category *
                 </Label>
                 <Select
-                  value={form.category_id}
-                  onValueChange={(v) => updateField("category_id", v)}
+                  value={selectedParentId}
+                  onValueChange={handleParentCategoryChange}
                 >
                   <SelectTrigger className="w-full rounded-xl bg-[#fbfbfb] text-xs">
-                    <SelectValue placeholder="Select Category..." />
+                    <SelectValue placeholder="Select Main Category..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((c) => (
+                    {availableParentCategories.map((c) => (
                       <SelectItem key={c.id} value={c.id} className="text-xs">
                         {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-zinc-700">
+                    Collection / Line
+                  </Label>
+                  <span className="text-[10px] text-zinc-400">
+                    {availableCollections.length > 0 ? `${availableCollections.length} available` : "Optional"}
+                  </span>
+                </div>
+                <Select
+                  value={selectedCollectionId || "none"}
+                  onValueChange={handleCollectionChange}
+                  disabled={!selectedParentId || availableCollections.length === 0}
+                >
+                  <SelectTrigger className="w-full rounded-xl bg-[#fbfbfb] text-xs">
+                    <SelectValue placeholder={
+                      !selectedParentId
+                        ? "Select category first..."
+                        : availableCollections.length === 0
+                          ? "No sub-collections (General)"
+                          : "Select Collection..."
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" className="text-xs text-zinc-500">
+                      None (General Category Item)
+                    </SelectItem>
+                    {availableCollections.map((col) => (
+                      <SelectItem key={col.id} value={col.id} className="text-xs">
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span>{col.name}</span>
+                          {!col.is_active && (
+                            <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded-md font-medium">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1021,9 +962,21 @@ export default function AddProductForm({
                   onValueChange={(v) => updateField("color", v)}
                 >
                   <SelectTrigger className="w-full rounded-xl bg-[#fbfbfb] text-xs">
-                    <SelectValue placeholder="Select Color..." />
+                    <div className="flex items-center gap-2 truncate">
+                      {form.color && (
+                        <span
+                          className="size-2.5 rounded-full border border-black/10 shrink-0"
+                          style={{
+                            backgroundColor:
+                              COLORS.find((c) => c.name === form.color)?.hex ||
+                              "#000",
+                          }}
+                        />
+                      )}
+                      <SelectValue placeholder="Select Color..." />
+                    </div>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-64">
                     {COLORS.map((c) => (
                       <SelectItem
                         key={c.name}
@@ -1108,7 +1061,6 @@ export default function AddProductForm({
               </span>
             </div>
 
-            {/* Selected Tags Chips */}
             {selectedTags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 p-2 rounded-xl bg-[#fbfbfb] border border-black/5">
                 {selectedTags.map((tag) => (
@@ -1130,7 +1082,6 @@ export default function AddProductForm({
               </div>
             )}
 
-            {/* Custom Tag Input */}
             <div className="flex gap-2">
               <Input
                 value={customTagInput}
@@ -1167,7 +1118,6 @@ export default function AddProductForm({
               </Button>
             </div>
 
-            {/* Preset Suggestions */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-semibold text-zinc-500">
@@ -1374,7 +1324,7 @@ export default function AddProductForm({
                     key={`${item.size}-${idx}`}
                     className="flex items-center justify-between p-2.5 text-xs"
                   >
-                    <span className="  font-bold text-zinc-900 w-16">
+                    <span className="font-bold text-zinc-900 w-16">
                       {item.size}
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -1385,7 +1335,7 @@ export default function AddProductForm({
                       >
                         <Minus className="size-3" />
                       </button>
-                      <span className="w-12 text-center   font-semibold">
+                      <span className="w-12 text-center font-semibold">
                         {item.stock}
                       </span>
                       <button
@@ -1600,7 +1550,6 @@ export default function AddProductForm({
 
             {/* Main Product Card Preview */}
             <div className="group overflow-hidden rounded-xl border border-black/10 bg-[#fafafa] shadow-xs transition-all duration-300 hover:shadow-md">
-              {/* Product Image Stage (Compact Fashion Height) */}
               <div className="relative h-48 w-full overflow-hidden bg-zinc-100">
                 {images.length > 0 ? (
                   <Image
@@ -1609,7 +1558,6 @@ export default function AddProductForm({
                     fill
                     sizes="(max-width: 768px) 100vw, 360px"
                     className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                    unoptimized
                   />
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center gap-1.5 p-4 text-center text-zinc-400">
@@ -1623,7 +1571,7 @@ export default function AddProductForm({
                   </div>
                 )}
 
-                {/* Floating Fashion Badges (Top-Left) */}
+                {/* Badges */}
                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                   {form.is_new && (
                     <span className="rounded-full bg-zinc-900/90 backdrop-blur-md px-2 py-0.5 text-[8px] font-bold tracking-wider text-white shadow-xs">
@@ -1642,7 +1590,7 @@ export default function AddProductForm({
                   )}
                 </div>
 
-                {/* Live Status Pill (Top-Right) */}
+                {/* Status */}
                 <div className="absolute top-2 right-2 z-10">
                   <span
                     className={cn(
@@ -1662,7 +1610,6 @@ export default function AddProductForm({
                   </span>
                 </div>
 
-                {/* Image Counter Badge (Bottom-Right) */}
                 {images.length > 1 && (
                   <div className="absolute bottom-2 right-2 z-10 rounded-full bg-black/60 backdrop-blur-md px-1.5 py-0.5 text-[8px] font-semibold text-white">
                     {previewImageIndex + 1} / {images.length}
@@ -1670,7 +1617,7 @@ export default function AddProductForm({
                 )}
               </div>
 
-              {/* Gallery Thumbnails Carousel Strip (if > 1 image) */}
+              {/* Gallery Thumbnails Carousel */}
               {images.length > 1 && (
                 <div className="flex items-center gap-1.5 p-1.5 bg-white/90 border-b border-black/5 overflow-x-auto">
                   {images.map((img, idx) => (
@@ -1690,16 +1637,14 @@ export default function AddProductForm({
                         alt={`Thumb ${idx + 1}`}
                         fill
                         className="object-cover object-top"
-                        unoptimized
                       />
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Product Information Body */}
+              {/* Details */}
               <div className="p-3 space-y-1.5 bg-white">
-                {/* Brand & Category */}
                 <div className="flex items-center justify-between text-[9px] uppercase font-bold tracking-widest text-primary/80">
                   <span>{form.brand || "LÉVARO"}</span>
                   {selectedCategoryName && (
@@ -1709,12 +1654,10 @@ export default function AddProductForm({
                   )}
                 </div>
 
-                {/* Title */}
                 <h3 className="font-bodoni text-sm font-bold text-zinc-900 leading-tight line-clamp-1">
                   {form.name || "Untitled Luxury Product"}
                 </h3>
 
-                {/* Attributes Pills */}
                 <div className="flex flex-wrap items-center gap-1 text-[9px] text-zinc-500">
                   {form.fit && (
                     <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-medium">
@@ -1733,7 +1676,6 @@ export default function AddProductForm({
                   )}
                 </div>
 
-                {/* Available Sizes In Stock */}
                 {stock.length > 0 && (
                   <div className="space-y-0.5 pt-0.5">
                     <p className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider">
@@ -1757,7 +1699,6 @@ export default function AddProductForm({
                   </div>
                 )}
 
-                {/* Pricing & Stock Status Bar */}
                 <div className="flex items-baseline justify-between pt-1.5 border-t border-black/5">
                   <div>
                     <div className="flex items-baseline gap-1">
@@ -1817,3 +1758,5 @@ export default function AddProductForm({
     </div>
   );
 }
+
+export default ProductForm;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-interface TopHeaderProps {
+export interface TopHeaderProps {
   title: string;
   description: string;
   buttonName?: string;
@@ -11,13 +11,13 @@ interface TopHeaderProps {
 
 /**
  * Reusable top header component for admin dashboard views.
- * Displays page title, subtitle description, and optional action button.
+ * Displays page title, subtitle description, and optional action button (as Link or interactive button).
  */
-export default function TopHeader({
+export function TopHeader({
   title,
   description,
   buttonName,
-  buttonHref = "/admin/products/create",
+  buttonHref,
   onButtonClick,
 }: TopHeaderProps) {
   return (
@@ -32,16 +32,29 @@ export default function TopHeader({
       </div>
 
       {buttonName && (
-        <Link href={buttonHref} className="shrink-0">
+        buttonHref ? (
+          <Link href={buttonHref} className="shrink-0">
+            <Button
+              type="button"
+              variant="default"
+              className="h-9.5 px-4 rounded-xl bg-primary text-xs font-semibold text-white hover:bg-primary/90 transition-all shadow-xs active:scale-[0.98]"
+            >
+              {buttonName}
+            </Button>
+          </Link>
+        ) : (
           <Button
+            type="button"
             variant="default"
             onClick={onButtonClick}
-            className="h-9.5 px-4 rounded-xl bg-primary text-xs font-semibold text-white hover:bg-primary/90 transition-all shadow-xs active:scale-[0.98]"
+            className="h-9.5 px-4 rounded-xl bg-primary text-xs font-semibold text-white hover:bg-primary/90 transition-all shadow-xs active:scale-[0.98] shrink-0"
           >
             {buttonName}
           </Button>
-        </Link>
+        )
       )}
     </header>
   );
 }
+
+export default TopHeader;

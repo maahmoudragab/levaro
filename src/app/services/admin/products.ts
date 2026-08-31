@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache, revalidateTag, revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /* -------------------------------------------------------------------------- */
@@ -31,13 +31,14 @@ export type Product = {
   country_of_origin: string | null;
   tags: string[] | null;
   product_type: string | null;
-  sort_order: number;
   category_id: string | null;
   color: string | null;
   stock: StockItem[] | null;
   image: string | null;
   images?: string[];
   category_name: string | null;
+  category_slug?: string | null;
+  category_parent_id?: string | null;
   created_at: string;
   updated_at: string | null;
 };
@@ -56,39 +57,49 @@ export type UpdateProductInput = Partial<CreateProductInput>;
 /* -------------------------------------------------------------------------- */
 
 /**
- * Normalizes raw JSON database stock value into structured StockItem array.
+ * Normalizes user-input strings into URL-safe slug format with Arabic unicode support.
  */
-function normalizeStock(value: unknown): StockItem[] {
-  if (!Array.isArray(value)) return [];
+const slugify = (text: string) => {
+  if (!text) return "";
+  return text
+    .toString()
+    .normalize("NFKD")
+    .toLowerCase()
+    .trim()
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
 
-  return value
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const row = item as Record<string, unknown>;
-      const size = typeof row.size === "string" ? row.size.trim() : "";
-      const stock =
-        typeof row.stock === "number"
-          ? row.stock
-          : typeof row.quantity === "number"
-            ? row.quantity
-            : 0;
-
-      return size ? { size, stock } : null;
-    })
-    .filter(Boolean) as StockItem[];
+/**
+ * Safely parses string array or comma-separated string tags into a clean string array.
+ */
+function parseTags(rawTags: unknown): string[] | null {
+  if (Array.isArray(rawTags)) {
+    return rawTags.map((t) => String(t).trim()).filter(Boolean);
+  }
+  if (typeof rawTags === "string" && rawTags.trim().length > 0) {
+    return rawTags.split(",").map((t) => t.trim()).filter(Boolean);
+  }
+  return null;
 }
 
 /**
- * Extracts first available image URL/path string from database row object.
+ * Extracts a valid string representation from various database image row column formats.
  */
-function getImageValue(row: Record<string, unknown>): string | null {
+function getImageValue(img: Record<string, unknown> | string): string | null {
+  if (typeof img === "string") return img;
+  if (!img || typeof img !== "object") return null;
+
   const candidates = [
-    row.image_url,
-    row.url,
-    row.path,
-    row.image,
-    row.file_path,
-    row.storage_path,
+    img.image_url,
+    img.url,
+    img.image,
+    img.path,
+    img.src,
+    img.file_path,
   ];
 
   const value = candidates.find(
@@ -102,7 +113,7 @@ function getImageValue(row: Record<string, unknown>): string | null {
  * Resolves a storage path or remote URL into a valid public image URL.
  */
 function getPublicImageUrl(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAdminClient>,
   value: string | null,
 ): string | null {
   if (!value) return null;
@@ -133,487 +144,436 @@ function getPublicImageUrl(
 }
 
 /**
- * Fetches primary product images for a list of product IDs in a single batch query.
+ * Transforms a raw Supabase joined product row into a typed Product object.
  */
-async function getProductImages(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  productIds: string[],
-): Promise<Map<string, string>> {
-  const imageMap = new Map<string, string>();
-  if (!productIds.length) return imageMap;
+function mapProductRow(
+  supabase: ReturnType<typeof createAdminClient>,
+  row: Record<string, unknown>,
+): Product {
+  const id = row.id as string;
 
-  const { data, error } = await supabase
-    .from("product_images")
-    .select("*")
-    .in("product_id", productIds)
-    .order("sort_order", { ascending: true });
-
-  if (error) {
-    console.error("Product images query error:", error.message);
-    return imageMap;
+  // Resolve Category Name, Slug, and Parent from join
+  let categoryName: string | null = null;
+  let categorySlug: string | null = null;
+  let categoryParentId: string | null = null;
+  if (row.categories && typeof row.categories === "object") {
+    const catObj = Array.isArray(row.categories)
+      ? (row.categories[0] as Record<string, unknown>)
+      : (row.categories as Record<string, unknown>);
+    if (catObj && typeof catObj === "object") {
+      categoryName = (catObj.name as string) ?? null;
+      categorySlug = (catObj.slug as string) ?? null;
+      categoryParentId = (catObj.parent_id as string | null) ?? null;
+    }
   }
 
-  for (const row of data ?? []) {
-    const productId = row.product_id as string | undefined;
-    if (!productId || imageMap.has(productId)) continue;
+  // Resolve Gallery Images from join
+  let images: string[] = [];
+  if (Array.isArray(row.product_images)) {
+    const sortedImages = [...(row.product_images as Record<string, unknown>[])].sort(
+      (a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0),
+    );
 
-    const rawValue = getImageValue(row);
-    const url = getPublicImageUrl(supabase, rawValue);
-    if (url) imageMap.set(productId, url);
+    images = sortedImages
+      .map((img) => getPublicImageUrl(supabase, getImageValue(img)))
+      .filter((img): img is string => Boolean(img));
   }
 
-  return imageMap;
+  const primaryImage = images[0] ?? null;
+
+  return {
+    id,
+    name: (row.name as string) ?? "",
+    slug: (row.slug as string) ?? "",
+    price: Number(row.price ?? 0),
+    sale_price: row.sale_price != null ? Number(row.sale_price) : null,
+    description: (row.description as string | null) ?? null,
+    short_description: (row.short_description as string | null) ?? null,
+    brand: (row.brand as string | null) ?? null,
+    material: (row.material as string | null) ?? null,
+    gender: (row.gender as string | null) ?? null,
+    sku: (row.sku as string | null) ?? null,
+    is_active: Boolean(row.is_active),
+    is_featured: Boolean(row.is_featured),
+    is_new: Boolean(row.is_new),
+    fit: (row.fit as string | null) ?? null,
+    country_of_origin: (row.country_of_origin as string | null) ?? null,
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : null,
+    product_type: (row.product_type as string | null) ?? null,
+    category_id: (row.category_id as string | null) ?? null,
+    color: (row.color as string | null) ?? null,
+    stock: Array.isArray(row.stock) ? (row.stock as StockItem[]) : null,
+    image: primaryImage,
+    images,
+    category_name: categoryName,
+    category_slug: categorySlug,
+    category_parent_id: categoryParentId,
+    created_at: (row.created_at as string) ?? "",
+    updated_at: (row.updated_at as string | null) ?? null,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
-/* Database Queries                                                           */
+/* Database Queries (Cached Server Queries)                                   */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Fetches all products with category names and primary images for admin catalog management.
+ * Fetches all products with complete relational data (Categories & Images).
+ * Supports immediate on-demand cache revalidation.
  */
-export async function getProducts(): Promise<Product[]> {
-  const supabase = await createClient();
+export const getProducts = unstable_cache(
+  async (): Promise<Product[]> => {
+    const supabase = createAdminClient();
 
-  const [
-    { data: products, error: productsError },
-    { data: categories, error: categoriesError },
-  ] = await Promise.all([
-    supabase
+    const { data: products, error } = await supabase
       .from("products")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false }),
+      .select(`
+        *,
+        categories (
+          id,
+          name,
+          slug,
+          parent_id
+        ),
+        product_images (
+          id,
+          image_url,
+          is_primary
+        )
+      `)
+      .order("created_at", { ascending: false });
 
-    supabase
-      .from("categories")
-      .select("id, name")
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true }),
-  ]);
+    if (error) {
+      console.error("Error in getProducts:", error.message);
+      throw new Error(error.message);
+    }
 
-  if (productsError) throw new Error(productsError.message);
-  if (categoriesError) throw new Error(categoriesError.message);
-
-  const categoryMap = new Map((categories ?? []).map((c) => [c.id, c.name]));
-  const productRows = (products ?? []) as Record<string, unknown>[];
-  const productIds = productRows
-    .map((p) => p.id)
-    .filter((id): id is string => typeof id === "string");
-
-  const imageMap = await getProductImages(supabase, productIds);
-
-  return productRows.map((row): Product => {
-    const id = row.id as string;
-    const catId = (row.category_id as string | null) ?? null;
-
-    return {
-      id,
-      name: (row.name as string) ?? "",
-      slug: (row.slug as string) ?? "",
-      price: Number(row.price ?? 0),
-      sale_price: row.sale_price != null ? Number(row.sale_price) : null,
-      description: (row.description as string | null) ?? null,
-      short_description: (row.short_description as string | null) ?? null,
-      brand: (row.brand as string | null) ?? null,
-      material: (row.material as string | null) ?? null,
-      gender: (row.gender as string | null) ?? null,
-      sku: (row.sku as string | null) ?? null,
-      is_active: Boolean(row.is_active),
-      is_featured: Boolean(row.is_featured),
-      is_new: Boolean(row.is_new),
-      fit: (row.fit as string | null) ?? null,
-      country_of_origin: (row.country_of_origin as string | null) ?? null,
-      tags: Array.isArray(row.tags)
-        ? (row.tags as string[])
-        : typeof row.tags === "string" && row.tags.trim()
-          ? row.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
-          : null,
-      product_type: (row.product_type as string | null) ?? null,
-      sort_order: Number(row.sort_order ?? 0),
-      category_id: catId,
-      color: (row.color as string | null) ?? null,
-      stock: normalizeStock(row.stock),
-      created_at: row.created_at as string,
-      updated_at: (row.updated_at as string | null) ?? null,
-      image: imageMap.get(id) ?? null,
-      category_name: catId ? categoryMap.get(catId) ?? null : null,
-    };
-  });
-}
+    return (products ?? []).map((row) =>
+      mapProductRow(supabase, row as Record<string, unknown>),
+    );
+  },
+  ["admin-products-list"],
+  { tags: ["products"] },
+);
 
 /**
  * Fetches a single product by its unique slug (or fallback UUID) along with its complete image gallery.
- * Supports multilingual / Arabic slugs and URI-encoded routes.
  */
-export async function getProductById(
-  idOrSlug: string,
-): Promise<(Product & { images: string[] }) | null> {
-  const supabase = await createClient();
-  const cleanIdOrSlug = decodeURIComponent(idOrSlug);
+export const getProductById = unstable_cache(
+  async (idOrSlug: string): Promise<(Product & { images: string[] }) | null> => {
+    const supabase = createAdminClient();
+    const cleanIdOrSlug = decodeURIComponent(idOrSlug);
 
-  // Try finding product by decoded slug first
-  let { data: product } = await supabase
-    .from("products")
-    .select("*, categories(name)")
-    .eq("slug", cleanIdOrSlug)
-    .maybeSingle();
+    const selectQuery = `
+      *,
+      categories (
+        id,
+        name,
+        slug,
+        parent_id
+      ),
+      product_images (
+        id,
+        image_url,
+        is_primary,
+        sort_order
+      )
+    `;
 
-  // If not found and slug differed from original, try raw parameter
-  if (!product && cleanIdOrSlug !== idOrSlug) {
-    const res = await supabase
+    // Try finding product by decoded slug
+    let { data: product } = await supabase
       .from("products")
-      .select("*, categories(name)")
-      .eq("slug", idOrSlug)
+      .select(selectQuery)
+      .eq("slug", cleanIdOrSlug)
       .maybeSingle();
-    product = res.data;
-  }
 
-  // Fallback: match by UUID if slug lookup yields no record
-  if (!product) {
-    const isUuid =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        cleanIdOrSlug,
-      );
-    if (isUuid) {
-      const res = await supabase
+    // Fallback: try finding by UUID if slug search was empty
+    if (!product && /^[0-9a-f-]{36}$/i.test(cleanIdOrSlug)) {
+      const result = await supabase
         .from("products")
-        .select("*, categories(name)")
+        .select(selectQuery)
         .eq("id", cleanIdOrSlug)
         .maybeSingle();
-      product = res.data;
+      product = result.data;
     }
-  }
 
-  if (!product) return null;
+    if (!product) return null;
 
-  // Retrieve associated gallery images in order
-  const { data: imagesData } = await supabase
-    .from("product_images")
-    .select("*")
-    .eq("product_id", product.id)
-    .order("sort_order", { ascending: true });
-
-  const images = (imagesData ?? [])
-    .map((img) => getPublicImageUrl(supabase, getImageValue(img)))
-    .filter((img): img is string => Boolean(img));
-
-  return {
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    price: Number(product.price ?? 0),
-    sale_price: product.sale_price != null ? Number(product.sale_price) : null,
-    description: product.description ?? null,
-    short_description: product.short_description ?? null,
-    brand: product.brand ?? null,
-    material: product.material ?? null,
-    gender: product.gender ?? null,
-    sku: product.sku ?? null,
-    is_active: Boolean(product.is_active),
-    is_featured: Boolean(product.is_featured),
-    is_new: Boolean(product.is_new),
-    fit: product.fit ?? null,
-    country_of_origin: product.country_of_origin ?? null,
-    tags: Array.isArray(product.tags)
-      ? product.tags
-      : typeof product.tags === "string" && product.tags.trim()
-        ? product.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
-        : [],
-    product_type: product.product_type ?? null,
-    sort_order: Number(product.sort_order ?? 0),
-    category_id: product.category_id ?? null,
-    color: product.color ?? null,
-    stock: normalizeStock(product.stock),
-    created_at: product.created_at,
-    updated_at: product.updated_at ?? null,
-    image: images[0] ?? null,
-    images,
-    category_name: product.categories?.name ?? null,
-  };
-}
-
-export const getProductBySlug = getProductById;
-
-/* -------------------------------------------------------------------------- */
-/* Database Mutations (Server Actions)                                       */
-/* -------------------------------------------------------------------------- */
+    const mapped = mapProductRow(supabase, product as Record<string, unknown>);
+    return {
+      ...mapped,
+      images: mapped.images ?? [],
+    };
+  },
+  ["admin-product-by-id"],
+  { tags: ["products"] },
+);
 
 /**
- * Creates a new product record and saves associated gallery images.
+ * Helper alias for fetching product by unique slug.
  */
-export async function createProduct(
-  input: CreateProductInput,
-): Promise<Record<string, unknown>> {
-  const supabase = await createClient();
+export async function getProductBySlug(
+  slug: string,
+): Promise<(Product & { images: string[] }) | null> {
+  return getProductById(slug);
+}
 
-  // Validate unique slug constraint
-  if (input.slug) {
-    const { data: existingSlug } = await supabase
-      .from("products")
-      .select("id")
-      .eq("slug", input.slug.trim())
-      .maybeSingle();
+/* -------------------------------------------------------------------------- */
+/* Database Mutations (Server Actions with On-Demand Instant Revalidation)    */
+/* -------------------------------------------------------------------------- */
 
-    if (existingSlug) {
-      throw new Error(`A product with the slug "${input.slug}" already exists.`);
-    }
+function purgeProductsCache() {
+  try {
+    revalidateTag("products", { expire: 0 });
+    revalidateTag("categories", { expire: 0 });
+  } catch {
+    // Fallback if called outside request lifecycle
+  }
+  revalidatePath("/admin");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/admin/categories");
+  revalidatePath("/");
+}
+
+/**
+ * Uploads an image binary to the Supabase Storage product-images bucket.
+ */
+export async function uploadProductImage(
+  formData: FormData,
+): Promise<{ url: string; path: string }> {
+  const file = formData.get("file") as File;
+  if (!file) throw new Error("No image file provided in upload request.");
+
+  const supabase = createAdminClient();
+  const fileExt = file.name.split(".").pop() || "webp";
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+  const filePath = `products/${uniqueName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("product-images")
+    .upload(filePath, file, {
+      cacheControl: "31536000",
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("Image upload error:", uploadError.message);
+    throw new Error(`Failed to upload image asset: ${uploadError.message}`);
   }
 
-  const formattedTags: string[] | null = Array.isArray(input.tags)
-    ? input.tags.map((t: string) => t.trim().toLowerCase()).filter(Boolean)
-    : typeof input.tags === "string" && (input.tags as string).trim()
-      ? (input.tags as string)
-          .split(",")
-          .map((t: string) => t.trim().toLowerCase())
-          .filter(Boolean)
-      : null;
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("product-images").getPublicUrl(filePath);
 
-  const productId = input.id || crypto.randomUUID();
+  return { url: publicUrl, path: filePath };
+}
+
+/**
+ * Creates a new product and inserts its gallery images in an atomic operation.
+ */
+export async function createProduct(input: CreateProductInput): Promise<Product> {
+  const supabase = createAdminClient();
+
+  const generatedSlug = slugify(input.name);
+  const finalSlug = input.slug ? slugify(input.slug) : generatedSlug;
 
   const productData = {
-    id: productId,
     name: input.name,
-    slug: input.slug,
-    description: input.description ?? null,
-    short_description: input.short_description ?? null,
-    brand: input.brand ?? null,
-    material: input.material ?? null,
-    gender: input.gender ?? null,
-    price: input.price,
-    sale_price: input.sale_price ?? null,
-    sku: input.sku ?? null,
-    is_active: input.is_active ?? true,
-    is_featured: input.is_featured ?? false,
-    is_new: input.is_new ?? false,
-    fit: input.fit ?? null,
-    country_of_origin: input.country_of_origin ?? null,
-    tags: formattedTags,
-    product_type: input.product_type ?? null,
-    sort_order: input.sort_order ?? 0,
+    slug: finalSlug,
+    price: Number(input.price),
+    sale_price: input.sale_price ? Number(input.sale_price) : null,
+    description: input.description || null,
+    short_description: input.short_description || null,
+    brand: input.brand || "LÉVARO",
+    material: input.material || null,
+    gender: input.gender || null,
+    sku: input.sku || null,
+    is_active: input.is_active !== undefined ? input.is_active : true,
+    is_featured: Boolean(input.is_featured),
+    is_new: Boolean(input.is_new),
+    fit: input.fit || null,
+    country_of_origin: input.country_of_origin || null,
+    tags: parseTags(input.tags),
+    product_type: input.product_type || null,
     category_id: input.category_id || null,
-    color: input.color ?? null,
-    stock: normalizeStock(input.stock),
+    color: input.color || null,
+    stock: input.stock || [],
   };
 
-  const { data: newProduct, error: productError } = await supabase
+  const { data: createdProduct, error: productError } = await supabase
     .from("products")
     .insert(productData)
     .select()
     .single();
 
-  if (productError || !newProduct) {
-    throw new Error(
-      `Failed to create product: ${productError?.message ?? "Unknown database error"}`,
-    );
+  if (productError) {
+    console.error("Product creation failed:", productError.message);
+    throw new Error(productError.message);
   }
 
-  // Insert image gallery entries
-  if (input.images && input.images.length > 0) {
-    const imageRows = input.images.map((imgUrl, index) => ({
-      product_id: productId,
+  // Insert gallery images if supplied
+  if (Array.isArray(input.images) && input.images.length > 0) {
+    const imagesToInsert = input.images.map((imgUrl, index) => ({
+      product_id: createdProduct.id,
       image_url: imgUrl,
-      alt_text: input.name,
       is_primary: index === 0,
       sort_order: index,
     }));
 
-    const { error: imagesError } = await supabase
+    const { error: imageError } = await supabase
       .from("product_images")
-      .insert(imageRows);
+      .insert(imagesToInsert);
 
-    if (imagesError) {
-      console.error("Failed to insert product images:", imagesError.message);
+    if (imageError) {
+      console.warn("Product images insert warning:", imageError.message);
     }
   }
 
-  return newProduct;
+  purgeProductsCache();
+  return mapProductRow(supabase, createdProduct);
 }
 
 /**
- * Updates an existing product record and synchronizes gallery images.
+ * Updates an existing product and synchronizes its image gallery.
  */
 export async function updateProduct(
   id: string,
-  values: UpdateProductInput,
-): Promise<Record<string, unknown>> {
+  input: UpdateProductInput,
+): Promise<Product> {
   const supabase = createAdminClient();
 
-  // Validate unique slug if modified
-  if (values.slug !== undefined && values.slug.trim()) {
-    const { data: existingSlug } = await supabase
-      .from("products")
-      .select("id")
-      .eq("slug", values.slug.trim())
-      .neq("id", id)
-      .maybeSingle();
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
 
-    if (existingSlug) {
-      throw new Error(
-        `The slug "${values.slug}" is already in use by another product.`,
-      );
-    }
+  if (input.name !== undefined) updateData.name = input.name;
+  if (input.slug !== undefined) updateData.slug = slugify(input.slug);
+  if (input.price !== undefined) updateData.price = Number(input.price);
+  if (input.sale_price !== undefined)
+    updateData.sale_price = input.sale_price ? Number(input.sale_price) : null;
+  if (input.description !== undefined)
+    updateData.description = input.description || null;
+  if (input.short_description !== undefined)
+    updateData.short_description = input.short_description || null;
+  if (input.brand !== undefined) updateData.brand = input.brand || null;
+  if (input.material !== undefined) updateData.material = input.material || null;
+  if (input.gender !== undefined) updateData.gender = input.gender || null;
+  if (input.sku !== undefined) updateData.sku = input.sku || null;
+  if (input.is_active !== undefined) updateData.is_active = input.is_active;
+  if (input.is_featured !== undefined)
+    updateData.is_featured = input.is_featured;
+  if (input.is_new !== undefined) updateData.is_new = input.is_new;
+  if (input.fit !== undefined) updateData.fit = input.fit || null;
+  if (input.country_of_origin !== undefined)
+    updateData.country_of_origin = input.country_of_origin || null;
+  if (input.product_type !== undefined)
+    updateData.product_type = input.product_type || null;
+  if (input.category_id !== undefined)
+    updateData.category_id = input.category_id || null;
+  if (input.color !== undefined) updateData.color = input.color || null;
+  if (input.stock !== undefined) updateData.stock = input.stock;
+
+  if (input.tags !== undefined) {
+    updateData.tags = parseTags(input.tags);
   }
 
-  const updateData: Record<string, unknown> = {};
-
-  if (values.name !== undefined) updateData.name = values.name;
-  if (values.slug !== undefined) updateData.slug = values.slug;
-  if (values.description !== undefined) updateData.description = values.description;
-  if (values.short_description !== undefined)
-    updateData.short_description = values.short_description;
-  if (values.brand !== undefined) updateData.brand = values.brand;
-  if (values.material !== undefined) updateData.material = values.material;
-  if (values.gender !== undefined) updateData.gender = values.gender;
-  if (values.price !== undefined) updateData.price = values.price;
-  if (values.sale_price !== undefined) updateData.sale_price = values.sale_price;
-  if (values.sku !== undefined) updateData.sku = values.sku;
-  if (values.is_active !== undefined) updateData.is_active = values.is_active;
-  if (values.is_featured !== undefined) updateData.is_featured = values.is_featured;
-  if (values.is_new !== undefined) updateData.is_new = values.is_new;
-  if (values.fit !== undefined) updateData.fit = values.fit;
-  if (values.country_of_origin !== undefined)
-    updateData.country_of_origin = values.country_of_origin;
-  if (values.tags !== undefined) {
-    updateData.tags = Array.isArray(values.tags)
-      ? values.tags.map((t: string) => t.trim().toLowerCase()).filter(Boolean)
-      : typeof values.tags === "string" && (values.tags as string).trim()
-        ? (values.tags as string)
-            .split(",")
-            .map((t: string) => t.trim().toLowerCase())
-            .filter(Boolean)
-        : null;
-  }
-  if (values.product_type !== undefined)
-    updateData.product_type = values.product_type;
-  if (values.color !== undefined) updateData.color = values.color;
-  if (values.category_id !== undefined)
-    updateData.category_id = values.category_id;
-  if (values.stock !== undefined) updateData.stock = normalizeStock(values.stock);
-
-  updateData.updated_at = new Date().toISOString();
-
-  const { data: updatedProduct, error } = await supabase
+  const { data: updatedProduct, error: productError } = await supabase
     .from("products")
     .update(updateData)
     .eq("id", id)
-    .select("*")
+    .select()
     .single();
 
-  if (error || !updatedProduct) {
-    throw new Error(error?.message ?? "Failed to update product");
+  if (productError) {
+    console.error("Product update failed:", productError.message);
+    throw new Error(productError.message);
   }
 
-  // Update gallery images if provided
-  if (values.images !== undefined) {
+  // Synchronize gallery images if new images array was provided
+  if (Array.isArray(input.images)) {
     await supabase.from("product_images").delete().eq("product_id", id);
 
-    if (values.images.length > 0) {
-      const imageRows = values.images.map((imgUrl, index) => ({
+    if (input.images.length > 0) {
+      const imagesToInsert = input.images.map((imgUrl, index) => ({
         product_id: id,
         image_url: imgUrl,
-        alt_text: values.name ?? updatedProduct.name,
         is_primary: index === 0,
         sort_order: index,
       }));
 
-      await supabase.from("product_images").insert(imageRows);
+      await supabase.from("product_images").insert(imagesToInsert);
     }
   }
 
-  return updatedProduct;
+  purgeProductsCache();
+  return mapProductRow(supabase, updatedProduct);
 }
 
 /**
- * Toggles product active visibility status.
+ * Permanently deletes a product and removes its associated gallery images.
  */
-export async function toggleProductActive(id: string, value: boolean) {
-  return updateProduct(id, { is_active: value });
-}
+export async function deleteProduct(id: string): Promise<boolean> {
+  const supabase = createAdminClient();
 
-/**
- * Toggles product featured highlight status.
- */
-export async function toggleProductFeatured(id: string, value: boolean) {
-  return updateProduct(id, { is_featured: value });
-}
-
-/**
- * Deletes a product, its database records, and all uploaded images in storage.
- */
-export async function deleteProduct(id: string) {
-  const supabase = await createClient();
-
-  // Delete image relations
-  const { error: imagesError } = await supabase
-    .from("product_images")
-    .delete()
-    .eq("product_id", id);
-
-  if (imagesError) {
-    console.error("Failed to delete product images records:", imagesError.message);
-  }
-
-  // Delete image files in Supabase Storage
-  try {
-    const { data: fileList } = await supabase.storage
-      .from("product-images")
-      .list(id);
-
-    if (fileList && fileList.length > 0) {
-      const pathsToDelete = fileList.map((f) => `${id}/${f.name}`);
-      await supabase.storage.from("product-images").remove(pathsToDelete);
-    }
-  } catch (storageErr) {
-    console.error("Storage delete error:", storageErr);
-  }
-
-  // Delete main product entry
+  await supabase.from("product_images").delete().eq("product_id", id);
   const { error } = await supabase.from("products").delete().eq("id", id);
 
-  if (error) throw new Error(error.message);
-  return { success: true };
-}
-
-/* -------------------------------------------------------------------------- */
-/* Storage Upload Operations                                                  */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Uploads a product photo to the `product-images` bucket in Supabase Storage.
- */
-export async function uploadProductImage(
-  formData: FormData,
-): Promise<{ url: string; path: string }> {
-  const supabase = createAdminClient();
-  const file = formData.get("file") as File | null;
-  const productId = (formData.get("productId") as string) || "general";
-  const index = (formData.get("index") as string) || "0";
-
-  if (!file) throw new Error("No file provided");
-
-  const ext = file.name.split(".").pop() || "jpg";
-  const cleanBaseName = file.name
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[^a-zA-Z0-9_-]/g, "_")
-    .slice(0, 30);
-  const fileName = `${index}-${Date.now()}-${cleanBaseName}.${ext}`;
-  const filePath = `${productId}/${fileName}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-  if (uploadError) {
-    throw new Error(`Failed to upload image: ${uploadError.message}`);
+  if (error) {
+    console.error("Product deletion failed:", error.message);
+    throw new Error(error.message);
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(filePath);
+  purgeProductsCache();
+  return true;
+}
 
-  return { url: publicUrlData.publicUrl, path: filePath };
+/**
+ * Quick toggle for product active/storefront visibility.
+ */
+export async function toggleProductActive(
+  id: string,
+  isActive: boolean,
+): Promise<Product> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .update({ is_active: isActive, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Toggle active status failed:", error.message);
+    throw new Error(error.message);
+  }
+
+  purgeProductsCache();
+  return mapProductRow(supabase, data);
+}
+
+/**
+ * Quick toggle for product featured status.
+ */
+export async function toggleProductFeatured(
+  id: string,
+  isFeatured: boolean,
+): Promise<Product> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .update({ is_featured: isFeatured, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Toggle featured status failed:", error.message);
+    throw new Error(error.message);
+  }
+
+  purgeProductsCache();
+  return mapProductRow(supabase, data);
 }

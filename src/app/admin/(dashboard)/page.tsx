@@ -1,16 +1,21 @@
-import TopHeader from "@/components/dashboard/TopHeader";
+import { TopHeader } from "@/components/shared/TopHeader";
+
+export const metadata = {
+  title: "Dashboard | LÉVARO Admin",
+};
 
 /**
  * Admin Overview Dashboard Page (Server Component).
+ * Renders TopHeader only.
  */
 export default async function AdminOverviewPage() {
   return (
-    <div className="p-4 flex flex-col gap-2 pb-50">
+    <div className="p-3 sm:p-4 flex flex-col gap-4 font-sans">
       <TopHeader
         title="Dashboard"
-        description="Welcome back, here's what's happening today."
-        buttonName="Notifications"
-        buttonHref="#"
+        description="Welcome back to LÉVARO Atelier. Overview & storefront management."
+        buttonName="Add New Product"
+        buttonHref="/admin/products/create"
       />
     </div>
   );
