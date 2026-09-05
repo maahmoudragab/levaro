@@ -1,277 +1,81 @@
-# LÉVARO — AI Agent Instructions
+# AGENTS.md — LÉVARO
 
-## Project Overview
+Guidance for any AI coding agent working in this repository. Read this before touching UI code.
 
-LÉVARO is a modern fashion e-commerce website for:
+## Project
 
-* Men
-* Women
-* Kids
-* Accessories
+LÉVARO is a premium/luxury fashion e-commerce site.
+Stack: **Next.js (App Router, TypeScript), Tailwind CSS, GSAP + ScrollTrigger, Supabase (`@supabase/ssr`)**. Uses `proxy.ts` instead of `middleware.ts`. No payment gateway — purchases redirect to WhatsApp with a pre-filled message (size, color, product). Auth/login is implemented. Admin dashboard lives under `/admin` in a `(dashboard)` route group.
 
-The project is built with Next.js, React, TypeScript, Tailwind CSS, and Supabase.
-
-The customer-facing website does NOT have:
-
-* Customer authentication
-* Online payment
-* Real checkout/payment processing
-
-Customers can browse products, search, filter, sort, view product details, select sizes and check available stock.
+The storefront must feel like a fashion house that happens to have a store — never a generic e-commerce template wearing a luxury skin. When in doubt, remove UI rather than add it.
 
 ---
 
-## General Rules
+## Design system
 
-* Always use TypeScript.
-* Write clean, readable, maintainable code.
-* Prefer reusable components over duplicated code.
-* Do not create unnecessary files or components.
-* Do not add unnecessary dependencies.
-* Do not change the project architecture without a good reason.
-* Do not rewrite working code unnecessarily.
-* Before making a major architectural change, explain the reason first.
-* Keep solutions simple. Do not over-engineer.
+### Colors — four only, no accent color
 
----
+| Token | Hex | Use |
+|---|---|---|
+| `near-black` | `#0A0A0A` | Primary dark background (reads as ink, not pure black) |
+| `off-white` | `#F5F3EF` | Primary light background (warm, not clinical) |
+| `charcoal` | `#1C1C1C` | Mid-tone, section transitions |
+| `gray` | `#8C8A85` | Secondary/utility text only |
 
-## Next.js
+Never introduce gold, metallics, gradients, glassmorphism, heavy drop shadows, or an accent color. Never add rounded cards by default — corners stay sharp unless a component explicitly calls for a pill shape.
 
-* Use the Next.js App Router.
-* Prefer Server Components by default.
-* Use `"use client"` only when client-side functionality is actually required.
-* Use Server Components for data fetching when possible.
-* Avoid unnecessary client-side state.
-* Use Next.js built-in features when they provide a better solution.
-* Use `next/image` for images.
-* Use proper metadata for pages when needed.
-* Keep SEO in mind when creating public pages.
+Banned UI patterns: SALE/discount badges, star ratings, review counts, stock-status labels, newsletter signup blocks, generic image-zoom-on-hover (`scale-105`).
 
----
+### Typography — two families only
 
-## React
+- **Display** (headlines, section titles, department/collection names): a tall, condensed grotesque. This carries the brand identity — treat it as an architectural element on the page, not decoration.
+- **Utility sans** (nav, labels, prices, metadata): plain, tight-tracked sans, always uppercase, letter-spaced.
 
-* Use functional components.
-* Keep components focused on a single responsibility.
-* Create reusable components when the same UI or logic is used more than once.
-* Avoid unnecessary `useEffect`.
-* Avoid unnecessary re-renders.
-* Do not put everything into one large component.
-* Keep business logic separate from presentation when appropriate.
+No third typeface. No traditional luxury serif as the dominant voice.
+
+### Motion — one signature curve
+
+Every animation in the codebase uses the same easing: `cubic-bezier(0.65, 0, 0.35, 1)`. Define it once (e.g. a shared GSAP default ease or a Tailwind/CSS custom property) and reuse it everywhere — don't let individual components invent their own easing.
+
+Banned: bounce, elastic, back-out, random rotation, particle effects, "everything scales on hover," excessive parallax.
+
+Allowed scale range: **1.0 → 1.04 max**, and only in the hero's entrance reveal. Every other interaction uses opacity, clip-path masks, or position — never scale.
 
 ---
 
-## Styling
+## Component architecture
 
-* Use Tailwind CSS as the primary styling solution.
-* Do not introduce another styling system unless explicitly requested.
-* Keep the design responsive.
-* Support mobile, tablet, and desktop.
-* Maintain consistent spacing, typography, colors, and UI patterns.
-* Avoid excessive animations.
-* Animations must not negatively affect performance or usability.
+Build sections as self-contained, reusable components:
 
----
+`Header`, `MenuOverlay`, `Hero`, `NewArrivals`, `ProductRail`, `ProductCard`, `Departments`, `DepartmentItem`, `Collections`, `CollectionItem`, `BrandStory`, `Footer`
 
-## UI / UX
+Each owns its own GSAP/ScrollTrigger timeline but imports the shared easing curve rather than redefining it.
 
-LÉVARO should feel like a premium modern fashion brand.
+## Layout rules
 
-Prioritize:
+- 12-column grid, 24px gutter, 80px outer margin on desktop (1440px reference)
+- Minimum 120px vertical rhythm between major sections — a background color change (black ↔ off-white ↔ charcoal) is itself the section transition; don't add a divider on top of it
+- Mobile (390px reference) is its own composition, never a scaled-down desktop layout — different image crops, stacked (not side-by-side) department blocks, full-screen (not side-panel) menu overlay
 
-* Clean layouts
-* Strong typography
-* Good whitespace
-* High-quality product presentation
-* Smooth but lightweight interactions
-* Responsive design
-* Accessibility
-* Fast loading
+## Content discipline
 
-Do not add visual effects just because they look impressive.
+Priority order when adding anything to the storefront: brand identity → visual impact → typography → photography → motion → product discovery → navigation. The homepage and category pages should intentionally show **less** information than a typical e-commerce site — no SKU, no long descriptions, no secondary CTAs competing with the primary one.
 
-Every animation or interaction should have a purpose.
+No invented brand history — no founding year, no city of origin, no heritage/craftsmanship claims. Brand copy stays philosophical/abstract (form, movement, material, identity), never biographical.
 
----
+## Header/nav constraints
 
-## Performance
+No permanent navbar, no permanent sidebar, no visible cart/wishlist/search/account icons in the header. Header is two elements only: wordmark (left) and a `MENU` trigger (right) that opens a full-height overlay — never a persistent dropdown or mega-menu.
 
-Performance is important.
+## Preloader / Page Loading Curtain Requirement
 
-* Optimize images.
-* Avoid loading unnecessary JavaScript.
-* Avoid unnecessary client components.
-* Avoid unnecessary API/database requests.
-* Avoid unnecessary state updates.
-* Do not add heavy animation libraries unless they are actually needed.
-* Prefer CSS animations for simple animations.
-* Lazy-load content when appropriate.
-* Avoid rendering large amounts of unnecessary data.
-* Keep pages fast and responsive.
+Every storefront page in this application (e.g. `/`, `/about`, `/shop`, etc.) MUST include `<Preloader />`.
+The preloader is **fully functional, not merely decorative**. It actively and strictly waits for:
+1. `document.fonts.ready` (all brand typography)
+2. `document.readyState === 'complete'` / window load (all stylesheets, scripts, network requests)
+3. GPU bitmap decoding (`Image.decode()`) of all critical imagery
+The curtain only lifts after the page is 100% loaded and decoded, ensuring zero layout shifts, zero font jumps, and zero image pop-in across the entire site.
 
----
+## Full reference
 
-## Supabase
-
-Supabase is the backend/database for the project.
-
-Use Supabase for:
-
-* Product data
-* Product categories
-* Product sizes
-* Stock information
-* Product images through Supabase Storage
-
-Do not change the database schema without explicitly asking first.
-
-Do not delete or rename existing database tables, columns, buckets, or policies without confirmation.
-
-Do not expose sensitive Supabase credentials in client-side code.
-
-Never expose service-role keys in the browser.
-
-Use environment variables for credentials.
-
----
-
-## Product Data
-
-Products may contain information such as:
-
-* Name
-* Description
-* Category
-* Price
-* Images
-* Sizes
-* Available stock
-* Gender
-* Featured status
-* Other relevant product attributes
-
-Keep product-related logic reusable and organized.
-
-Do not hardcode product data inside UI components when the data should come from Supabase.
-
----
-
-## Components
-
-Prefer a clear component structure.
-
-Example:
-
-```text
-components/
-├── ui/
-├── layout/
-├── product/
-├── category/
-└── shared/
-```
-
-Do not create a component for every tiny HTML element.
-
-Create components when they improve:
-
-* Reusability
-* Readability
-* Maintainability
-* Separation of concerns
-
----
-
-## Data Fetching
-
-* Fetch only the data required by the page.
-* Avoid duplicate requests.
-* Use appropriate caching/revalidation strategies.
-* Do not fetch all products if only a small subset is required.
-* Implement pagination or other appropriate strategies for large datasets.
-
----
-
-## Error Handling
-
-* Handle loading states.
-* Handle empty states.
-* Handle errors gracefully.
-* Never leave the user with a broken or blank UI when an error can be handled.
-* Do not silently ignore important errors.
-
----
-
-## Accessibility
-
-* Use semantic HTML.
-* Images must have meaningful `alt` text.
-* Buttons should be actual `<button>` elements.
-* Links should use `<a>` or Next.js `Link`.
-* Interactive elements must be keyboard accessible.
-* Do not rely only on color to communicate information.
-
----
-
-## Code Quality
-
-Before finishing a task:
-
-1. Check for TypeScript errors.
-2. Check for obvious runtime issues.
-3. Check responsive behavior.
-4. Check for unnecessary code.
-5. Check that existing functionality was not broken.
-6. Keep the final implementation as simple as possible.
-
----
-
-## Important Restrictions
-
-Do NOT:
-
-* Install packages without asking first.
-* Replace existing libraries without a strong reason.
-* Change the database schema without asking.
-* Delete existing functionality without asking.
-* Rewrite large parts of the project for a small change.
-* Add authentication unless explicitly requested.
-* Add payment processing unless explicitly requested.
-* Add unnecessary dependencies.
-* Hardcode secrets or API keys.
-* Use mock product data when real Supabase data is available.
-
----
-
-## Working Style
-
-When asked to implement a feature:
-
-1. Understand the existing code first.
-2. Reuse existing components and utilities.
-3. Make the smallest reasonable change.
-4. Keep the existing architecture intact.
-5. Explain important changes briefly.
-6. Do not modify unrelated files.
-
-If there are multiple reasonable approaches, prefer the simplest and most maintainable one.
-
-When something is unclear, ask before making a major assumption.
-
----
-
-## Design Guidelines & UI/UX Standards
-
-When designing, reviewing, or implementing UI/UX components:
-* Adhere to the design system and audit rules in `.agents/skills/apple-design/SKILL.md`.
-* Refer to `.agents/skills/apple-design/references/hig-lookup.md` and related reference documents in `.agents/skills/apple-design/references/hig/` for specific guidelines (Typography, Color, Spacing, Accessibility, Motion, etc.).
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+The complete section-by-section build spec (hero copy direction, motion timelines, exact measurements, mobile breakpoints) lives in `levaro-homepage-prompt.md`. Treat this file as the binding constraints; that file as the detailed implementation brief.

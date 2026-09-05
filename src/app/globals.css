@@ -51,6 +51,73 @@
 
 @theme {
   --color-primary: var(--primary);
+  --color-near-black: #0A0A0A;
+  --color-off-white: #F5F3EF;
+  --color-charcoal: #1C1C1C;
+  --color-brand-gray: #8C8A85;
+  --font-sans: var(--font-supreme), ui-sans-serif, system-ui, sans-serif;
+  --font-supreme: var(--font-supreme);
+  --font-display: var(--font-clash), ui-sans-serif, system-ui, sans-serif;
+  --font-clash: var(--font-clash);
+  --font-utility: var(--font-supreme), ui-sans-serif, system-ui, sans-serif;
+  --ease-signature: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@utility site-container {
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@utility site-padding-x {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  @media (min-width: 640px) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  @media (min-width: 768px) {
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+@utility section-py {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  @media (min-width: 640px) {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@keyframes marquee-glide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-glide {
+  display: flex;
+  width: max-content;
+  animation: marquee-glide 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-glide:hover {
+  animation-play-state: paused;
 }
 
 :root {
@@ -125,12 +192,96 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+    border-color: var(--border);
   }
   html {
     @apply font-sans;
   }
+  
+  /* Storefront Pure Full-Bleed (No clunky scrollbar, No white gutter strips) */
+  html:not(:has([data-dashboard])),
+  body:not(:has([data-dashboard])) {
+    color-scheme: dark;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html:not(:has([data-dashboard]))::-webkit-scrollbar,
+  body:not(:has([data-dashboard]))::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Admin Dashboard Normal Scrollbar */
+  html:has([data-dashboard]),
+  body:has([data-dashboard]),
+  [data-dashboard] {
+    color-scheme: light;
+    scrollbar-width: auto;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Default & Dark Sections: Pure White Background, Black Text */
+  ::selection {
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+  }
+  *::selection {
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+  }
+
+  /* Light Sections (Departments, SelectedEditions, etc.): Black Background, Pure White Text */
+  [data-light-section="true"] ::selection,
+  [data-light-section="true"] *::selection,
+  [data-light-section="true"]::selection,
+  .bg-off-white ::selection,
+  .bg-off-white *::selection,
+  .bg-off-white::selection,
+  .bg-white ::selection,
+  .bg-white *::selection,
+  .bg-white::selection {
+    background-color: #0A0A0A !important;
+    color: #FFFFFF !important;
+  }
+
+  /* Dark Sections Explicit Reinforcement (Hero, Collections, Footer, Menu): White Background, Black Text */
+  [data-dark-section="true"] ::selection,
+  [data-dark-section="true"] *::selection,
+  [data-dark-section="true"]::selection,
+  .bg-near-black ::selection,
+  .bg-near-black *::selection,
+  .bg-near-black::selection,
+  .bg-charcoal ::selection,
+  .bg-charcoal *::selection,
+  .bg-charcoal::selection {
+    background-color: #FFFFFF !important;
+    color: #0A0A0A !important;
+  }
+}
+
+.gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes progress5s {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-progress-5s {
+  transform-origin: left;
+  animation: progress5s 5s linear forwards;
 }
