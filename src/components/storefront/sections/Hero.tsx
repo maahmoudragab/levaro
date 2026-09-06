@@ -135,15 +135,15 @@ export function Hero() {
             alt="LÉVARO — Move Your Way"
             fill
             priority
-            quality={100}
+            quality={90}
             sizes="100vw"
             className="object-cover object-top md:object-[center_top]"
           />
           {/* Responsive Atmospheric Gradients */}
           <div className="absolute inset-0 bg-near-black/25" />
-          <div className="absolute inset-0 bg-gradient-to-t from-near-black via-near-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-near-black/60 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-near-black/40 via-transparent to-transparent hidden md:block" />
+          <div className="absolute inset-0 bg-linear-to-t from-near-black via-near-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-b from-near-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-near-black/40 via-transparent to-transparent hidden md:block" />
         </div>
       </div>
 

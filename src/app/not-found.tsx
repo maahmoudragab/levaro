@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { Header, LuxuryCursor, Preloader } from "@/components/storefront/shared";
-import { Footer } from "@/components/storefront/sections";
+import { Header } from "@/components/storefront/shared/Header";
+import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
+import { Preloader } from "@/components/storefront/shared/Preloader";
+import { Footer } from "@/components/storefront/sections/Footer";
 
 export const metadata: Metadata = {
   title: "404 — ARCHIVE VOID | LÉVARO",
@@ -31,11 +33,11 @@ export default function NotFound() {
             <div className="site-container flex flex-col items-center justify-center gap-6 sm:gap-8 max-w-3xl">
               {/* Top Status Tag */}
               <div className="inline-flex items-center gap-3">
-                <span className="w-8 h-[1px] bg-off-white/60" />
+                <span className="w-8 h-px bg-off-white/60" />
                 <span className="text-[10px] sm:text-xs uppercase font-sans tracking-[0.3em] text-brand-gray font-medium">
                   ERROR 404 / UNLOCATED COORDINATE
                 </span>
-                <span className="w-8 h-[1px] bg-off-white/60" />
+                <span className="w-8 h-px bg-off-white/60" />
               </div>
 
               {/* Master Headline */}

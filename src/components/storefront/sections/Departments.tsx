@@ -7,7 +7,8 @@ import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
-import { SectionHeader, SectionFooter } from "@/components/storefront/shared";
+import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
+import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
 import { registerGyroscope } from "@/lib/gyroscope";
 import { DEPARTMENTS } from "@/data/storefront";
 
@@ -23,15 +24,19 @@ export function Departments() {
   const footerRef = useRef<HTMLDivElement>(null);
   const trackContainerRef = useRef<HTMLDivElement>(null);
   const parallaxLayersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const isVisibleRef = useRef(false);
+  const activeChapterIndexRef = useRef(activeChapterIndex);
+  activeChapterIndexRef.current = activeChapterIndex;
 
-  // Auto-advance active department button every 5 seconds
+  // Auto-advance active department button every 5 seconds ONLY when section is visible in viewport
   useEffect(() => {
     const timer = setInterval(() => {
+      if (!isVisibleRef.current) return;
       setActiveChapterIndex((prev) => (prev + 1) % DEPARTMENTS.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [activeChapterIndex]);
+  }, []);
 
   // 144Hz Smooth Multi-Axis Parallax Engine + Scroll Entrance
   useEffect(() => {
@@ -66,7 +71,7 @@ export function Departments() {
         "-=0.55"
       );
 
-      if (trackContainerRef.current) {
+      if (trackContainerRef.current && trackContainerRef.current.children.length > 0) {
         tl.fromTo(
           Array.from(trackContainerRef.current.children),
           { y: 16, opacity: 0 },
@@ -103,11 +108,10 @@ export function Departments() {
         );
       });
 
-      // 2. High-Impact Mouse & Gyroscope Parallax (Subtle 2D)
-      let isVisible = false;
+      // 3. Viewport observer to pause off-screen computations
       const observer = new IntersectionObserver(
         ([entry]) => {
-          isVisible = entry.isIntersecting;
+          isVisibleRef.current = entry.isIntersecting;
         },
         { threshold: 0.05 }
       );
@@ -121,23 +125,27 @@ export function Departments() {
       );
 
       const handleMouseMove = (e: MouseEvent) => {
+        if (!isVisibleRef.current) return;
         const rect = portal.getBoundingClientRect();
         const normX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
         const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
 
-        xSetters.forEach((setX) => setX && setX(normX * 22));
-        ySetters.forEach((setY) => setY && setY(normY * 16));
+        const activeIdx = activeChapterIndexRef.current;
+        xSetters[activeIdx]?.(normX * 22);
+        ySetters[activeIdx]?.(normY * 16);
       };
 
       const handleMouseLeave = () => {
-        xSetters.forEach((setX) => setX && setX(0));
-        ySetters.forEach((setY) => setY && setY(0));
+        const activeIdx = activeChapterIndexRef.current;
+        xSetters[activeIdx]?.(0);
+        ySetters[activeIdx]?.(0);
       };
 
       const unregisterGyro = registerGyroscope(({ normX, normY }) => {
-        if (!isVisible) return;
-        xSetters.forEach((setX) => setX && setX(normX * 26));
-        ySetters.forEach((setY) => setY && setY(normY * 20));
+        if (!isVisibleRef.current) return;
+        const activeIdx = activeChapterIndexRef.current;
+        xSetters[activeIdx]?.(normX * 26);
+        ySetters[activeIdx]?.(normY * 20);
       });
 
       portal.addEventListener("mousemove", handleMouseMove, { passive: true });

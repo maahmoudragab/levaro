@@ -13,9 +13,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { PriceTag } from "@/components/shared/PriceTag";
-import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { PriceTag } from "@/components/dashboard/categories/shared/PriceTag";
+import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
+import { EmptyState } from "@/components/dashboard/categories/shared/EmptyState";
 import type { CategoryOption } from "@/components/dashboard/products/product-utils";
 import {
   getStockInfo,

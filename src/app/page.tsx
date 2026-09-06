@@ -8,19 +8,28 @@ import { Collections } from "@/components/storefront/sections/Collections";
 import { BrandStory } from "@/components/storefront/sections/BrandStory";
 import { SelectedEditions } from "@/components/storefront/sections/SelectedEditions";
 import { Footer } from "@/components/storefront/sections/Footer";
+import { getStorefrontProducts } from "@/app/services/storefront/products";
+import { getStorefrontTaxonomies } from "@/app/services/storefront/categories";
+import { DEPARTMENTS } from "@/data/storefront";
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function Home() {
+  const [products] = await Promise.all([
+    getStorefrontProducts(),
+    getStorefrontTaxonomies(),
+  ]);
+
+  // Preload critical above-the-fold assets strictly to ensure instant, fluid entrance
+  const criticalImages = [
+    "/images/hero background.jpg",
+    products[0]?.images[0] || DEPARTMENTS[0].image,
+  ];
+
   return (
     <>
       {/* Luxury Preloader (Full Real Asset & Font Decode) */}
-      <Preloader
-        images={[
-          "/images/hero background.jpg",
-          "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=85&w=1400&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=85&w=1400&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=85&w=1200&auto=format&fit=crop",
-        ]}
-      />
+      <Preloader images={criticalImages} />
 
       {/* Trailing Inverted Luxury Cursor */}
       <LuxuryCursor />
@@ -40,8 +49,8 @@ export default function Home() {
           {/* 3. COLLECTIONS */}
           <Collections />
 
-          {/* 5. SELECTED EDITIONS (CURATED PIECES) */}
-          <SelectedEditions />
+          {/* 5. SELECTED EDITIONS (CURATED PIECES FROM SUPABASE) */}
+          <SelectedEditions products={products} />
 
           {/* 4. BRAND STORY & MANIFESTO */}
           <BrandStory />

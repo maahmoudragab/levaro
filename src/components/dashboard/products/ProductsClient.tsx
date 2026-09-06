@@ -10,10 +10,10 @@ import {
   toggleProductFeatured,
   type Product,
 } from "@/app/services/admin/products";
-import { TopHeader } from "@/components/shared/TopHeader";
-import { ProductDetailsSheet } from "@/components/shared/ProductDetailsSheet";
-import { DeleteProductDialog } from "@/components/shared/DeleteProductDialog";
-import { PaginationControls } from "@/components/shared/PaginationControls";
+import { TopHeader } from "@/components/dashboard/categories/shared/TopHeader";
+import { ProductDetailsSheet } from "@/components/dashboard/categories/shared/ProductDetailsSheet";
+import { DeleteProductDialog } from "@/components/dashboard/categories/shared/DeleteProductDialog";
+import { PaginationControls } from "@/components/dashboard/categories/shared/PaginationControls";
 import { ProductSearch } from "@/components/dashboard/products/ProductSearch";
 import {
   ProductFilters,

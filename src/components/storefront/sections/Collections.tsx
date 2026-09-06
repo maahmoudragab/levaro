@@ -7,7 +7,8 @@ import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
-import { SectionHeader, SectionFooter } from "@/components/storefront/shared";
+import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
+import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
 import { registerGyroscope } from "@/lib/gyroscope";
 import { FEATURED_COLLECTIONS } from "@/data/storefront";
 
@@ -44,7 +45,7 @@ export function Collections() {
         );
       }
 
-      if (cardsGridRef.current) {
+      if (cardsGridRef.current && cardsGridRef.current.children.length > 0) {
         tl.fromTo(
           Array.from(cardsGridRef.current.children),
           { y: 24, opacity: 0 },
@@ -127,21 +128,21 @@ export function Collections() {
         subtitle="Explorations in proportion, drape, and shadow."
         theme="dark"
         action={{
-          label: "VIEW COLLS",
-          href: "/collections",
+          label: "VIEW ALL",
+          href: "/shop",
         }}
       />
 
-      {/* 2. REFINED 2-COLUMN EXHIBITION GRID */}
+      {/* 2. REFINED 2-COLUMN EXHIBITION GRID (COMPACT LUXURY HEIGHT) */}
       <div
         ref={cardsGridRef}
-        className="site-container grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 my-8 sm:my-10 lg:my-12"
+        className="site-container grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 my-6 sm:my-8"
       >
         {FEATURED_COLLECTIONS.map((col, index) => (
           <Link
             key={col.id}
             href={col.href}
-            className="group relative w-full h-[340px] sm:h-[380px] lg:h-[430px] bg-charcoal border border-off-white/15 hover:border-off-white/40 transition-colors duration-500 overflow-hidden flex flex-col justify-end p-5 sm:p-6 lg:p-7 cursor-pointer"
+            className="group relative w-full h-[260px] sm:h-[300px] lg:h-[340px] bg-charcoal border border-off-white/15 hover:border-off-white/40 transition-colors duration-500 overflow-hidden flex flex-col justify-end p-5 sm:p-6 cursor-pointer"
           >
             {/* Parallax Image Shell */}
             <div
@@ -195,8 +196,8 @@ export function Collections() {
           href: "#manifesto",
         }}
         action={{
-          label: "VIEW ALL ARCHIVES",
-          href: "/collections",
+          label: "EXPLORE FULL SHOP",
+          href: "/shop",
         }}
         className="mt-6 sm:mt-8"
       />

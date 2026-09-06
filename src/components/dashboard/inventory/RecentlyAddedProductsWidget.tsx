@@ -3,8 +3,8 @@ import { Eye, Package } from "lucide-react";
 import type { Product } from "@/app/services/admin/products";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PriceTag } from "@/components/shared/PriceTag";
-import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
+import { PriceTag } from "@/components/dashboard/categories/shared/PriceTag";
+import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
 import {
   formatRelativeDate,
   getTotalStock,

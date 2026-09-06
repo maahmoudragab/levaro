@@ -1,24 +1,44 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, MessageSquare } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
-import { SectionHeader, SectionFooter } from "@/components/storefront/shared";
+import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
+import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
 import { registerGyroscope } from "@/lib/gyroscope";
 import { CURATED_EDITIONS } from "@/data/storefront";
+import type { ProductItem } from "@/types/storefront";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function SelectedEditions() {
+export function SelectedEditions({ products }: { products?: ProductItem[] } = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const imageLayersRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const editions = useMemo(() => {
+    if (products && products.length > 0) {
+      const featured = products.filter((p) => p.is_featured);
+      const chosen = featured.length >= 4 ? featured.slice(0, 4) : products.slice(0, 4);
+      return chosen.map((p) => ({
+        id: p.id,
+        code: p.code,
+        discipline: (p.department || "ATELIER").toUpperCase(),
+        name: p.name,
+        material: p.material,
+        price: p.priceFormatted || `EGP ${p.price}`,
+        image: p.images[0] || "/placeholder.jpg",
+        href: `/shop/${p.slug}`,
+      }));
+    }
+    return CURATED_EDITIONS;
+  }, [products]);
 
   useEffect(() => {
     registerSignatureEase();
@@ -44,7 +64,7 @@ export function SelectedEditions() {
         );
       }
 
-      if (gridRef.current) {
+      if (gridRef.current && gridRef.current.children.length > 0) {
         tl.fromTo(
           Array.from(gridRef.current.children),
           { y: 20, opacity: 0 },
@@ -138,57 +158,51 @@ export function SelectedEditions() {
         ref={gridRef}
         className="site-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-8 my-10 sm:my-14 lg:my-16"
       >
-        {CURATED_EDITIONS.map((product, index) => {
-          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(product.whatsappMessage)}`;
-
+        {editions.map((product, index) => {
           return (
             <div
               key={product.id}
               className="group flex flex-col justify-between border-b border-near-black/15 pb-6 transition-colors duration-300"
             >
               {/* Product Visual Container */}
-              <div className="relative w-full aspect-[3/4] bg-charcoal overflow-hidden border border-near-black/10 group-hover:border-near-black/30 transition-colors duration-500 mb-4">
-                {/* Parallax Image Shell */}
-                <div
-                  ref={(el) => {
-                    imageLayersRef.current[index] = el;
-                  }}
-                  className="absolute -top-14 -bottom-14 -left-12 -right-12 w-[calc(100%+96px)] h-[calc(100%+112px)] will-change-transform gpu overflow-hidden"
+              <div className="relative w-full aspect-3/4 bg-charcoal overflow-hidden border border-near-black/10 group-hover:border-near-black/30 transition-colors duration-500 mb-4">
+                {/* Product Detail Link */}
+                <Link
+                  href={product.href}
+                  className="absolute inset-0 z-0 block cursor-pointer"
+                  aria-label={`View ${product.name}`}
                 >
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    priority={index === 0}
-                    quality={95}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover object-top filter grayscale contrast-110 brightness-[0.88] group-hover:brightness-[0.98] group-hover:scale-104 transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
-                  />
-                </div>
-
-                {/* Ambient Subtle Vignette */}
-                <div className="absolute inset-0 bg-gradient-to-t from-near-black/40 via-transparent to-transparent pointer-events-none" />
-
-                {/* Quick WhatsApp Inquiry Action overlay on hover */}
-                <div className="absolute bottom-3 left-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 bg-off-white/95 text-near-black text-[10px] uppercase font-sans tracking-[0.22em] font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-off-white transition-colors cursor-pointer"
+                  {/* Parallax Image Shell */}
+                  <div
+                    ref={(el) => {
+                      imageLayersRef.current[index] = el;
+                    }}
+                    className="absolute -top-14 -bottom-14 -left-12 -right-12 w-[calc(100%+96px)] h-[calc(100%+112px)] will-change-transform gpu overflow-hidden"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>INQUIRE VIA WHATSAPP</span>
-                  </a>
-                </div>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      priority={index === 0}
+                      quality={95}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover object-top brightness-[0.98] group-hover:brightness-100 group-hover:scale-104 transition-all duration-700 ease-signature"
+                    />
+                  </div>
+
+                  {/* Ambient Subtle Vignette */}
+                  <div className="absolute inset-0 bg-linear-to-t from-near-black/40 via-transparent to-transparent pointer-events-none" />
+                </Link>
               </div>
 
               {/* Product Metadata & Price */}
               <div className="flex flex-col gap-1.5 pt-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h3 className="text-sm sm:text-base font-display font-normal uppercase tracking-tight text-near-black leading-tight group-hover:translate-x-1 transition-transform duration-300">
-                    {product.name}
-                  </h3>
+                  <Link href={product.href} className="block">
+                    <h3 className="text-sm sm:text-base font-display font-normal uppercase tracking-tight text-near-black leading-tight group-hover:translate-x-1 hover:opacity-75 transition-all duration-300">
+                      {product.name}
+                    </h3>
+                  </Link>
                   <span className="text-xs uppercase font-sans tracking-[0.18em] text-near-black font-semibold shrink-0">
                     {product.price}
                   </span>
@@ -196,15 +210,13 @@ export function SelectedEditions() {
 
                 <div className="flex items-center justify-between text-[10px] uppercase font-sans tracking-[0.16em] text-brand-gray">
                   <span>{product.material}</span>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={product.href}
                     className="inline-flex items-center gap-1 text-near-black/70 hover:text-near-black transition-colors font-medium cursor-pointer"
                   >
-                    <span>DETAILS</span>
+                    <span>VIEW PIECE</span>
                     <ArrowUpRight className="w-3 h-3" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

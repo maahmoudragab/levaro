@@ -40,7 +40,7 @@ export function Footer() {
         );
       }
 
-      if (colsGridRef.current) {
+      if (colsGridRef.current && colsGridRef.current.children.length > 0) {
         tl.fromTo(
           Array.from(colsGridRef.current.children),
           { y: 16, opacity: 0 },
@@ -178,13 +178,18 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#collections" className="hover:text-off-white transition-colors">
-                  MOTION &amp; SHIFT
+                <Link href="/shop?collection=motion" className="hover:text-off-white transition-colors">
+                  MOTION (AW26)
                 </Link>
               </li>
               <li>
-                <Link href="/#collections" className="hover:text-off-white transition-colors">
-                  VIEW ALL COLLECTIONS
+                <Link href="/shop?collection=shift" className="hover:text-off-white transition-colors">
+                  SHIFT (W26)
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop" className="hover:text-off-white transition-colors">
+                  VIEW ALL IN SHOP
                 </Link>
               </li>
             </ul>

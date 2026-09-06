@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { PriceTag } from "@/components/shared/PriceTag";
-import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
+import { PriceTag } from "@/components/dashboard/categories/shared/PriceTag";
+import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
 
 interface ProductDetailsSheetProps {
   product: Product | null;
@@ -148,7 +148,7 @@ export function ProductDetailsSheet({
 
             {/* Live Storefront Link */}
             <Link
-              href={`/products/${product.slug}`}
+              href={`/shop/${product.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-zinc-200/90 bg-white text-xs font-medium text-primary shadow-2xs transition-colors hover:bg-primary/5 hover:border-primary/30"

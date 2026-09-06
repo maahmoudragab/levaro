@@ -1,4 +1,4 @@
-import { UnifiedLoading } from "@/components/shared/UnifiedLoading";
+import { UnifiedLoading } from "@/components/dashboard/categories/shared/UnifiedLoading";
 
 /**
  * Unified Dashboard Loading Component.

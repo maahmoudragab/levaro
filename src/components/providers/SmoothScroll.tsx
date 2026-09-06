@@ -18,24 +18,30 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     gsap.registerPlugin(ScrollTrigger);
     registerSignatureEase();
 
-    // High-performance Lenis smooth scroll
+    // High-performance Lenis smooth scroll synced strictly with GSAP Ticker
     const lenis = new Lenis({
-      autoRaf: true,
-      duration: 1.1,
+      autoRaf: false,
+      duration: 1.05,
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.5,
+      touchMultiplier: 1.2,
     });
 
     // Expose lenis instance globally for frictionless menu freeze/unfreeze
     window.__lenis = lenis;
 
     // Synchronize Lenis with ScrollTrigger
-    lenis.on("scroll", () => {
-      ScrollTrigger.update();
-    });
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const updateLenis = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
+      gsap.ticker.remove(updateLenis);
       lenis.destroy();
       window.__lenis = undefined;
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());

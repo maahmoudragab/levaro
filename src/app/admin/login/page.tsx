@@ -87,7 +87,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="flex items-center justify-end">
           <Link
             href="/admin/login/forgot-password"
-            className="text-xs text-primary hover:underline font-medium"
+            className="text-xs text-primary hover:underline medium"
           >
             Forgot password?
           </Link>

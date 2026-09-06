@@ -5,9 +5,9 @@ import type { Product } from "@/app/services/admin/products";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { PriceTag } from "@/components/shared/PriceTag";
-import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { PriceTag } from "@/components/dashboard/categories/shared/PriceTag";
+import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
+import { EmptyState } from "@/components/dashboard/categories/shared/EmptyState";
 import { getStockInfo } from "@/components/dashboard/products/product-utils";
 
 interface ProductsGridProps {

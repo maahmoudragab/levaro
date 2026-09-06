@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { Header, LuxuryCursor, Preloader } from "@/components/storefront/shared";
-import { Footer } from "@/components/storefront/sections";
+import { Header } from "@/components/storefront/shared/Header";
+import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
+import { Preloader } from "@/components/storefront/shared/Preloader";
+import { Footer } from "@/components/storefront/sections/Footer";
 
 export const metadata: Metadata = {
   title: "THE HOUSE — LÉVARO",
