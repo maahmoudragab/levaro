@@ -8,9 +8,9 @@ import {
   toggleProductFeatured,
   type Product,
 } from "@/app/services/admin/products";
-import { TopHeader } from "@/components/dashboard/categories/shared/TopHeader";
-import { ProductDetailsSheet } from "@/components/dashboard/categories/shared/ProductDetailsSheet";
-import { DeleteProductDialog } from "@/components/dashboard/categories/shared/DeleteProductDialog";
+import { TopHeader } from "@/components/shared/TopHeader";
+import { ProductDetailsSheet } from "@/components/shared/ProductDetailsSheet";
+import { DeleteProductDialog } from "@/components/shared/DeleteProductDialog";
 import { InventoryMetrics } from "@/components/dashboard/inventory/InventoryMetrics";
 import { StockBySizeWidget } from "@/components/dashboard/inventory/StockBySizeWidget";
 import { StockAlertsWidget } from "@/components/dashboard/inventory/StockAlertsWidget";

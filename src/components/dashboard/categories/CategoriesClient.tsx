@@ -13,7 +13,7 @@ import {
   type CreateCategoryInput,
   type UpdateCategoryInput,
 } from "@/app/services/admin/categories";
-import { TopHeader } from "@/components/dashboard/categories/shared/TopHeader";
+import { TopHeader } from "@/components/shared/TopHeader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CategoryHierarchyCard } from "@/components/dashboard/categories/CategoryHierarchyCard";

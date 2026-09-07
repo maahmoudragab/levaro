@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { PriceTag } from "@/components/dashboard/categories/shared/PriceTag";
-import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
+import { PriceTag } from "@/components/shared/PriceTag";
+import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
 
 interface ProductDetailsSheetProps {
   product: Product | null;

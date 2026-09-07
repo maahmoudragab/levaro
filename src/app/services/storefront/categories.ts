@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCategoriesHierarchy } from "@/app/services/admin/categories";
 
 export interface StorefrontCategory {
   id: string;
@@ -18,6 +19,8 @@ export interface StorefrontTaxonomyItem {
   parent_id?: string | null;
   parent_slug?: string | null;
   parent_name?: string | null;
+  is_active?: boolean;
+  product_count?: number;
 }
 
 export interface StorefrontTaxonomies {
@@ -29,8 +32,7 @@ export interface StorefrontTaxonomies {
 }
 
 /**
- * Fetches all active storefront categories.
- * Cached for 1 hour with on-demand tag revalidation.
+ * Fetches all storefront categories directly from Supabase.
  */
 export const getStorefrontCategories = unstable_cache(
   async (): Promise<StorefrontCategory[]> => {
@@ -40,7 +42,6 @@ export const getStorefrontCategories = unstable_cache(
       const { data, error } = await supabase
         .from("categories")
         .select("id, name, slug, parent_id, description, is_active")
-        .eq("is_active", true)
         .order("name", { ascending: true });
 
       if (error || !data) {
@@ -61,66 +62,53 @@ export const getStorefrontCategories = unstable_cache(
 );
 
 /**
- * Fetches structured taxonomies from Supabase categories.
- * Parents (parent_id is null) are main categories (الكاتيجوري الأساسي).
- * Children (parent_id is not null) are sub-categories/collections (الكاتيجوريهات الابن).
+ * Fetches structured taxonomies from Supabase categories hierarchy.
+ * Uses the exact same hierarchy as the admin dashboard (Categories & Collections).
  */
 export const getStorefrontTaxonomies = unstable_cache(
   async (): Promise<StorefrontTaxonomies> => {
     try {
-      const allCategories = await getStorefrontCategories();
+      const hierarchy = await getCategoriesHierarchy();
 
-      const parents = allCategories.filter((c) => !c.parent_id);
-      const children = allCategories.filter((c) => Boolean(c.parent_id));
-
-      const parentMap = new Map<string, StorefrontCategory>();
-      parents.forEach((p) => parentMap.set(p.id, p));
-
-      // Build main categories directly from Supabase parent categories
-      const dynamicMainCategories: StorefrontTaxonomyItem[] = parents.map((p) => ({
-        key: p.slug,
-        label: p.name.toUpperCase(),
-        slug: p.slug,
-        id: p.id,
+      // Parent categories are Disciplines / Main Categories
+      const dynamicMainCategories: StorefrontTaxonomyItem[] = hierarchy.map((parent) => ({
+        key: parent.slug,
+        label: parent.name.toUpperCase(),
+        slug: parent.slug,
+        id: parent.id,
       }));
 
-      // Combined main categories with "ALL DISCIPLINES"
-      const mainCategoriesList: StorefrontTaxonomyItem[] = [
-        { key: "all", label: "ALL DISCIPLINES", slug: "all", id: "all" },
-      ];
-
-      dynamicMainCategories.forEach((m) => {
-        if (!mainCategoriesList.some((item) => item.key.toLowerCase() === m.key.toLowerCase())) {
-          mainCategoriesList.push(m);
-        }
-      });
-
-      // Ensure foundational disciplines exist as fallbacks if not yet in database
-      const fallbackDisciplines = ["men", "women", "accessories"];
-      fallbackDisciplines.forEach((deptKey) => {
-        if (!mainCategoriesList.some((m) => m.key.toLowerCase() === deptKey)) {
-          mainCategoriesList.push({
-            key: deptKey,
-            label: deptKey.toUpperCase(),
-            slug: deptKey,
-            id: deptKey,
+      // Child collections directly under each parent from the database
+      const subCategoriesList: StorefrontTaxonomyItem[] = [];
+      hierarchy.forEach((parent) => {
+        (parent.collections || []).forEach((col) => {
+          if (col.is_active === false) return;
+          subCategoriesList.push({
+            key: col.slug,
+            label: col.name.toUpperCase(),
+            slug: col.slug,
+            id: col.id,
+            parent_id: parent.id,
+            parent_slug: parent.slug,
+            parent_name: parent.name.toUpperCase(),
+            is_active: col.is_active,
+            product_count: col.product_count ?? 0,
           });
-        }
+        });
       });
 
-      // Build child sub-categories directly linked to their parent category
-      const subCategoriesList: StorefrontTaxonomyItem[] = children.map((c) => {
-        const parent = c.parent_id ? parentMap.get(c.parent_id) : null;
-        return {
-          key: c.slug,
-          label: c.name.toUpperCase(),
-          slug: c.slug,
-          id: c.id,
-          parent_id: c.parent_id,
-          parent_slug: parent?.slug || null,
-          parent_name: parent?.name ? parent.name.toUpperCase() : null,
-        };
-      });
+      const mainCategoriesList: StorefrontTaxonomyItem[] =
+        dynamicMainCategories.length > 0
+          ? [
+              { key: "all", label: "ALL DISCIPLINES", slug: "all", id: "all" },
+              ...dynamicMainCategories,
+            ]
+          : [
+              { key: "all", label: "ALL DISCIPLINES", slug: "all", id: "all" },
+              { key: "men", label: "MEN", slug: "men", id: "men" },
+              { key: "women", label: "WOMEN", slug: "women", id: "women" },
+              { key: "accessories", label: "ACCESSORIES", slug: "accessories", id: "accessories" },
+            ];
 
       return {
         mainCategories: mainCategoriesList,
@@ -149,6 +137,6 @@ export const getStorefrontTaxonomies = unstable_cache(
   ["storefront-taxonomies"],
   {
     revalidate: 3600,
-    tags: ["storefront-categories", "categories"],
+    tags: ["categories", "storefront-categories"],
   },
 );

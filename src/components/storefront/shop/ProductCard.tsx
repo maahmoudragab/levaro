@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import type { ProductItem } from "@/types/storefront";
@@ -19,66 +17,91 @@ export function ProductCard({
   const productHref = `/shop/${product.slug}`;
   const isLight = theme === "light";
 
+  const hasDiscount = Boolean(
+    product.sale_price &&
+    product.sale_price > 0 &&
+    product.sale_price < product.price
+  );
+
+  const formatPrice = (amount: number) => `EGP ${amount.toLocaleString("en-US")}`;
+  const originalPriceFormatted = product.priceFormatted || formatPrice(product.price);
+  const salePriceFormatted =
+    product.salePriceFormatted ||
+    (product.sale_price ? formatPrice(product.sale_price) : null);
+
+  const displayFit = product.fit || product.silhouette || "REGULAR FIT";
+
   return (
     <div className="group flex flex-col transition-all duration-300">
-      {/* 1. EDITORIAL IMAGE CONTAINER */}
+      {/* 1. EDITORIAL IMAGE CONTAINER (Explicit aspect-[3/4] prevents CLS) */}
       <Link
         href={productHref}
-        className={`relative w-full aspect-3/4 overflow-hidden transition-colors duration-500 mb-3 block cursor-pointer ${
+        className={`relative w-full aspect-[3/4] overflow-hidden transition-colors duration-500 mb-3 block cursor-pointer ${
           isLight ? "bg-[#F0EEEA]" : "bg-charcoal"
         }`}
         aria-label={`View ${product.name}`}
       >
-        <div className="relative w-full h-full will-change-transform overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden">
           <Image
             src={primaryImage}
             alt={product.name}
             fill
             priority={priority}
-            quality={92}
+            fetchPriority={priority ? "high" : "auto"}
+            quality={75}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover object-top brightness-[0.98] group-hover:brightness-100 group-hover:scale-[1.02] transition-all duration-700 ease-signature"
           />
         </div>
-
-        {/* Minimal Subtle Edition Tag */}
-        <div className="absolute top-3 left-3 z-10 pointer-events-none">
-          <span
-            className={`px-2 py-0.5 text-[9px] uppercase font-mono tracking-[0.2em] ${
-              isLight
-                ? "bg-white/90 text-near-black border border-near-black/10"
-                : "bg-near-black/75 text-off-white/80 border border-off-white/10"
-            }`}
-          >
-            {product.code}
-          </span>
-        </div>
       </Link>
 
       {/* 2. PRODUCT METADATA */}
-      <div className="flex flex-col gap-1 pt-1">
-        <div className="flex items-baseline justify-between gap-3">
-          <Link href={productHref} className="block group/title">
-            <h3
-              className={`text-xs sm:text-sm font-sans tracking-[0.14em] uppercase transition-opacity duration-200 hover:opacity-70 ${
-                isLight ? "text-near-black font-medium" : "text-off-white font-medium"
-              }`}
-            >
-              {product.name}
-            </h3>
-          </Link>
-          <span
-            className={`text-xs font-mono tracking-[0.12em] shrink-0 ${
-              isLight ? "text-near-black" : "text-off-white"
+      <div className="flex flex-col gap-2 pt-2.5">
+        {/* Full Name: takes its own row (1 or 2 lines depending on length) */}
+        <Link href={productHref} className="block group/title">
+          <h3
+            className={`text-xs sm:text-[13px] font-sans tracking-[0.14em] uppercase transition-opacity duration-200 hover:opacity-70 line-clamp-2 leading-relaxed ${
+              isLight ? "text-near-black font-medium" : "text-off-white font-medium"
             }`}
+            title={product.name}
           >
-            {product.priceFormatted}
-          </span>
-        </div>
+            {product.name}
+          </h3>
+        </Link>
 
-        <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-[0.18em] text-brand-gray">
-          <span>{product.material}</span>
-          <span className="opacity-60">{product.category_name || product.category}</span>
+        {/* Price & Fit Row: Price moved down below the name */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 pt-1 border-t border-near-black/5">
+          {/* Price before and after discount */}
+          <div className="flex items-baseline gap-1.5 font-mono text-[11px] sm:text-xs tracking-[0.1em] sm:tracking-[0.12em] shrink-0">
+            {hasDiscount ? (
+              <>
+                <span
+                  className={
+                    isLight
+                      ? "text-near-black font-medium"
+                      : "text-off-white font-medium"
+                  }
+                >
+                  {salePriceFormatted}
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-brand-gray line-through opacity-75">
+                  {originalPriceFormatted}
+                </span>
+              </>
+            ) : (
+              <span className={isLight ? "text-near-black font-medium" : "text-off-white font-medium"}>
+                {originalPriceFormatted}
+              </span>
+            )}
+          </div>
+
+          {/* Fit */}
+          <span
+            className="text-[9px] sm:text-[10px] uppercase font-mono tracking-[0.14em] sm:tracking-[0.16em] text-brand-gray truncate text-right max-w-[50%]"
+            title={displayFit}
+          >
+            {displayFit}
+          </span>
         </div>
       </div>
     </div>

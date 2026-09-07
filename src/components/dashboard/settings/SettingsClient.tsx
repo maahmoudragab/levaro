@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Save,
 } from "lucide-react";
-import { TopHeader } from "@/components/dashboard/categories/shared/TopHeader";
+import { TopHeader } from "@/components/shared/TopHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

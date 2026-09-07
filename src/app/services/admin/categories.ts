@@ -68,6 +68,7 @@ function purgeCategoriesCache() {
   revalidatePath("/admin/products/create");
   revalidatePath("/admin/inventory");
   revalidatePath("/");
+  revalidatePath("/shop");
 }
 
 /* -------------------------------------------------------------------------- */

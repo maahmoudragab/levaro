@@ -18,13 +18,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     gsap.registerPlugin(ScrollTrigger);
     registerSignatureEase();
 
-    // High-performance Lenis smooth scroll synced strictly with GSAP Ticker
+    // Lightweight responsive Lenis: direct tracking while scrolling, smooth glide after release
     const lenis = new Lenis({
       autoRaf: false,
-      duration: 1.05,
+      duration: 0.6,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1.0,
-      touchMultiplier: 1.2,
+      wheelMultiplier: 1.15,
+      touchMultiplier: 1.0,
+      allowNestedScroll: true,
     });
 
     // Expose lenis instance globally for frictionless menu freeze/unfreeze
@@ -38,9 +40,29 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     };
 
     gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
+
+    // Automatically update scroll dimensions and limits when dynamic content expands (e.g. infinite scroll pagination)
+    let resizeTimer: number | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (typeof window !== "undefined" && typeof ResizeObserver !== "undefined" && document.body) {
+      resizeObserver = new ResizeObserver(() => {
+        lenis.resize();
+        if (resizeTimer) cancelAnimationFrame(resizeTimer);
+        resizeTimer = requestAnimationFrame(() => {
+          ScrollTrigger.refresh();
+        });
+      });
+      resizeObserver.observe(document.body);
+    }
 
     return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      if (resizeTimer) {
+        cancelAnimationFrame(resizeTimer);
+      }
       gsap.ticker.remove(updateLenis);
       lenis.destroy();
       window.__lenis = undefined;

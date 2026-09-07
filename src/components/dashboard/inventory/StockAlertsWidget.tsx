@@ -4,7 +4,7 @@ import type { Product } from "@/app/services/admin/products";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ProductThumbnail } from "@/components/dashboard/categories/shared/ProductThumbnail";
+import { ProductThumbnail } from "@/components/shared/ProductThumbnail";
 import { getTotalStock } from "@/components/dashboard/products/product-utils";
 
 interface StockAlertsWidgetProps {

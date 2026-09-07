@@ -1,4 +1,4 @@
-import { TopHeader } from "@/components/dashboard/categories/shared/TopHeader";
+import { TopHeader } from "@/components/shared/TopHeader";
 
 export const metadata = {
   title: "Dashboard | LÉVARO Admin",

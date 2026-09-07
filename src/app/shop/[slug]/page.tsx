@@ -10,6 +10,7 @@ import {
   getStorefrontProductBySlug,
   getStorefrontProductSlugs,
   getStorefrontProducts,
+  getRelatedProductsByTags,
 } from "@/app/services/storefront/products";
 import { SHOP_PRODUCTS } from "@/data/storefront";
 
@@ -51,11 +52,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  // Find related products efficiently from cached products list without extra DB hit
+  // Find genuinely related products based primarily on shared tags, collection, and category
   const allProducts = await getStorefrontProducts();
-  const relatedProducts = allProducts
-    .filter((p) => p.id !== product.id && (p.category === product.category || p.department === product.department))
-    .slice(0, 3);
+  const relatedProducts = getRelatedProductsByTags(product, allProducts, 3);
 
 
   return (

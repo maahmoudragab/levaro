@@ -1,132 +1,50 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight, MessageSquare } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
-
-gsap.registerPlugin(ScrollTrigger);
+import { ArrowUpRight, MessageSquare } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const footerRef = useRef<HTMLElement>(null);
-  const topRowRef = useRef<HTMLDivElement>(null);
-  const colsGridRef = useRef<HTMLDivElement>(null);
-  const bottomWordmarkRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    registerSignatureEase();
-
-    const footer = footerRef.current;
-    if (!footer) return;
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: footer,
-          start: "top 85%",
-          once: true,
-        },
-      });
-
-      if (topRowRef.current) {
-        tl.fromTo(
-          topRowRef.current,
-          { y: 18, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.75, ease: SIGNATURE_EASE }
-        );
-      }
-
-      if (colsGridRef.current && colsGridRef.current.children.length > 0) {
-        tl.fromTo(
-          Array.from(colsGridRef.current.children),
-          { y: 16, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.65, stagger: 0.06, ease: SIGNATURE_EASE },
-          "-=0.5"
-        );
-      }
-
-      if (bottomWordmarkRef.current) {
-        tl.fromTo(
-          bottomWordmarkRef.current,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: SIGNATURE_EASE },
-          "-=0.4"
-        );
-      }
-    }, footer);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <footer
       id="footer"
-      ref={footerRef}
       className="relative w-full bg-near-black text-off-white site-padding-x section-py border-t border-off-white/10 transition-colors duration-500 overflow-hidden"
     >
       <div className="site-container flex flex-col gap-16 sm:gap-24">
         
-        {/* 1. TOP ROW: ARCHIVE NOTIFICATIONS & DIRECT WHATSAPP CONCIERGE */}
-        <div ref={topRowRef} className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 pb-16 border-b border-off-white/10 items-start">
-          {/* Left Column: Private Releases */}
-          <div className="lg:col-span-6 flex flex-col gap-4">
+        {/* 1. TOP ROW: ATELIER IDENTITY & DIRECT WHATSAPP CONCIERGE */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 pb-16 border-b border-off-white/10 items-start">
+          {/* Left Column: Brand Philosophy */}
+          <div className="lg:col-span-7 flex flex-col gap-4">
             <span className="text-[10px] uppercase font-sans tracking-[0.28em] text-brand-gray font-semibold">
-              EARLY ACCESS
+              ATELIER ARCHIVE
             </span>
 
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-display font-light uppercase tracking-tight text-off-white leading-tight">
-              NEVER MISS <br />
-              <span className="font-light text-off-white">A NEW DROP</span>
+              SCULPTURAL FORM. <br />
+              <span className="font-light text-brand-gray">DISCIPLINED LUXURY.</span>
             </h3>
 
             <p className="text-xs uppercase font-sans tracking-[0.16em] text-brand-gray max-w-md leading-relaxed">
-              Get direct notification when new pieces and seasonal collections go live.
+              Every edition is produced in numbered runs with bespoke textiles and architectural silhouettes.
             </p>
-
-            {/* Minimal Input Line */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thank you. You are enrolled for new drop notifications.");
-              }}
-              className="mt-4 flex items-center border-b border-off-white/30 max-w-md pb-2 focus-within:border-off-white transition-colors"
-            >
-              <input
-                type="email"
-                required
-                placeholder="ENTER YOUR EMAIL"
-                className="w-full bg-transparent text-xs uppercase font-sans tracking-[0.2em] text-off-white placeholder:text-brand-gray/60 outline-none"
-              />
-              <button
-                type="submit"
-                className="text-xs uppercase font-sans tracking-[0.25em] text-off-white hover:text-brand-gray font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer"
-              >
-                <span>JOIN</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </form>
           </div>
 
-          {/* Right Column: WhatsApp Concierge Inquiries */}
-          <div className="lg:col-span-6 flex flex-col gap-6 justify-between lg:pl-10">
-            <div className="flex flex-col gap-3">
+          {/* Right Column: Direct WhatsApp Concierge */}
+          <div className="lg:col-span-5 flex flex-col gap-6 justify-between lg:pl-6">
+            <div className="flex flex-col gap-2">
               <span className="text-[10px] uppercase font-sans tracking-[0.25em] text-brand-gray font-semibold">
-                CUSTOMER CARE &bull; WHATSAPP
+                DIRECT CONCIERGE &bull; WHATSAPP
               </span>
               <p className="text-xs uppercase font-sans tracking-[0.16em] text-off-white/80 leading-relaxed max-w-md">
-                Have questions about sizing, fit, or orders? Our concierge team is ready on WhatsApp with direct support.
+                Inquire about sizing, fit specifications, or private appointments directly with the atelier team.
               </p>
             </div>
 
             <a
-              href="https://wa.me/?text=Hello%20L%C3%89VARO,%20I%20have%20a%20question%20about%20your%20pieces."
+              href="https://wa.me/?text=Hello%20L%C3%89VARO,%20I%20have%20an%20inquiry%20regarding%20your%20pieces."
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-4 px-8 py-4 bg-off-white text-near-black text-xs uppercase font-sans tracking-[0.26em] font-semibold transition-all duration-300 hover:bg-off-white/90 shadow-xl cursor-pointer w-fit"
+              className="group inline-flex items-center gap-3.5 px-7 py-3.5 bg-off-white text-near-black text-xs uppercase font-sans tracking-[0.24em] font-semibold transition-all duration-300 hover:bg-white cursor-pointer w-fit"
             >
               <MessageSquare className="w-4 h-4" />
               <span>MESSAGE ON WHATSAPP</span>
@@ -136,7 +54,7 @@ export function Footer() {
         </div>
 
         {/* 2. MIDDLE ROW: NAVIGATION & ESSENTIAL COLUMNS */}
-        <div ref={colsGridRef} className="grid grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 pb-16 border-b border-off-white/10 text-xs font-sans tracking-[0.2em]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 pb-16 border-b border-off-white/10 text-xs font-sans tracking-[0.2em]">
           {/* Col 1: Shop */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
@@ -189,7 +107,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/shop" className="hover:text-off-white transition-colors">
-                  VIEW ALL IN SHOP
+                  COMPLETE ARCHIVE
                 </Link>
               </li>
             </ul>
@@ -198,22 +116,22 @@ export function Footer() {
           {/* Col 3: Client Relations */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              HELP &amp; INFO
+              ATELIER
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
                 <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="hover:text-off-white transition-colors">
-                  WHATSAPP CONCIERGE
+                  CONCIERGE DESK
                 </a>
               </li>
               <li>
-                <Link href="/shipping" className="hover:text-off-white transition-colors">
-                  SHIPPING &amp; TRANSIT
+                <Link href="/about" className="hover:text-off-white transition-colors">
+                  MATERIALS &amp; CRAFT
                 </Link>
               </li>
               <li>
                 <Link href="/admin" className="hover:text-off-white transition-colors">
-                  ATELIER DASHBOARD
+                  ADMINISTRATION
                 </Link>
               </li>
             </ul>
@@ -222,7 +140,7 @@ export function Footer() {
           {/* Col 4: Social & Presence */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              CONNECT
+              PRESENCE
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
@@ -242,10 +160,10 @@ export function Footer() {
         </div>
 
         {/* 3. BOTTOM ROW: MONUMENTAL LÉVARO WORDMARK */}
-        <div ref={bottomWordmarkRef} className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8">
           {/* Monumental Architectural Wordmark */}
           <div className="w-full text-center overflow-hidden">
-            <span className="text-[16vw] font-display font-light uppercase tracking-[0.08em] leading-none text-off-white/90 block hover:text-off-white transition-colors">
+            <span className="text-[16vw] font-display font-light uppercase tracking-[0.08em] leading-none text-off-white/90 block hover:text-off-white transition-colors select-none">
               LÉVARO
             </span>
           </div>

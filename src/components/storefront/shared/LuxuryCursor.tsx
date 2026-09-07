@@ -52,23 +52,33 @@ export function LuxuryCursor({ isMenuOpen = false }: LuxuryCursorProps) {
       }
     };
 
+    let rafId: number | null = null;
     const handleMouseMove = (e: MouseEvent) => {
       xTo(e.clientX);
       yTo(e.clientY);
 
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(() => {
+          rafId = null;
+          const target = e.target as HTMLElement | null;
+          if (!target) return;
 
-      const insideLightSection = !!target.closest(
-        "[data-light-section='true'], .bg-off-white, #departments, #collection"
-      );
-      const insideMenu = isMenuOpen || !!target.closest("[data-cursor-menu='true']");
+          const insideLightSection = !!target.closest(
+            "[data-light-section='true'], .bg-off-white, #departments, #collection"
+          );
+          const insideMenu = isMenuOpen || !!target.closest("[data-cursor-menu='true']");
 
-      setVisibility(insideMenu || insideLightSection);
-      setHovering(!!target.closest("a, button, [role='button'], input, select"));
+          setVisibility(insideMenu || insideLightSection);
+          setHovering(!!target.closest("a, button, [role='button'], input, select"));
+        });
+      }
     };
 
     const handleMouseLeave = () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       setVisibility(false);
     };
 

@@ -222,7 +222,6 @@ function mapSupabaseRowToStorefrontProduct(
     sizes,
     tags,
     images,
-    whatsappMessage: `Hello LÉVARO, I would like to inquire about the ${name} (${(row.sku as string) || `EDITION ${editionNumber}`}).`,
   };
 }
 
@@ -342,3 +341,74 @@ export async function getStorefrontProductSlugs(): Promise<{ slug: string }[]> {
     return SHOP_PRODUCTS.map((p) => ({ slug: p.slug }));
   }
 }
+
+/**
+ * Intelligently recommends related atelier pieces based primarily on shared tags,
+ * with secondary weighting on category, collection, and curated pairings.
+ */
+export function getRelatedProductsByTags(
+  currentProduct: ProductItem,
+  allProducts: ProductItem[],
+  limit = 3
+): ProductItem[] {
+  const currentTags = new Set(
+    (currentProduct.tags || []).map((t) => t.toLowerCase().trim()).filter(Boolean)
+  );
+
+  const scoredProducts = allProducts
+    .filter((p) => p.id !== currentProduct.id && p.is_active !== false)
+    .map((candidate) => {
+      const candidateTags = (candidate.tags || [])
+        .map((t) => t.toLowerCase().trim())
+        .filter(Boolean);
+
+      let matchingTagsCount = 0;
+      for (const tag of candidateTags) {
+        if (currentTags.has(tag)) {
+          matchingTagsCount++;
+        }
+      }
+
+      let affinityScore = matchingTagsCount * 10;
+
+      // Category match affinity
+      const isSameCategory =
+        (candidate.category_id && candidate.category_id === currentProduct.category_id) ||
+        (candidate.category_slug && candidate.category_slug.toLowerCase() === currentProduct.category_slug?.toLowerCase()) ||
+        (candidate.category && candidate.category.toLowerCase() === currentProduct.category?.toLowerCase());
+      if (isSameCategory) affinityScore += 4;
+
+      // Collection match affinity
+      if (candidate.collection && currentProduct.collection && candidate.collection.toLowerCase() === currentProduct.collection.toLowerCase()) {
+        affinityScore += 3;
+      }
+
+      // Department/Gender match affinity
+      const isSameDept =
+        (candidate.department && candidate.department.toLowerCase() === currentProduct.department?.toLowerCase()) ||
+        (candidate.gender && candidate.gender.toLowerCase() === currentProduct.gender?.toLowerCase());
+      if (isSameDept) affinityScore += 2;
+
+      // Explicit curated related product ID
+      if (currentProduct.relatedProductIds?.includes(candidate.id)) {
+        affinityScore += 25;
+      }
+
+      return {
+        product: candidate,
+        matchingTagsCount,
+        affinityScore,
+      };
+    });
+
+  // Sort primarily by matching tags count (descending), then by affinity score
+  scoredProducts.sort((a, b) => {
+    if (b.matchingTagsCount !== a.matchingTagsCount) {
+      return b.matchingTagsCount - a.matchingTagsCount;
+    }
+    return b.affinityScore - a.affinityScore;
+  });
+
+  return scoredProducts.slice(0, limit).map((sp) => sp.product);
+}
+
