@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, MessageSquare } from "lucide-react";
+import { ArrowUpRight, Mail } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +11,7 @@ export function Footer() {
     >
       <div className="site-container flex flex-col gap-16 sm:gap-24">
         
-        {/* 1. TOP ROW: ATELIER IDENTITY & DIRECT WHATSAPP CONCIERGE */}
+        {/* 1. TOP ROW: ATELIER IDENTITY & CURATORIAL INQUIRIES */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 pb-16 border-b border-off-white/10 items-start">
           {/* Left Column: Brand Philosophy */}
           <div className="lg:col-span-7 flex flex-col gap-4">
@@ -29,36 +29,34 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Right Column: Direct WhatsApp Concierge */}
+          {/* Right Column: Curatorial Inquiries */}
           <div className="lg:col-span-5 flex flex-col gap-6 justify-between lg:pl-6">
             <div className="flex flex-col gap-2">
               <span className="text-[10px] uppercase font-sans tracking-[0.25em] text-brand-gray font-semibold">
-                DIRECT CONCIERGE &bull; WHATSAPP
+                CURATORIAL DESK &bull; INQUIRIES
               </span>
               <p className="text-xs uppercase font-sans tracking-[0.16em] text-off-white/80 leading-relaxed max-w-md">
-                Inquire about sizing, fit specifications, or private appointments directly with the atelier team.
+                Inquire regarding architectural specifications, private salon viewings, or curatorial collaborations.
               </p>
             </div>
 
             <a
-              href="https://wa.me/?text=Hello%20L%C3%89VARO,%20I%20have%20an%20inquiry%20regarding%20your%20pieces."
-              target="_blank"
-              rel="noopener noreferrer"
+              href="mailto:curator@levaro.store"
               className="group inline-flex items-center gap-3.5 px-7 py-3.5 bg-off-white text-near-black text-xs uppercase font-sans tracking-[0.24em] font-semibold transition-all duration-300 hover:bg-white cursor-pointer w-fit"
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>MESSAGE ON WHATSAPP</span>
+              <Mail className="w-4 h-4" />
+              <span>EMAIL CURATORIAL DESK</span>
               <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
         </div>
 
-        {/* 2. MIDDLE ROW: NAVIGATION & ESSENTIAL COLUMNS */}
+        {/* 2. MIDDLE ROW: NAVIGATION & CLIENT SERVICES */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 pb-16 border-b border-off-white/10 text-xs font-sans tracking-[0.2em]">
           {/* Col 1: Shop */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              SHOP
+              SHOP &amp; ARCHIVE
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
@@ -84,10 +82,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 2: Collections */}
+          {/* Col 2: The House */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              COLLECTIONS
+              THE HOUSE
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
@@ -113,31 +111,31 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: Client Relations */}
+          {/* Col 3: Client Services & Legal (Zero Admin Link) */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              ATELIER
+              CLIENT &amp; LEGAL
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
-                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="hover:text-off-white transition-colors">
-                  CONCIERGE DESK
-                </a>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-off-white transition-colors">
-                  MATERIALS &amp; CRAFT
+                <Link href="/faq" className="hover:text-off-white transition-colors">
+                  FREQUENT INQUIRIES (FAQ)
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="hover:text-off-white transition-colors">
-                  ADMINISTRATION
+                <Link href="/privacy" className="hover:text-off-white transition-colors">
+                  PRIVACY POLICY
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-off-white transition-colors">
+                  TERMS &amp; CONDITIONS
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Social & Presence */}
+          {/* Col 4: Presence & Social */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
               PRESENCE
@@ -155,11 +153,17 @@ export function Footer() {
                   <ArrowUpRight className="w-3 h-3" />
                 </a>
               </li>
+              <li>
+                <a href="mailto:curator@levaro.store" className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors">
+                  <span>CURATOR DESK</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* 3. BOTTOM ROW: MONUMENTAL LÉVARO WORDMARK */}
+        {/* 3. BOTTOM ROW: MONUMENTAL LÉVARO WORDMARK & LEGAL LINKS */}
         <div className="flex flex-col gap-8">
           {/* Monumental Architectural Wordmark */}
           <div className="w-full text-center overflow-hidden">
@@ -168,12 +172,24 @@ export function Footer() {
             </span>
           </div>
 
-          {/* Bottom Copyright */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-off-white/10 text-[9px] sm:text-[10px] uppercase font-sans tracking-[0.26em] text-brand-gray">
+          {/* Bottom Copyright & Direct Legal Shortcuts */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-off-white/10 text-[9px] sm:text-[10px] uppercase font-sans tracking-[0.22em] text-brand-gray">
             <span>&copy; {currentYear} LÉVARO. ALL RIGHTS RESERVED.</span>
 
-            <div className="flex items-center gap-6">
-              <span>MADE FOR PEOPLE IN MOTION</span>
+            <div className="flex items-center flex-wrap gap-4 sm:gap-6 text-[9px] tracking-[0.2em]">
+              <Link href="/privacy" className="hover:text-off-white transition-colors">
+                PRIVACY
+              </Link>
+              <span>&bull;</span>
+              <Link href="/terms" className="hover:text-off-white transition-colors">
+                TERMS
+              </Link>
+              <span>&bull;</span>
+              <Link href="/faq" className="hover:text-off-white transition-colors">
+                FAQ
+              </Link>
+              <span>&bull;</span>
+              <span>PEOPLE IN MOTION</span>
             </div>
           </div>
         </div>
