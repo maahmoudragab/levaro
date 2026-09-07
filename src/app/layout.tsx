@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
+import { CommandPalette } from "@/components/storefront/search/CommandPalette";
 import "./globals.css";
 
 const supreme = localFont({
@@ -94,6 +95,7 @@ export default async function RootLayout({
     >
       <body className="font-sans">
         <Toaster />
+        <CommandPalette />
         {children}
       </body>
     </html>

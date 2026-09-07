@@ -16,6 +16,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { ProductCard } from "@/components/storefront/shop/ProductCard";
+import { EditorialLightbox } from "@/components/storefront/product/EditorialLightbox";
 import type { ProductItem } from "@/types/storefront";
 
 interface ProductDetailClientProps {
@@ -107,24 +108,8 @@ export function ProductDetailClient({
     }
   }, [product.images.length]);
 
-  // Full-screen White Studio Lightbox Takeover
+  // Full-screen Studio Editorial Lightbox Takeover
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-
-  // Close lightbox on ESC, navigate with ArrowLeft/ArrowRight
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isLightboxOpen) return;
-      if (e.key === "Escape") {
-        setIsLightboxOpen(false);
-      } else if (e.key === "ArrowRight") {
-        setSelectedImageIndex((prev) => (prev + 1) % product.images.length);
-      } else if (e.key === "ArrowLeft") {
-        setSelectedImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLightboxOpen, product.images.length]);
 
   const imagesList = product.images.length > 0 ? product.images : ["/placeholder.jpg"];
   const primaryDesktopImage = imagesList[selectedImageIndex] || imagesList[0];
@@ -251,19 +236,13 @@ export function ProductDetailClient({
                     className="object-cover object-[center_20%] will-change-transform"
                   />
 
-                  {/* Desktop Hover Zoom & Fullscreen Hint */}
+                  {/* Desktop Subtle Expand Hint */}
                   <div
-                    className={`absolute bottom-3 right-3 z-10 text-[9px] uppercase font-mono tracking-[0.2em] bg-[#FBF9F6]/90 text-near-black px-2.5 py-1 border border-near-black/10 pointer-events-none transition-opacity duration-300 backdrop-blur-xs flex items-center gap-1.5 ${
-                      isZoomed ? "opacity-0" : "opacity-100"
+                    className={`absolute bottom-3 right-3 z-10 bg-[#FBF9F6]/90 text-near-black p-2 border border-near-black/10 pointer-events-none transition-opacity duration-300 backdrop-blur-xs flex items-center justify-center ${
+                      isZoomed ? "opacity-0" : "opacity-80 group-hover:opacity-100"
                     }`}
                   >
-                    <Maximize2 className="w-2.5 h-2.5" />
-                    <span>EXPAND STUDIO VIEW</span>
-                  </div>
-
-                  {/* Identification Tag */}
-                  <div className="absolute top-3 left-3 z-10 text-[9px] uppercase font-mono tracking-[0.2em] bg-[#FBF9F6]/90 text-near-black px-2.5 py-1 border border-near-black/10 backdrop-blur-xs pointer-events-none font-semibold">
-                    {product.code || product.sku}
+                    <Maximize2 className="w-3 h-3" />
                   </div>
                 </div>
 
@@ -594,104 +573,13 @@ export function ProductDetailClient({
         </div>
       </div>
 
-      {/* 5. FULL-SCREEN WHITE STUDIO LIGHTBOX TAKEOVER */}
-      {isLightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-[#FBF9F6] text-near-black flex flex-col justify-between overflow-hidden animate-fadeIn">
-          {/* Top Bar with Product Reference & Close Button */}
-          <div className="site-padding-x py-4 sm:py-5 border-b border-near-black/10 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-mono tracking-[0.24em] text-brand-gray uppercase">
-                LÉVARO // STUDIO EXHIBIT
-              </span>
-              <span className="hidden sm:inline-block text-[10px] font-mono tracking-[0.2em] text-near-black font-semibold">
-                {product.name}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs font-mono tracking-[0.2em]">
-              <span>
-                {String(selectedImageIndex + 1).padStart(2, "0")} / {String(imagesList.length).padStart(2, "0")}
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsLightboxOpen(false)}
-                className="hover:opacity-60 transition-opacity cursor-pointer p-1"
-                aria-label="Close studio exhibit"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Central High-Resolution Studio Stage */}
-          <div className="relative flex-1 w-full max-w-5xl mx-auto p-4 flex items-center justify-center">
-            <div className="relative w-full h-full max-h-[80vh]">
-              <Image
-                src={imagesList[selectedImageIndex]}
-                alt={`${product.name} exhibit view`}
-                fill
-                quality={100}
-                sizes="100vw"
-                className="object-contain"
-              />
-            </div>
-
-            {/* Previous Image Arrow */}
-            {imagesList.length > 1 && (
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedImageIndex((prev) => (prev - 1 + imagesList.length) % imagesList.length)
-                }
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-near-black text-off-white flex items-center justify-center hover:bg-charcoal transition-colors cursor-pointer"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Next Image Arrow */}
-            {imagesList.length > 1 && (
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedImageIndex((prev) => (prev + 1) % imagesList.length)
-                }
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-near-black text-off-white flex items-center justify-center hover:bg-charcoal transition-colors cursor-pointer"
-                aria-label="Next image"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-
-          {/* Bottom Thumbnails Strip inside Lightbox */}
-          {imagesList.length > 1 && (
-            <div className="site-padding-x py-3 border-t border-near-black/10 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
-              {imagesList.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setSelectedImageIndex(idx)}
-                  className={`relative w-12 sm:w-16 aspect-[3/4] overflow-hidden border transition-all cursor-pointer shrink-0 ${
-                    selectedImageIndex === idx
-                      ? "border-near-black ring-1 ring-near-black"
-                      : "border-near-black/20 opacity-50 hover:opacity-100"
-                  }`}
-                >
-                  <Image
-                    src={img}
-                    alt={`Thumbnail ${idx + 1}`}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* 5. FULL-SCREEN MINIMAL IMAGE VIEW */}
+      <EditorialLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        images={imagesList}
+        initialIndex={selectedImageIndex}
+      />
     </div>
   );
 }

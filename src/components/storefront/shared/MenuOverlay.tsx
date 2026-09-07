@@ -3,7 +3,7 @@
 import { useLayoutEffect, useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { X, ArrowUpRight } from "lucide-react";
+import { X, ArrowUpRight, Search } from "lucide-react";
 import gsap from "gsap";
 
 import { MENU_ITEMS } from "@/data/storefront";
@@ -290,6 +290,31 @@ export function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
                 );
               })}
             </nav>
+
+            {/* Quick Command Palette Search Trigger */}
+            <div className="pt-4 sm:pt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent("open-command-palette"));
+                  }, 400);
+                }}
+                className="group flex items-center justify-between gap-4 px-4 py-3 bg-charcoal/40 border border-off-white/15 hover:border-off-white/40 hover:bg-charcoal/80 transition-all duration-300 cursor-pointer w-full max-w-sm"
+                aria-label="Search the archive"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Search className="w-3.5 h-3.5 text-brand-gray group-hover:text-off-white transition-colors" />
+                  <span className="text-[10px] uppercase font-sans tracking-[0.22em] text-off-white/80 group-hover:text-off-white transition-colors">
+                    SEARCH ARCHIVE &amp; EDITIONS
+                  </span>
+                </div>
+                <kbd className="px-1.5 py-0.5 border border-off-white/20 text-[9px] font-mono tracking-widest text-brand-gray group-hover:border-off-white/40 group-hover:text-off-white transition-colors">
+                  ⌘K
+                </kbd>
+              </button>
+            </div>
           </div>
 
           {/* Right Side: High-Performance Single-Node Showcase */}
@@ -338,7 +363,7 @@ export function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
         <div className="site-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-3">
             <span className="inline-block w-2 h-2 bg-off-white/80" />
-            <span>DIRECT ORDERS &amp; INQUIRIES VIA WHATSAPP</span>
+            <span>ATELIER ARCHIVE &bull; CURATORIAL INQUIRIES</span>
           </div>
           <div className="flex items-center gap-6 sm:gap-8">
             <span>MEN / WOMEN / ACCESSORIES</span>

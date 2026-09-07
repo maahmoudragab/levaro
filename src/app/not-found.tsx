@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { NotFoundActions } from "@/components/storefront/search/NotFoundActions";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Header } from "@/components/storefront/shared/Header";
 import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
@@ -52,23 +51,7 @@ export default function NotFound() {
               </p>
 
               {/* Luxury CTAs */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 pt-4">
-                <Link
-                  href="/"
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-off-white text-near-black text-xs uppercase font-sans tracking-[0.24em] font-semibold hover:bg-off-white/90 transition-all duration-300 shadow-xl cursor-pointer"
-                >
-                  <span>RETURN TO STOREFRONT</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-
-                <Link
-                  href="/about"
-                  className="group inline-flex items-center gap-2.5 px-8 py-4 bg-transparent border border-off-white/30 text-off-white text-xs uppercase font-sans tracking-[0.24em] hover:border-off-white transition-all duration-300 cursor-pointer"
-                >
-                  <span>THE HOUSE MANIFESTO</span>
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
-              </div>
+              <NotFoundActions />
             </div>
           </section>
 
