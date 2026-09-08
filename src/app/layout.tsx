@@ -90,6 +90,7 @@ export const metadata: Metadata = {
     default: "LÉVARO",
     template: "LÉVARO — %s",
   },
+  
   description: siteConfig.description,
   keywords: siteConfig.keywords,
   authors: [{ name: "Mahmoud Ragab", url: "https://www.linkedin.com/in/maahmoudragab/" }],
@@ -156,6 +157,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google: "HJcQ06N13ZmafDcTz4ph34ghIvb37tCX9mqz9-zUcEk",
+  },
 };
 
 export default async function RootLayout({
@@ -173,6 +177,10 @@ export default async function RootLayout({
       className={`${supreme.variable} ${clashDisplay.variable} h-full antialiased`}
     >
       <head>
+        <meta
+          name="google-site-verification"
+          content="HJcQ06N13ZmafDcTz4ph34ghIvb37tCX9mqz9-zUcEk"
+        />
         <link rel="image_src" href={`${SITE_URL}/images/og-levaro.jpg`} />
         <script
           type="application/ld+json"
