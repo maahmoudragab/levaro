@@ -1,18 +1,28 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 import { getStorefrontProducts } from "@/services/storefront/products";
-import {
-  getAllStorefrontSubCategories,
-  getStorefrontCategorySlugs,
-} from "@/services/storefront/categories";
+import { getStorefrontCategorySlugs } from "@/services/storefront/categories";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const currentDate = new Date();
+  const seenUrls = new Set<string>();
+  const entries: MetadataRoute.Sitemap = [];
+
+  const addEntry = (entry: MetadataRoute.Sitemap[number]) => {
+    const cleanUrl = entry.url.trim();
+    if (!seenUrls.has(cleanUrl)) {
+      seenUrls.add(cleanUrl);
+      entries.push({
+        ...entry,
+        url: cleanUrl,
+      });
+    }
+  };
 
   // 1. Core High-Priority Pages
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: SITE_URL,
+      url: `${SITE_URL}`,
       lastModified: currentDate,
       changeFrequency: "daily",
       priority: 1.0,
@@ -61,52 +71,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Dedicated Category & Discipline Routes (/shop/[slug])
-  let categoryRoutes: MetadataRoute.Sitemap = [];
+  staticRoutes.forEach(addEntry);
+
+  // 2. Dedicated Canonical Category Routes (/shop/[slug])
   try {
     const categorySlugs = await getStorefrontCategorySlugs();
-    categoryRoutes = categorySlugs.map((cat) => ({
-      url: `${SITE_URL}/shop/${cat.slug}`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    }));
+    for (const cat of categorySlugs) {
+      if (cat.slug) {
+        addEntry({
+          url: `${SITE_URL}/shop/${encodeURIComponent(cat.slug.toLowerCase().trim())}`,
+          lastModified: currentDate,
+          changeFrequency: "weekly",
+          priority: 0.9,
+        });
+      }
+    }
   } catch (err) {
     console.error("Error generating category sitemap entries:", err);
   }
 
-  // 3. Dynamic Product Pages (/shop/[slug])
-  let productRoutes: MetadataRoute.Sitemap = [];
+  // 3. Dynamic Product Canonical Pages (/shop/[slug])
   try {
     const products = await getStorefrontProducts();
-    productRoutes = products.map((product) => ({
-      url: `${SITE_URL}/shop/${product.slug}`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    }));
+    for (const product of products) {
+      if (product.slug) {
+        addEntry({
+          url: `${SITE_URL}/shop/${encodeURIComponent(product.slug.trim())}`,
+          lastModified: currentDate,
+          changeFrequency: "weekly",
+          priority: 0.85,
+        });
+      }
+    }
   } catch (err) {
     console.error("Error generating product sitemap entries:", err);
   }
 
-  // 4. Dynamic Sub-Category & Capsule Query Routes (/shop?department=...&collection=...)
-  let collectionRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const subCategories = await getAllStorefrontSubCategories();
-    collectionRoutes = subCategories.map((col) => ({
-      url: `${SITE_URL}${col.href}`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
-  } catch (err) {
-    console.error("Error generating collection sitemap entries:", err);
-  }
-
-  return [
-    ...staticRoutes,
-    ...categoryRoutes,
-    ...productRoutes,
-    ...collectionRoutes,
-  ];
+  return entries;
 }
