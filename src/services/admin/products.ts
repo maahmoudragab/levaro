@@ -209,6 +209,8 @@ function purgeProductsCache() {
   revalidatePath("/admin/inventory");
   revalidatePath("/admin/categories");
   revalidatePath("/");
+  revalidatePath("/shop");
+  revalidatePath("/sitemap.xml");
 }
 
 /**

@@ -3,6 +3,8 @@ import { SITE_URL } from "@/lib/seo";
 import { getStorefrontProducts } from "@/services/storefront/products";
 import { getStorefrontCategorySlugs } from "@/services/storefront/categories";
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const currentDate = new Date();
   const seenUrls = new Set<string>();
