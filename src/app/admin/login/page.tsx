@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { login } from "@/app/admin/login/actions";
@@ -38,13 +39,25 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-black/5 bg-white p-8 shadow-sm"
       >
         {/* Brand Header */}
-        <div className="text-center space-y-1 mb-2">
-          <h1 className="font-bodoni text-3xl font-extrabold text-primary">
-            LÉVARO
-          </h1>
-          <p className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-            Admin Portal
-          </p>
+        <div className="flex flex-col items-center text-center space-y-2 mb-2">
+          <div className="relative w-12 h-12">
+            <Image
+              src="/images/logo-without-background.png"
+              alt="LÉVARO"
+              fill
+              priority
+              sizes="48px"
+              className="object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="font-bodoni text-3xl font-extrabold text-primary">
+              LÉVARO
+            </h1>
+            <p className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+              Admin Portal
+            </p>
+          </div>
         </div>
 
         {/* Credentials Form */}

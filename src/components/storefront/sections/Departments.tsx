@@ -15,12 +15,6 @@ export function Departments({ departments = [] }: DepartmentsProps) {
   const items = departments || [];
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
 
-  if (items.length === 0) {
-    return null;
-  }
-
-  const activeChapter = items[activeChapterIndex] || items[0];
-
   // Auto-advance active department button every 5 seconds
   useEffect(() => {
     if (items.length <= 1) return;
@@ -30,6 +24,12 @@ export function Departments({ departments = [] }: DepartmentsProps) {
 
     return () => clearInterval(timer);
   }, [items.length]);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  const activeChapter = items[activeChapterIndex] || items[0];
 
   return (
     <section

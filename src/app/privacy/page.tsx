@@ -10,9 +10,16 @@ import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "PRIVACY",
-  description: "سياسة الخصوصية وحوكمة البيانات لدار ليفارو LÉVARO للأزياء الفاخرة.",
+  description: "Privacy policy and client data governance for the house of LÉVARO.",
   alternates: {
     canonical: `${SITE_URL}/privacy`,
+  },
+  openGraph: {
+    title: "LÉVARO — PRIVACY",
+    description: "Privacy policy and client data governance for the house of LÉVARO.",
+    url: `${SITE_URL}/privacy`,
+    siteName: "LÉVARO",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

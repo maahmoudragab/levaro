@@ -88,6 +88,15 @@ export function AboutHero() {
         <div className="lg:col-span-7 flex flex-col gap-6 sm:gap-8">
           {/* Eyebrow Label */}
           <div className="flex items-center gap-3">
+            <div className="relative w-5 h-5 shrink-0 opacity-80">
+              <Image
+                src="/images/logo-without-background.png"
+                alt="LÉVARO Emblem"
+                fill
+                sizes="20px"
+                className="object-contain"
+              />
+            </div>
             <span className="w-8 h-[1px] bg-near-black/40" />
             <span className="text-[10px] sm:text-xs uppercase font-sans tracking-[0.3em] text-brand-gray font-semibold">
               THE HOUSE OF LÉVARO / ATELIER

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { MenuOverlay } from "./MenuOverlay";
 
@@ -16,14 +17,29 @@ export function Header({ theme = "dark" }: HeaderProps) {
     <>
       <header className="absolute top-0 left-0 right-0 z-40 w-full site-padding-x py-8 flex items-center justify-between">
         <div className="site-container flex items-center justify-between w-full">
-          {/* Brand Wordmark (Left) */}
+          {/* Brand Logo & Wordmark (Left) */}
           <Link
             href="/"
-            className={`text-lg md:text-xl font-display font-bold tracking-[0.28em] uppercase hover:opacity-85 transition-opacity ${
-              isLight ? "text-near-black" : "text-off-white"
-            }`}
+            className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer"
+            aria-label="LÉVARO Home"
           >
-            LÉVARO
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-500 ease-signature group-hover:scale-105">
+              <Image
+                src="/images/logo-without-background.png"
+                alt="LÉVARO"
+                fill
+                priority
+                sizes="36px"
+                className="object-contain"
+              />
+            </div>
+            <span
+              className={`text-lg md:text-xl font-display font-bold tracking-[0.28em] uppercase hover:opacity-85 transition-opacity ${
+                isLight ? "text-near-black" : "text-off-white"
+              }`}
+            >
+              LÉVARO
+            </span>
           </Link>
 
           {/* Menu Trigger (Right) */}

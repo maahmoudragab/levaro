@@ -7,7 +7,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "الأسئلة المتكررة لدار ليفارو (LÉVARO): تفاصيل الطلب، الشحن والتوصيل في مصر، المقاسات، أقمشة الدينم والصوف، وطرق العناية بالأزياء الفاخرة.",
+    "Frequently asked questions about LÉVARO: order protocols, nationwide delivery in Egypt, sizing architecture, and material care.",
   keywords: [
     "الأسئلة الشائعة ليفارو",
     "خدمة عملاء ليفارو",
@@ -15,6 +15,8 @@ export const metadata: Metadata = {
     "شحن ليفارو مصر",
     "مقاسات ليفارو",
     "خامات ليفارو",
+    "ليفارو",
+    "LÉVARO",
     "Levaro FAQ",
     "Levaro questions",
     "Levaro customer care",
@@ -23,19 +25,30 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/faq`,
   },
   openGraph: {
-    title: "الأسئلة الشائعة وخدمة العملاء | LÉVARO CLIENT ARCHIVE",
+    title: "LÉVARO — FREQUENT INQUIRIES (FAQ)",
     description:
-      "إجابات وتفاصيل حول طلبات ليفارو، المقاسات، الأقمشة الفاخرة، والعناية بالملابس.",
+      "Frequently asked questions about LÉVARO: order protocols, nationwide delivery in Egypt, sizing architecture, and material care.",
     url: `${SITE_URL}/faq`,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "الأسئلة الشائعة — LÉVARO",
+        alt: "LÉVARO Client Inquiries",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LÉVARO — FREQUENT INQUIRIES (FAQ)",
+    description:
+      "Frequently asked questions about LÉVARO: order protocols, nationwide delivery in Egypt, sizing architecture, and material care.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

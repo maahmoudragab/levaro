@@ -5,10 +5,23 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://levaro.store";
 
 export const siteConfig = {
-  name: "LÉVARO | ليفارو",
+  name: "LÉVARO",
   shortName: "LÉVARO",
   legalName: "LÉVARO Atelier",
   arabicName: "ليفارو",
+  founder: "Mahmoud Ragab",
+  founderArabic: "محمود رجب",
+  founderRole: "Founder & Creative Director",
+  founderBio: "Founded in Cairo by Mahmoud Ragab, LÉVARO is a contemporary luxury fashion house exploring form, architectural silhouettes, and heavyweight material discipline.",
+  telephone: "+201158480351",
+  phoneDisplay: "01158480351",
+  email: "maaahmoudragab@gmail.com",
+  socialLinks: {
+    github: "https://github.com/maahmoudragab",
+    linkedin: "https://www.linkedin.com/in/maahmoudragab/",
+    facebook: "https://www.facebook.com/share/1BnB3opvXz/",
+    instagram: "https://www.instagram.com/maahmoudragab",
+  },
   alternateNames: [
     "ليفارو",
     "ليڤارو",
@@ -19,19 +32,20 @@ export const siteConfig = {
     "ماركة ليفارو",
     "متجر ليفارو",
     "دار ليفارو للأزياء",
+    "تيشرتات ليفارو",
+    "ملابس ليفارو",
+    "شوب ليفارو",
   ],
-  title: "LÉVARO | ليفارو — براند الأزياء الفاخرة والملابس العصرية في مصر",
+  title: "LÉVARO — Contemporary Luxury Fashion Atelier",
   description:
-    "براند ليفارو (LÉVARO) — العلامة التجارية المصرية الرائدة في الأزياء الفاخرة، التيشرتات الراقية (Oversized & Relaxed Fit)، الجواكت الأنيقة، ودينم السيلفدج الياباني. تسوق أحدث كولكشن من دار ليفارو مع شحن سريع لجميع محافظات مصر.",
+    "LÉVARO — Contemporary Egyptian luxury fashion house and ready-to-wear atelier. Architectural oversized silhouettes, elevated tailoring, and raw denim crafted with material precision. Express delivery across Egypt.",
   url: SITE_URL,
-  ogImage: `${SITE_URL}/opengraph-image`,
-  telephone: "+201000000000",
-  email: "curator@levaro.store",
+  ogImage: `${SITE_URL}/images/og-levaro.jpg`,
   country: "Egypt",
   city: "Cairo",
   currency: "EGP",
   keywords: [
-    // Brand Specific Keywords (Arabic)
+    // Brand Specific Keywords (Arabic) — Ensuring Arabic search queries rank #1
     "ليفارو",
     "ليڤارو",
     "براند ليفارو",
@@ -40,6 +54,7 @@ export const siteConfig = {
     "موقع ليفارو",
     "شوب ليفارو",
     "دار ليفارو",
+    "دار ليفارو للأزياء",
     "ليفارو مصر",
     // Products Specific Keywords (Arabic)
     "تيشرتات ليفارو",
@@ -89,6 +104,9 @@ export const siteConfig = {
     "minimal luxury clothing cairo",
     "contemporary ready-to-wear egypt",
     "menswear fashion egypt",
+    // Founder
+    "Mahmoud Ragab",
+    "محمود رجب",
   ],
 };
 
@@ -96,71 +114,84 @@ export const siteConfig = {
 /* Dynamic Product SEO Metadata Generator                                     */
 /* -------------------------------------------------------------------------- */
 
+function toAbsoluteUrl(url?: string | null): string {
+  if (!url) return `${SITE_URL}/images/og-levaro.jpg`;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${SITE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export function generateProductSeoMetadata(product: ProductItem): Metadata {
-  const isTshirt =
-    product.name.toLowerCase().includes("tee") ||
-    product.name.toLowerCase().includes("t-shirt") ||
-    product.category.toLowerCase().includes("tee") ||
-    product.category.toLowerCase().includes("shirt");
-
-  const productCategoryAr = isTshirt
-    ? "تيشرتات وملابس ليفارو"
-    : product.category.toLowerCase().includes("outerwear") || product.category.toLowerCase().includes("jacket")
-    ? "جواكت ومعاطف ليفارو"
-    : product.category.toLowerCase().includes("trouser") || product.category.toLowerCase().includes("denim")
-    ? "بناطيل ودينم ليفارو"
-    : "ملابس وأزياء ليفارو";
-
-  const cleanTitle = product.name.toUpperCase();
+  const cleanTitle = `${product.name.toUpperCase()} — LÉVARO`;
 
   const userProductDesc = (product.short_description || product.description || "").trim();
-  const richDescription = userProductDesc
-    ? `${userProductDesc} — تسوق ${product.name} الأصلي من دار ليفارو LÉVARO. متوفر الآن للشراء أونلاين مع شحن لجميع محافظات مصر.`.slice(0, 280)
-    : `تسوق ${product.name} الأصلي (${product.code}) من دار ليفارو LÉVARO. مصمم بخامة ${product.material} الفاخرة وقصة ${product.fit}. متوفر الآن للشراء أونلاين مع شحن لجميع محافظات مصر.`.slice(0, 280);
+  const englishDescription = userProductDesc
+    ? `${userProductDesc} — Official LÉVARO Atelier edition. Express delivery across Egypt.`.slice(0, 280)
+    : `Shop the ${product.name} (${product.code}) by LÉVARO. Crafted from ${product.material} with a signature ${product.fit} silhouette. Express delivery across Egypt.`.slice(0, 280);
 
-  const primaryImage = product.images?.[0] || siteConfig.ogImage;
+  const productImages = (product.images || []).filter(Boolean);
+  const primaryImageUrl = toAbsoluteUrl(productImages[0] || siteConfig.ogImage);
   const productUrl = `${SITE_URL}/shop/${product.slug}`;
+
+  const ogImages =
+    productImages.length > 0
+      ? productImages.slice(0, 4).map((img, idx) => ({
+          url: toAbsoluteUrl(img),
+          secureUrl: toAbsoluteUrl(img),
+          width: 1200,
+          height: 1600,
+          alt: `${product.name} — LÉVARO Edition ${idx + 1}`,
+        }))
+      : [
+          {
+            url: `${SITE_URL}/images/og-levaro.jpg`,
+            secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
+            width: 1200,
+            height: 630,
+            alt: `${product.name} — LÉVARO`,
+            type: "image/jpeg",
+          },
+        ];
 
   return {
     title: cleanTitle,
-    description: richDescription,
+    description: englishDescription,
     keywords: [
+      // Product Names in both English and Arabic for high ranking
       product.name,
       `${product.name} ليفارو`,
       "تيشرتات ليفارو",
       "ملابس ليفارو",
       "براند ليفارو",
+      "دار ليفارو",
+      "ليفارو",
       product.code,
       product.category,
       product.department,
+      "LÉVARO",
       "Lévaro",
       "Levaro",
       "Levaro Egypt",
+      "Levaro t-shirts",
       ...(product.tags || []),
     ],
     alternates: {
       canonical: productUrl,
     },
     openGraph: {
-      title: `${product.name} — LÉVARO (ليفارو)`,
-      description: richDescription,
+      title: cleanTitle,
+      description: englishDescription,
       url: productUrl,
-      siteName: siteConfig.name,
-      locale: "ar_EG",
-      alternateLocale: ["en_US"],
+      siteName: "LÉVARO",
+      locale: "en_US",
+      alternateLocale: ["ar_EG"],
       type: "website",
-      images: product.images.slice(0, 4).map((img, idx) => ({
-        url: img,
-        width: 1200,
-        height: 1600,
-        alt: `${product.name} - LÉVARO ليفارو صورة ${idx + 1}`,
-      })),
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | ليفارو — LÉVARO`,
-      description: richDescription,
-      images: [primaryImage],
+      title: cleanTitle,
+      description: englishDescription,
+      images: [primaryImageUrl],
     },
   };
 }
@@ -176,56 +207,57 @@ export function generateCategorySeoMetadata(category: {
   description?: string;
   image?: string;
 }): Metadata {
-  const cleanTitle = category.name.toUpperCase();
+  const cleanTitle = `${category.name.toUpperCase()} — LÉVARO`;
   const categoryUrl = `${SITE_URL}/shop/${category.slug}`;
   const userCatDesc = (category.description || "").trim();
-  const arabicBadge = category.arabicName || `قسم ${category.name} — دار ليفارو`;
-  const richDescription = userCatDesc
-    ? `${userCatDesc} — تسوق تشكيلة ${category.name} الفاخرة من دار ليفارو LÉVARO في مصر مع توصيل سريع.`.slice(0, 280)
-    : `تسوق كولكشن ${arabicBadge} (${category.name}) الفاخر من دار ليفارو LÉVARO. شحن لجميع محافظات مصر وتوصيل سريع.`;
-  const primaryImage = category.image || siteConfig.ogImage;
+  const englishDescription = userCatDesc
+    ? `${userCatDesc} — Official LÉVARO collection. Express delivery across Egypt.`.slice(0, 280)
+    : `Discover the ${category.name} collection by LÉVARO. Architectural silhouettes, elevated tailoring, and contemporary ready-to-wear with express delivery across Egypt.`.slice(0, 280);
+  const primaryImageUrl = toAbsoluteUrl(category.image || siteConfig.ogImage);
 
   return {
-    title: cleanTitle,
-    description: richDescription,
+    title: category.name.toUpperCase(),
+    description: englishDescription,
     keywords: [
       category.name,
-      arabicBadge,
+      category.arabicName || "",
       `${category.name} ليفارو`,
-      `${arabicBadge} ليفارو`,
+      `${category.arabicName || category.name} ليفارو`,
       "تيشرتات ليفارو",
       "ملابس ليفارو",
       "براند ليفارو",
       "دار ليفارو",
       "LEVARO",
+      "Levaro",
       "Levaro Egypt",
       `Levaro ${category.slug}`,
-    ],
+    ].filter(Boolean),
     alternates: {
       canonical: categoryUrl,
     },
     openGraph: {
-      title: `${category.name} | ${category.arabicName} — LÉVARO`,
-      description: richDescription,
+      title: cleanTitle,
+      description: englishDescription,
       url: categoryUrl,
-      siteName: siteConfig.name,
-      locale: "ar_EG",
-      alternateLocale: ["en_US"],
+      siteName: "LÉVARO",
+      locale: "en_US",
+      alternateLocale: ["ar_EG"],
       type: "website",
       images: [
         {
-          url: primaryImage,
+          url: primaryImageUrl,
+          secureUrl: primaryImageUrl,
           width: 1200,
           height: 800,
-          alt: `${category.name} - ليفارو LÉVARO`,
+          alt: `${category.name} — LÉVARO`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${category.name} | ${category.arabicName} — LÉVARO`,
-      description: richDescription,
-      images: [primaryImage],
+      title: cleanTitle,
+      description: englishDescription,
+      images: [primaryImageUrl],
     },
   };
 }
@@ -235,7 +267,8 @@ export function generateCategorySeoMetadata(category: {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Organization Schema: Establishes LÉVARO as an authoritative brand in both Arabic and English.
+ * Organization Schema: Establishes LÉVARO as an authoritative luxury fashion brand
+ * and formally links ownership to Mahmoud Ragab across all search graphs.
  */
 export function generateOrganizationJsonLd() {
   return {
@@ -246,14 +279,15 @@ export function generateOrganizationJsonLd() {
     alternateName: siteConfig.alternateNames,
     legalName: siteConfig.legalName,
     url: SITE_URL,
-    logo: `${SITE_URL}/opengraph-image`,
-    image: `${SITE_URL}/opengraph-image`,
+    logo: `${SITE_URL}/images/logo.png`,
+    image: `${SITE_URL}/images/og-levaro.jpg`,
     description: siteConfig.description,
     telephone: siteConfig.telephone,
     email: siteConfig.email,
     priceRange: "$$",
     currenciesAccepted: "EGP",
     paymentAccepted: "Cash, Card, Digital Wallets",
+    knowsLanguage: ["en", "ar"],
     areaServed: [
       {
         "@type": "Country",
@@ -267,14 +301,43 @@ export function generateOrganizationJsonLd() {
       addressRegion: "Cairo",
       addressCountry: "EG",
     },
+    founder: {
+      "@type": "Person",
+      "@id": `${SITE_URL}/#founder`,
+      name: "Mahmoud Ragab",
+      alternateName: ["محمود رجب", "Mahmoud Ragab"],
+      jobTitle: "Founder & Creative Director",
+      email: "maaahmoudragab@gmail.com",
+      telephone: "+201158480351",
+      url: "https://www.linkedin.com/in/maahmoudragab/",
+      sameAs: [
+        "https://github.com/maahmoudragab",
+        "https://www.linkedin.com/in/maahmoudragab/",
+        "https://www.facebook.com/share/1BnB3opvXz/",
+        "https://www.instagram.com/maahmoudragab",
+      ],
+    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: "+201158480351",
+        contactType: "customer support",
+        email: "maaahmoudragab@gmail.com",
+        availableLanguage: ["English", "Arabic"],
+        areaServed: "EG",
+      },
+    ],
     sameAs: [
-      "https://www.instagram.com/levaro.official",
+      "https://github.com/maahmoudragab",
+      "https://www.linkedin.com/in/maahmoudragab/",
+      "https://www.facebook.com/share/1BnB3opvXz/",
+      "https://www.instagram.com/maahmoudragab",
     ],
   };
 }
 
 /**
- * WebSite Schema: Enables Google Search Box and deep brand recognition.
+ * WebSite Schema: Enables Google Search Box and dual-language brand recognition.
  */
 export function generateWebSiteJsonLd() {
   return {
@@ -282,13 +345,13 @@ export function generateWebSiteJsonLd() {
     "@type": "WebSite",
     "@id": `${SITE_URL}/#website`,
     name: "LÉVARO",
-    alternateName: ["ليفارو", "ليڤارو", "Levaro", "Lévaro Egypt"],
+    alternateName: siteConfig.alternateNames,
     url: SITE_URL,
     description: siteConfig.description,
     publisher: {
       "@id": `${SITE_URL}/#organization`,
     },
-    inLanguage: ["ar-EG", "en-US"],
+    inLanguage: ["en-US", "ar-EG"],
     potentialAction: {
       "@type": "SearchAction",
       target: `${SITE_URL}/shop?q={search_term_string}`,
@@ -298,20 +361,31 @@ export function generateWebSiteJsonLd() {
 }
 
 /**
- * Product Schema: Generates rich product snippets in Google Search with pricing, availability, and brand.
+ * Product Schema: Rich product snippets in Google Search with pricing, availability, and brand.
  */
 export function generateProductJsonLd(product: ProductItem) {
   const currentPrice = product.sale_price || product.price;
   const isAvailable = product.stock && product.stock.length > 0;
+  const productImages = (product.images || []).map(toAbsoluteUrl);
+  const userProductDesc = (product.short_description || product.description || "").trim();
+  const englishDescription = userProductDesc
+    ? `${userProductDesc} — Official LÉVARO Atelier edition. Express delivery across Egypt.`
+    : `Shop the ${product.name} (${product.code}) by LÉVARO. Crafted from ${product.material} with a signature ${product.fit} silhouette. Express delivery across Egypt.`;
 
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${SITE_URL}/shop/${product.slug}#product`,
     name: product.name,
-    alternateName: `${product.name} من ليفارو`,
-    description: `${product.description} - تصميم حصري من دار ليفارو LÉVARO بمواد ${product.material} الفاخرة وقصة ${product.fit}.`,
-    image: product.images,
+    alternateName: [
+      product.name,
+      `${product.name} ليفارو`,
+      `تيشيرت ${product.name} ليفارو`,
+      "تيشرتات ليفارو",
+      "ملابس ليفارو",
+    ],
+    description: englishDescription,
+    image: productImages,
     sku: product.sku || product.code,
     mpn: product.code,
     brand: {
@@ -418,14 +492,14 @@ export function generateCategoryJsonLd(
         position: index + 1,
         url: `${SITE_URL}/shop/${product.slug}`,
         name: product.name,
-        image: product.images?.[0] || undefined,
+        image: product.images?.[0] ? toAbsoluteUrl(product.images[0]) : undefined,
       })),
     },
   };
 }
 
 /**
- * AboutPage Schema: Defines the brand's architectural manifesto and heritage.
+ * AboutPage Schema: Defines the brand's architectural manifesto and founder heritage.
  */
 export function generateAboutPageJsonLd() {
   return {
@@ -433,9 +507,10 @@ export function generateAboutPageJsonLd() {
     "@type": "AboutPage",
     "@id": `${SITE_URL}/about#webpage`,
     url: `${SITE_URL}/about`,
-    name: "About LÉVARO Atelier | عن دار ليفارو للأزياء الفاخرة",
+    name: "About LÉVARO Atelier",
+    alternateName: "عن دار ليفارو للأزياء الفاخرة",
     description:
-      "دار ليفارو (LÉVARO) — علامة أزياء مصرية رائدة تمزج بين القصات المعمارية الدقيقة وخامات النسيج الفاخرة مثل القطن الجيزة ودينم السيلفدج الياباني.",
+      "The House of LÉVARO: An architectural fashion atelier exploring form, weight, and silhouette. Founded in Cairo by Mahmoud Ragab, merging sartorial discipline with contemporary ready-to-wear.",
     publisher: {
       "@type": "ClothingStore",
       "@id": `${SITE_URL}/#organization`,

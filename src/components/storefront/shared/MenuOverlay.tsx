@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { X, ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
@@ -223,9 +224,21 @@ export function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
           <Link
             href="/"
             onClick={handleClose}
-            className="text-lg md:text-xl font-display font-bold tracking-[0.28em] text-off-white uppercase hover:opacity-85 transition-opacity"
+            className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer"
+            aria-label="LÉVARO Home"
           >
-            LÉVARO
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-500 ease-signature group-hover:scale-105">
+              <Image
+                src="/images/logo-without-background.png"
+                alt="LÉVARO"
+                fill
+                sizes="36px"
+                className="object-contain"
+              />
+            </div>
+            <span className="text-lg md:text-xl font-display font-bold tracking-[0.28em] text-off-white uppercase hover:opacity-85 transition-opacity">
+              LÉVARO
+            </span>
           </Link>
           <button
             type="button"

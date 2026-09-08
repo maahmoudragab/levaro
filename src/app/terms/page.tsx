@@ -10,9 +10,16 @@ import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "TERMS",
-  description: "الشروط والأحكام المنظمة لمعرض وتجارة دار ليفارو LÉVARO للأزياء الفاخرة.",
+  description: "Terms and commercial conditions governing the exhibition and acquisition of LÉVARO editions.",
   alternates: {
     canonical: `${SITE_URL}/terms`,
+  },
+  openGraph: {
+    title: "LÉVARO — TERMS",
+    description: "Terms and commercial conditions governing the exhibition and acquisition of LÉVARO editions.",
+    url: `${SITE_URL}/terms`,
+    siteName: "LÉVARO",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

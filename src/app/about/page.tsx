@@ -15,32 +15,47 @@ import { SITE_URL, siteConfig, generateAboutPageJsonLd, generateBreadcrumbJsonLd
 export const metadata: Metadata = {
   title: "ABOUT",
   description:
-    "تعرف على دار ليفارو (LÉVARO) للأزياء الفاخرة في مصر: الفلسفة المعمارية، خامات السيلفدج والصوف المعالج، والحرفية العالية في تفصيل الأزياء المعاصرة.",
+    "The House of LÉVARO: An architectural fashion atelier exploring form, weight, and silhouette. Founded in Cairo by Mahmoud Ragab, merging sartorial discipline with contemporary ready-to-wear.",
   keywords: [
     "عن ليفارو",
     "دار ليفارو",
     "قصة براند ليفارو",
     "أتيليه ليفارو",
+    "LÉVARO",
     "Lévaro House",
     "About Levaro",
     "Levaro atelier",
+    "Mahmoud Ragab",
+    "محمود رجب",
   ],
   alternates: {
     canonical: `${SITE_URL}/about`,
   },
   openGraph: {
-    title: "عن دار ليفارو للأزياء الفاخرة — THE HOUSE — LÉVARO",
-    description: "الفلسفة المعمارية وخامات دار ليفارو للأزياء الفاخرة في مصر.",
+    title: "LÉVARO — THE HOUSE",
+    description:
+      "The House of LÉVARO: An architectural fashion atelier exploring form, weight, and silhouette. Founded in Cairo by Mahmoud Ragab.",
     url: `${SITE_URL}/about`,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "دار ليفارو — LÉVARO",
+        alt: "The House of LÉVARO",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LÉVARO — THE HOUSE",
+    description:
+      "The House of LÉVARO: An architectural fashion atelier exploring form, weight, and silhouette. Founded in Cairo by Mahmoud Ragab.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 
@@ -49,8 +64,8 @@ export const revalidate = 3600;
 export default function AboutPage() {
   const aboutJsonLd = generateAboutPageJsonLd();
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
-    { name: "الرئيسية", url: "/" },
-    { name: "عن دار ليفارو", url: "/about" },
+    { name: "Home", url: "/" },
+    { name: "About", url: "/about" },
   ]);
 
   // Critical images to preload & decode on GPU before lifting curtain

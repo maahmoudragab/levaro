@@ -14,7 +14,7 @@ import { SITE_URL, siteConfig, generateBreadcrumbJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "SHOP",
   description:
-    "تسوق كتالوج ليفارو (LÉVARO) الكامل: أحدث تشكيلة من تيشرتات ليفارو الفاخرة (Oversized Tees & Minimalist Tops)، البناطيل، المعاطف، ودينم السيلفدج الياباني. تصاميم معمارية راقية مع شحن سريع في مصر.",
+    "Explore the complete LÉVARO catalog: architectural oversized tees, structured trousers, outerwear, and Japanese selvedge denim. Designed in Cairo with express delivery across Egypt.",
   keywords: [
     "تيشرتات ليفارو",
     "تيشيرت ليفارو",
@@ -24,38 +24,44 @@ export const metadata: Metadata = {
     "متجر ليفارو",
     "كتالوج ليفارو",
     "هدوم ليفارو",
+    "ليفارو",
+    "LÉVARO",
+    "Levaro",
     "Levaro t-shirts",
     "Levaro tees",
     "Levaro shop",
     "Levaro catalog",
     "Levaro clothing",
     "Levaro Egypt",
-    "تيشرتات براند مصري",
-    "ملابس شبابية راقية مصر",
   ],
   alternates: {
     canonical: `${SITE_URL}/shop`,
   },
   openGraph: {
-    title: "تسوق تيشرتات وملابس ليفارو الرسمية — LÉVARO CATALOG",
+    title: "LÉVARO — SHOP",
     description:
-      "تصفح أحدث كولكشن من دار ليفارو: تيشرتات أوفر سايز راقية، أزياء عصرية، وجواكت مصممة بخامات فاخرة.",
+      "Explore the complete LÉVARO catalog: architectural oversized tees, structured trousers, outerwear, and Japanese selvedge denim.",
     url: `${SITE_URL}/shop`,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "تيشرتات وملابس ليفارو — LÉVARO",
+        alt: "LÉVARO Catalog",
+        type: "image/jpeg",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "تسوق تيشرتات وملابس ليفارو | LÉVARO",
+    title: "LÉVARO — SHOP",
     description:
-      "كتالوج وتيشرتات ليفارو الفاخرة — تصاميم معمارية راقية وتوصيل سريع لكافة محافظات مصر.",
+      "Explore the complete LÉVARO catalog: architectural oversized tees, structured trousers, outerwear, and Japanese selvedge denim.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 
@@ -100,8 +106,8 @@ export default async function ShopPage() {
   ].filter(Boolean);
 
   const breadcrumbSchema = generateBreadcrumbJsonLd([
-    { name: "الرئيسية", url: "/" },
-    { name: "تسوق تيشرتات وملابس ليفارو", url: "/shop" },
+    { name: "Home", url: "/" },
+    { name: "Shop", url: "/shop" },
   ]);
 
   return (

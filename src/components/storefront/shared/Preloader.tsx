@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
@@ -294,8 +295,18 @@ export function Preloader({
         <span>{tagline}</span>
       </div>
 
-      {/* Center Brand Title */}
-      <div className="my-auto text-center">
+      {/* Center Brand Emblem & Title */}
+      <div className="my-auto text-center flex flex-col items-center gap-5 sm:gap-7">
+        <div className="relative w-14 h-14 sm:w-20 sm:h-20 opacity-95">
+          <Image
+            src="/images/logo-without-background.png"
+            alt="LÉVARO"
+            fill
+            priority
+            sizes="(max-width: 640px) 56px, 80px"
+            className="object-contain"
+          />
+        </div>
         <h1
           ref={brandRef}
           className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-[0.35em] uppercase text-off-white"

@@ -13,12 +13,14 @@ import { SITE_URL, siteConfig, generateBreadcrumbJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "COLLECTIONS",
   description:
-    "استكشف كولكشن ليفارو (LÉVARO) الكامل: كبسولات حصرية، تصاميم دينم السيلفدج، المعاطف المهيكلة، والقصات الحديثة. تصفح التشكيلات الحصرية لدار ليفارو في مصر.",
+    "Archive of seasonal capsules, structural outerwear, and permanent editions by LÉVARO. Engineered with architectural precision.",
   keywords: [
     "كولكشن ليفارو",
     "تشكيلات ليفارو",
     "براند ليفارو كولكشن",
     "أزياء ليفارو",
+    "ليفارو",
+    "LÉVARO",
     "Levaro collections",
     "Levaro capsules",
     "Levaro Egypt",
@@ -27,18 +29,30 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/collections`,
   },
   openGraph: {
-    title: "كولكشن ليفارو — LÉVARO COLLECTIONS ARCHIVE",
-    description: "استكشف كافة كبسولات وتشكيلات دار ليفارو للأزياء الفاخرة في مصر.",
+    title: "LÉVARO — COLLECTIONS",
+    description:
+      "Archive of seasonal capsules, structural outerwear, and permanent editions by LÉVARO.",
     url: `${SITE_URL}/collections`,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "كولكشن وتشكيلات ليفارو — LÉVARO",
+        alt: "LÉVARO Collections Archive",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LÉVARO — COLLECTIONS",
+    description:
+      "Archive of seasonal capsules, structural outerwear, and permanent editions by LÉVARO.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

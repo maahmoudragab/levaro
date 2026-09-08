@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Mail } from "lucide-react";
 
@@ -145,27 +146,73 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 4: Presence & Social */}
+          {/* Col 4: Presence & Direct Contact */}
           <div className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.26em] text-brand-gray font-semibold">
-              PRESENCE
+              PRESENCE &amp; ATELIER
             </span>
-            <ul className="flex flex-col gap-2.5 text-off-white/80">
+            <ul className="flex flex-col gap-2.5 text-off-white/80 text-[11px] font-sans">
               <li>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors">
+                <a
+                  href="https://www.instagram.com/maahmoudragab"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors"
+                >
                   <span>INSTAGRAM</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </a>
               </li>
               <li>
-                <a href="https://threads.net" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors">
-                  <span>THREADS</span>
+                <a
+                  href="https://www.linkedin.com/in/maahmoudragab/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors"
+                >
+                  <span>LINKEDIN</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </a>
               </li>
               <li>
-                <a href="mailto:curator@levaro.store" className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors">
-                  <span>CURATOR DESK</span>
+                <a
+                  href="https://www.facebook.com/share/1BnB3opvXz/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors"
+                >
+                  <span>FACEBOOK</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/maahmoudragab"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors"
+                >
+                  <span>GITHUB</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:maaahmoudragab@gmail.com"
+                  className="inline-flex items-center gap-1.5 hover:text-off-white transition-colors"
+                >
+                  <span>DIRECT DESK</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/201158480351"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-off-white hover:underline transition-colors"
+                >
+                  <span>TEL: 01158480351</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </a>
               </li>
@@ -173,8 +220,23 @@ export function Footer() {
           </div>
         </div>
 
-        {/* 3. BOTTOM ROW: MONUMENTAL LÉVARO WORDMARK & LEGAL LINKS */}
-        <div className="flex flex-col gap-8">
+        {/* 3. BOTTOM ROW: MONUMENTAL LÉVARO EMBLEM, WORDMARK & LEGAL LINKS */}
+        <div className="flex flex-col items-center gap-6 sm:gap-8 pt-4">
+          {/* Centered Transparent Luxury Emblem */}
+          <Link
+            href="/"
+            className="group relative w-16 h-16 sm:w-20 sm:h-20 transition-transform duration-500 ease-signature hover:scale-105 cursor-pointer"
+            aria-label="LÉVARO Home"
+          >
+            <Image
+              src="/images/logo-without-background.png"
+              alt="LÉVARO Emblem"
+              fill
+              sizes="(max-width: 640px) 64px, 80px"
+              className="object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+            />
+          </Link>
+
           {/* Monumental Architectural Wordmark */}
           <div className="w-full text-center overflow-hidden">
             <span className="text-[16vw] font-display font-light uppercase tracking-[0.08em] leading-none text-off-white/90 block hover:text-off-white transition-colors select-none">
@@ -184,7 +246,7 @@ export function Footer() {
 
           {/* Bottom Copyright & Direct Legal Shortcuts */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-off-white/10 text-[9px] sm:text-[10px] uppercase font-sans tracking-[0.22em] text-brand-gray">
-            <span>&copy; {currentYear} LÉVARO. ALL RIGHTS RESERVED.</span>
+            <span>&copy; {currentYear} LÉVARO. FOUNDED BY MAHMOUD RAGAB. ALL RIGHTS RESERVED.</span>
 
             <div className="flex items-center flex-wrap gap-4 sm:gap-6 text-[9px] tracking-[0.2em]">
               <Link href="/privacy" className="hover:text-off-white transition-colors">

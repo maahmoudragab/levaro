@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -42,9 +43,20 @@ export default function Sidebar() {
       {/* Mobile Top Bar Header                                                */}
       {/* -------------------------------------------------------------------- */}
       <header className="flex items-center justify-between bg-[#f7f8f9] p-4 lg:hidden border-b border-black/5">
-        <h1 className="font-bodoni text-2xl font-extrabold text-primary">
-          LÉVARO
-        </h1>
+        <Link href="/admin" className="flex items-center gap-2.5">
+          <div className="relative w-7 h-7">
+            <Image
+              src="/images/logo-without-background.png"
+              alt="LÉVARO"
+              fill
+              sizes="28px"
+              className="object-contain"
+            />
+          </div>
+          <h1 className="font-bodoni text-2xl font-extrabold text-primary">
+            LÉVARO
+          </h1>
+        </Link>
         <button
           type="button"
           onClick={() => setIsOpen(true)}
@@ -75,14 +87,25 @@ export default function Sidebar() {
         <div className="space-y-8">
           {/* Logo & Close Button */}
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-bodoni text-4xl font-extrabold text-primary">
-                LÉVARO
-              </h1>
-              <p className="mt-1 text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase">
-                Admin Dashboard
-              </p>
-            </div>
+            <Link href="/admin" className="flex items-center gap-3">
+              <div className="relative w-10 h-10 shrink-0">
+                <Image
+                  src="/images/logo-without-background.png"
+                  alt="LÉVARO"
+                  fill
+                  sizes="40px"
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="font-bodoni text-3xl font-extrabold text-primary leading-none">
+                  LÉVARO
+                </h1>
+                <p className="mt-1 text-[10px] font-bold tracking-[0.25em] text-zinc-500 uppercase">
+                  Admin Dashboard
+                </p>
+              </div>
+            </Link>
             <button
               type="button"
               onClick={() => setIsOpen(false)}

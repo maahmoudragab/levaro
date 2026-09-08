@@ -13,13 +13,15 @@ import { SITE_URL, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "NEW ARRIVALS",
   description:
-    "استكشف أحدث قطع وملابس وتيشرتات ليفارو (LÉVARO) التي وصلت حديثاً: تصميمات جديدة، خامات فاخرة، وإصدارات محدودة جاهزة للشحن الفوري في مصر.",
+    "Discover the latest drops from LÉVARO: limited atelier releases, sculptural cuts, and heavyweight luxury cottons ready for immediate dispatch across Egypt.",
   keywords: [
     "وصل حديثا ليفارو",
     "جديد ليفارو",
     "تيشرتات ليفارو الجديدة",
     "كولكشن ليفارو الجديد",
     "ملابس ليفارو الجديدة",
+    "ليفارو",
+    "LÉVARO",
     "Levaro new arrivals",
     "Levaro new collection",
     "Levaro latest drops",
@@ -28,18 +30,30 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/new-arrivals`,
   },
   openGraph: {
-    title: "وصل حديثاً | أحدث إصدارات ليفارو — LÉVARO NEW ARRIVALS",
-    description: "أحدث إصدارات دار ليفارو للأزياء الفاخرة لعام 2026. تسوق الآن أونلاين.",
+    title: "LÉVARO — NEW ARRIVALS",
+    description:
+      "Discover the latest drops from LÉVARO: limited atelier releases, sculptural cuts, and heavyweight luxury cottons.",
     url: `${SITE_URL}/new-arrivals`,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "وصل حديثاً — ليفارو LÉVARO",
+        alt: "LÉVARO New Arrivals",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LÉVARO — NEW ARRIVALS",
+    description:
+      "Discover the latest drops from LÉVARO: limited atelier releases, sculptural cuts, and heavyweight luxury cottons.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

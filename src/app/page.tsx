@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     absolute: "LÉVARO",
   },
   description:
-    "الموقع الرسمي لدار ليفارو (LÉVARO) في مصر. تسوق أرقى تشكيلة من التيشرتات الفاخرة، البناطيل، المعاطف، ودينم السيلفدج الياباني بتصاميم وقصات هندسية فريدة مع شحن لجميع المحافظات.",
+    "Official website of LÉVARO in Egypt. Discover architectural oversized silhouettes, elevated tailoring, and raw selvedge denim. Express delivery across all Egyptian governorates.",
   keywords: [
     "ليفارو",
     "براند ليفارو",
@@ -30,30 +30,42 @@ export const metadata: Metadata = {
     "متجر ليفارو الرسمي",
     "تيشرتات ليفارو",
     "ملابس ليفارو",
+    "LÉVARO",
     "Lévaro",
     "Levaro",
     "Levaro Egypt",
     "Levaro clothing",
-    "براندات ملابس مصرية فاخرة",
-    "أزياء رجالية راقية مصر",
+    "Levaro t-shirts",
+    "Mahmoud Ragab",
   ],
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "LÉVARO | ليفارو — براند الأزياء الفاخرة والملابس العصرية",
+    title: "LÉVARO — Contemporary Luxury Fashion Atelier",
     description:
-      "الموقع الرسمي لدار ليفارو (LÉVARO) في مصر. تسوق أرقى تشكيلة من التيشرتات الفاخرة، البناطيل، المعاطف، ودينم السيلفدج الياباني بتصاميم وقصات هندسية فريدة.",
+      "Official website of LÉVARO in Egypt. Discover architectural oversized silhouettes, elevated tailoring, and raw selvedge denim.",
     url: SITE_URL,
-    siteName: siteConfig.name,
+    siteName: "LÉVARO",
+    locale: "en_US",
+    alternateLocale: ["ar_EG"],
     images: [
       {
-        url: `${SITE_URL}/opengraph-image`,
+        url: `${SITE_URL}/images/og-levaro.jpg`,
+        secureUrl: `${SITE_URL}/images/og-levaro.jpg`,
         width: 1200,
         height: 630,
-        alt: "LÉVARO | ليفارو — Modern Luxury Fashion",
+        alt: "LÉVARO — Contemporary Luxury Fashion Atelier",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LÉVARO — Contemporary Luxury Fashion Atelier",
+    description:
+      "Official website of LÉVARO in Egypt. Discover architectural oversized silhouettes, elevated tailoring, and raw selvedge denim.",
+    images: [`${SITE_URL}/images/og-levaro.jpg`],
   },
 };
 

@@ -95,8 +95,8 @@ export default async function ShopSlugPage({ params }: ShopSlugPageProps) {
     const relatedProducts = getRelatedProductsByTags(product, allProducts, 3);
     const productJsonLd = generateProductJsonLd(product);
     const breadcrumbJsonLd = generateBreadcrumbJsonLd([
-      { name: "الرئيسية", url: "/" },
-      { name: "تسوق تيشرتات وملابس ليفارو", url: "/shop" },
+      { name: "Home", url: "/" },
+      { name: "Shop", url: "/shop" },
       {
         name: product.category_name || product.category,
         url: `/shop?category=${encodeURIComponent(product.category_slug || product.category)}`,
@@ -149,8 +149,8 @@ export default async function ShopSlugPage({ params }: ShopSlugPageProps) {
     const categoryProducts = filterProductsByCategory(allProducts, category);
     const categoryJsonLd = generateCategoryJsonLd(category, categoryProducts);
     const breadcrumbJsonLd = generateBreadcrumbJsonLd([
-      { name: "الرئيسية", url: "/" },
-      { name: "المتجر", url: "/shop" },
+      { name: "Home", url: "/" },
+      { name: "Shop", url: "/shop" },
       { name: category.name, url: `/shop/${category.slug}` },
     ]);
 
