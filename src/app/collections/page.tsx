@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Header } from "@/components/storefront/shared/Header";
@@ -8,10 +8,38 @@ import { Footer } from "@/components/storefront/sections/Footer";
 import { CollectionsCatalog } from "@/components/storefront/collections/CollectionsCatalog";
 import { getAllStorefrontSubCategories } from "@/services/storefront/categories";
 
+import { SITE_URL, siteConfig, generateBreadcrumbJsonLd } from "@/lib/seo";
+
 export const metadata: Metadata = {
-  title: "COLLECTIONS ARCHIVE — LÉVARO",
+  title: "COLLECTIONS",
   description:
-    "Explore all curated collections, sub-categories, and specialized atelier capsules. Select any collection to explore filtered editions in the main store.",
+    "استكشف كولكشن ليفارو (LÉVARO) الكامل: كبسولات حصرية، تصاميم دينم السيلفدج، المعاطف المهيكلة، والقصات الحديثة. تصفح التشكيلات الحصرية لدار ليفارو في مصر.",
+  keywords: [
+    "كولكشن ليفارو",
+    "تشكيلات ليفارو",
+    "براند ليفارو كولكشن",
+    "أزياء ليفارو",
+    "Levaro collections",
+    "Levaro capsules",
+    "Levaro Egypt",
+  ],
+  alternates: {
+    canonical: `${SITE_URL}/collections`,
+  },
+  openGraph: {
+    title: "كولكشن ليفارو — LÉVARO COLLECTIONS ARCHIVE",
+    description: "استكشف كافة كبسولات وتشكيلات دار ليفارو للأزياء الفاخرة في مصر.",
+    url: `${SITE_URL}/collections`,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: `${SITE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "كولكشن وتشكيلات ليفارو — LÉVARO",
+      },
+    ],
+  },
 };
 
 export const revalidate = 3600;

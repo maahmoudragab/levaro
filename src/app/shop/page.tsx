@@ -9,10 +9,54 @@ import { ShopCatalog } from "@/components/storefront/shop/ShopCatalog";
 import { getStorefrontProducts } from "@/services/storefront/products";
 import { getStorefrontTaxonomies } from "@/services/storefront/categories";
 
+import { SITE_URL, siteConfig, generateBreadcrumbJsonLd } from "@/lib/seo";
+
 export const metadata: Metadata = {
-  title: "CATALOG ARCHIVE — ALL EDITIONS — LÉVARO",
+  title: "SHOP",
   description:
-    "Explore the complete catalogue of LÉVARO editions. Filter by discipline, seasonal collection, raw selvedge denim, sculptural tailoring, and minimal objects.",
+    "تسوق كتالوج ليفارو (LÉVARO) الكامل: أحدث تشكيلة من تيشرتات ليفارو الفاخرة (Oversized Tees & Minimalist Tops)، البناطيل، المعاطف، ودينم السيلفدج الياباني. تصاميم معمارية راقية مع شحن سريع في مصر.",
+  keywords: [
+    "تيشرتات ليفارو",
+    "تيشيرت ليفارو",
+    "تيشرتات اوفر سايز ليفارو",
+    "ملابس ليفارو",
+    "شوب ليفارو",
+    "متجر ليفارو",
+    "كتالوج ليفارو",
+    "هدوم ليفارو",
+    "Levaro t-shirts",
+    "Levaro tees",
+    "Levaro shop",
+    "Levaro catalog",
+    "Levaro clothing",
+    "Levaro Egypt",
+    "تيشرتات براند مصري",
+    "ملابس شبابية راقية مصر",
+  ],
+  alternates: {
+    canonical: `${SITE_URL}/shop`,
+  },
+  openGraph: {
+    title: "تسوق تيشرتات وملابس ليفارو الرسمية — LÉVARO CATALOG",
+    description:
+      "تصفح أحدث كولكشن من دار ليفارو: تيشرتات أوفر سايز راقية، أزياء عصرية، وجواكت مصممة بخامات فاخرة.",
+    url: `${SITE_URL}/shop`,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: `${SITE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "تيشرتات وملابس ليفارو — LÉVARO",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "تسوق تيشرتات وملابس ليفارو | LÉVARO",
+    description:
+      "كتالوج وتيشرتات ليفارو الفاخرة — تصاميم معمارية راقية وتوصيل سريع لكافة محافظات مصر.",
+  },
 };
 
 // High-speed cached ISR revalidation
@@ -55,8 +99,19 @@ export default async function ShopPage() {
     products[1]?.images[0] || "",
   ].filter(Boolean);
 
+  const breadcrumbSchema = generateBreadcrumbJsonLd([
+    { name: "الرئيسية", url: "/" },
+    { name: "تسوق تيشرتات وملابس ليفارو", url: "/shop" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
       {/* 1. Mandatory Functional Preloader */}
       <Preloader
         images={criticalImages}

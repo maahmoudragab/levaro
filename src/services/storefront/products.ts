@@ -1,6 +1,5 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SHOP_PRODUCTS } from "@/data/storefront";
 import type { ProductItem } from "@/types/storefront";
 import { formatEgpPrice } from "@/lib/formatting";
 import { getImageValue, getPublicImageUrl } from "@/lib/supabase/storage";
@@ -252,8 +251,10 @@ export const getStorefrontProducts = unstable_cache(
       });
 
       if (error || !data || data.length === 0) {
-        console.warn("Notice [getStorefrontProducts]: Supabase returned empty or error, falling back to mock catalog.");
-        return SHOP_PRODUCTS;
+        if (error) {
+          console.error("Error in getStorefrontProducts:", error.message);
+        }
+        return [];
       }
 
       return data.map((row, index) =>
@@ -261,7 +262,7 @@ export const getStorefrontProducts = unstable_cache(
       );
     } catch (err) {
       console.error("Error in getStorefrontProducts:", err);
-      return SHOP_PRODUCTS;
+      return [];
     }
   },
   ["storefront-all-products"],
@@ -313,16 +314,13 @@ export const getStorefrontProductBySlug = unstable_cache(
       });
 
       if (error || !data) {
-        // Fallback to mock data if slug is found there
-        const fallback = SHOP_PRODUCTS.find((p) => p.slug === cleanSlug);
-        return fallback || null;
+        return null;
       }
 
       return mapSupabaseRowToStorefrontProduct(supabase, data as Record<string, unknown>, 0, categoryMap);
     } catch (err) {
       console.error(`Error in getStorefrontProductBySlug(${slug}):`, err);
-      const fallback = SHOP_PRODUCTS.find((p) => p.slug === slug);
-      return fallback || null;
+      return null;
     }
   },
   ["storefront-product-detail"],
@@ -340,7 +338,7 @@ export async function getStorefrontProductSlugs(): Promise<{ slug: string }[]> {
     const products = await getStorefrontProducts();
     return products.map((p) => ({ slug: p.slug }));
   } catch {
-    return SHOP_PRODUCTS.map((p) => ({ slug: p.slug }));
+    return [];
   }
 }
 

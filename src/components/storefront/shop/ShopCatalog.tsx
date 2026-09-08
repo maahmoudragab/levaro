@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { fetchStorefrontProductsAction } from "@/services/storefront/actions";
-import { SHOP_PRODUCTS } from "@/data/storefront";
 import type {
   DepartmentKey,
   CategoryKey,
@@ -95,7 +94,7 @@ interface ShopCatalogProps {
 }
 
 export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogProps = {}) {
-  const productsList = initialProducts && initialProducts.length > 0 ? initialProducts : SHOP_PRODUCTS;
+  const productsList = initialProducts || [];
 
   // Build dynamic categories list from Supabase taxonomies or products
   const dynamicCategories = useMemo(() => {

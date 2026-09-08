@@ -5,16 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
-import { DEPARTMENTS } from "@/data/storefront";
 import type { DepartmentChapter } from "@/types/storefront";
 
 interface DepartmentsProps {
   departments?: DepartmentChapter[];
 }
 
-export function Departments({ departments = DEPARTMENTS }: DepartmentsProps) {
-  const items = departments && departments.length > 0 ? departments : DEPARTMENTS;
+export function Departments({ departments = [] }: DepartmentsProps) {
+  const items = departments || [];
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+
+  if (items.length === 0) {
+    return null;
+  }
+
   const activeChapter = items[activeChapterIndex] || items[0];
 
   // Auto-advance active department button every 5 seconds

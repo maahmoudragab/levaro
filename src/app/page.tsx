@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Header } from "@/components/storefront/shared/Header";
 import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
@@ -13,7 +14,48 @@ import {
   getStorefrontDepartments,
   getStorefrontCuratedCollections,
 } from "@/services/storefront/categories";
-import { DEPARTMENTS } from "@/data/storefront";
+import { SITE_URL, siteConfig } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "LÉVARO",
+  },
+  description:
+    "الموقع الرسمي لدار ليفارو (LÉVARO) في مصر. تسوق أرقى تشكيلة من التيشرتات الفاخرة، البناطيل، المعاطف، ودينم السيلفدج الياباني بتصاميم وقصات هندسية فريدة مع شحن لجميع المحافظات.",
+  keywords: [
+    "ليفارو",
+    "براند ليفارو",
+    "ماركة ليفارو",
+    "دار ليفارو",
+    "متجر ليفارو الرسمي",
+    "تيشرتات ليفارو",
+    "ملابس ليفارو",
+    "Lévaro",
+    "Levaro",
+    "Levaro Egypt",
+    "Levaro clothing",
+    "براندات ملابس مصرية فاخرة",
+    "أزياء رجالية راقية مصر",
+  ],
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: "LÉVARO | ليفارو — براند الأزياء الفاخرة والملابس العصرية",
+    description:
+      "الموقع الرسمي لدار ليفارو (LÉVARO) في مصر. تسوق أرقى تشكيلة من التيشرتات الفاخرة، البناطيل، المعاطف، ودينم السيلفدج الياباني بتصاميم وقصات هندسية فريدة.",
+    url: SITE_URL,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: `${SITE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "LÉVARO | ليفارو — Modern Luxury Fashion",
+      },
+    ],
+  },
+};
 
 export const revalidate = 3600;
 
@@ -27,7 +69,7 @@ export default async function Home() {
   // Preload critical above-the-fold assets strictly to ensure instant, fluid entrance
   const criticalImages = [
     "/images/hero-background.jpg",
-    departments[0]?.image || products[0]?.images[0] || DEPARTMENTS[0].image,
+    departments[0]?.image || products[0]?.images?.[0] || "",
     curatedCollections[0]?.imagePrimary || "",
   ].filter(Boolean);
 

@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Header } from "@/components/storefront/shared/Header";
@@ -8,10 +8,39 @@ import { Footer } from "@/components/storefront/sections/Footer";
 import { NewArrivalsCatalog } from "@/components/storefront/shop/NewArrivalsCatalog";
 import { getStorefrontProducts } from "@/services/storefront/products";
 
+import { SITE_URL, siteConfig } from "@/lib/seo";
+
 export const metadata: Metadata = {
-  title: "NEW ARRIVALS — LÉVARO",
+  title: "NEW ARRIVALS",
   description:
-    "Explore the newest LÉVARO editions, seasonal drops, and latest ready-to-wear pieces. Modern luxury tailored for movement.",
+    "استكشف أحدث قطع وملابس وتيشرتات ليفارو (LÉVARO) التي وصلت حديثاً: تصميمات جديدة، خامات فاخرة، وإصدارات محدودة جاهزة للشحن الفوري في مصر.",
+  keywords: [
+    "وصل حديثا ليفارو",
+    "جديد ليفارو",
+    "تيشرتات ليفارو الجديدة",
+    "كولكشن ليفارو الجديد",
+    "ملابس ليفارو الجديدة",
+    "Levaro new arrivals",
+    "Levaro new collection",
+    "Levaro latest drops",
+  ],
+  alternates: {
+    canonical: `${SITE_URL}/new-arrivals`,
+  },
+  openGraph: {
+    title: "وصل حديثاً | أحدث إصدارات ليفارو — LÉVARO NEW ARRIVALS",
+    description: "أحدث إصدارات دار ليفارو للأزياء الفاخرة لعام 2026. تسوق الآن أونلاين.",
+    url: `${SITE_URL}/new-arrivals`,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: `${SITE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "وصل حديثاً — ليفارو LÉVARO",
+      },
+    ],
+  },
 };
 
 export const revalidate = 3600;

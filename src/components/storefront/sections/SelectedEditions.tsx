@@ -4,12 +4,11 @@ import { useMemo } from "react";
 import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
 import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
 import { ProductCard } from "@/components/storefront/shop/ProductCard";
-import { SHOP_PRODUCTS } from "@/data/storefront";
 import type { ProductItem } from "@/types/storefront";
 
 export function SelectedEditions({ products }: { products?: ProductItem[] } = {}) {
   const displayedProducts = useMemo(() => {
-    const list = products && products.length > 0 ? products : SHOP_PRODUCTS;
+    const list = products || [];
     const featured = list.filter((p) => p.is_featured === true);
     const nonFeatured = list.filter((p) => !p.is_featured);
 
@@ -18,6 +17,10 @@ export function SelectedEditions({ products }: { products?: ProductItem[] } = {}
       ? featured.slice(0, 6)
       : [...featured, ...nonFeatured].slice(0, 6);
   }, [products]);
+
+  if (displayedProducts.length === 0) {
+    return null;
+  }
 
   return (
     <section

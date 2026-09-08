@@ -1,8 +1,7 @@
-﻿import { unstable_cache } from "next/cache";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCategoriesHierarchy } from "@/services/admin/categories";
-import { DEPARTMENTS, FEATURED_COLLECTIONS } from "@/data/storefront";
-import type { DepartmentChapter } from "@/types/storefront";
+import type { DepartmentChapter, ProductItem } from "@/types/storefront";
 import { getStorefrontProducts } from "@/services/storefront/products";
 
 export interface StorefrontCategory {
@@ -32,6 +31,34 @@ export interface StorefrontTaxonomies {
   departments: StorefrontTaxonomyItem[];
   categories: StorefrontTaxonomyItem[];
   collections: StorefrontTaxonomyItem[];
+}
+
+/**
+ * Resolves public image URL from Supabase storage or external URL.
+ */
+export function getPublicCategoryImageUrl(
+  supabase: ReturnType<typeof createAdminClient>,
+  value: string | null,
+): string | null {
+  if (!value) return null;
+  if (
+    value.startsWith("blob:") ||
+    value.includes("blob:http") ||
+    value.includes("localhost:")
+  ) {
+    return null;
+  }
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("data:")
+  ) {
+    return value;
+  }
+  return supabase.storage
+    .from("product-images")
+    .getPublicUrl(value)
+    .data.publicUrl;
 }
 
 /**
@@ -108,9 +135,6 @@ export const getStorefrontTaxonomies = unstable_cache(
             ]
           : [
               { key: "all", label: "ALL DISCIPLINES", slug: "all", id: "all" },
-              { key: "men", label: "MEN", slug: "men", id: "men" },
-              { key: "women", label: "WOMEN", slug: "women", id: "women" },
-              { key: "accessories", label: "ACCESSORIES", slug: "accessories", id: "accessories" },
             ];
 
       return {
@@ -124,9 +148,6 @@ export const getStorefrontTaxonomies = unstable_cache(
       console.error("Error in getStorefrontTaxonomies:", err);
       const defaultDepts: StorefrontTaxonomyItem[] = [
         { key: "all", label: "ALL DISCIPLINES", slug: "all", id: "all" },
-        { key: "men", label: "MEN", slug: "men", id: "men" },
-        { key: "women", label: "WOMEN", slug: "women", id: "women" },
-        { key: "accessories", label: "ACCESSORIES", slug: "accessories", id: "accessories" },
       ];
       return {
         mainCategories: defaultDepts,
@@ -144,34 +165,9 @@ export const getStorefrontTaxonomies = unstable_cache(
   },
 );
 
-function getPublicCategoryImageUrl(
-  supabase: ReturnType<typeof createAdminClient>,
-  value: string | null,
-): string | null {
-  if (!value) return null;
-  if (
-    value.startsWith("blob:") ||
-    value.includes("blob:http") ||
-    value.includes("localhost:")
-  ) {
-    return null;
-  }
-  if (
-    value.startsWith("http://") ||
-    value.startsWith("https://") ||
-    value.startsWith("data:")
-  ) {
-    return value;
-  }
-  return supabase.storage
-    .from("product-images")
-    .getPublicUrl(value)
-    .data.publicUrl;
-}
-
 /**
  * Fetches real active departments from Supabase (categories where parent_id is null)
- * with their real image, description, and product counts from /admin/categories.
+ * with their real image, description, and product counts from Supabase.
  */
 export const getStorefrontDepartments = unstable_cache(
   async (): Promise<DepartmentChapter[]> => {
@@ -181,28 +177,15 @@ export const getStorefrontDepartments = unstable_cache(
       const activeParents = hierarchy.filter((p) => p.is_active !== false);
 
       if (!activeParents || activeParents.length === 0) {
-        return DEPARTMENTS;
+        return [];
       }
 
       return activeParents.map((parent, index) => {
         const number = String(index + 1).padStart(2, "0");
-        const matchingFallback = DEPARTMENTS.find(
-          (d) =>
-            d.id.toLowerCase() === parent.slug?.toLowerCase() ||
-            d.title.toLowerCase() === parent.name?.toLowerCase(),
-        );
-
         const resolvedImage = getPublicCategoryImageUrl(supabase, parent.image);
-        const image =
-          resolvedImage ||
-          matchingFallback?.image ||
-          "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=85&w=1400&auto=format&fit=crop";
-
+        const image = resolvedImage || "";
         const count = parent.product_count ?? 0;
-        const editionText =
-          count > 0
-            ? `${count} EDITIONS`
-            : matchingFallback?.edition || "CURATED EDITIONS";
+        const editionText = `${count} ${count === 1 ? "EDITION" : "EDITIONS"}`;
 
         return {
           id: parent.slug || parent.id,
@@ -211,16 +194,13 @@ export const getStorefrontDepartments = unstable_cache(
           title: parent.name.toUpperCase(),
           tagline:
             parent.description ||
-            matchingFallback?.tagline ||
             "Essential disciplines shaped for daily movement.",
           edition: editionText,
           narrative:
             parent.description ||
-            matchingFallback?.narrative ||
             "Structured silhouettes, clean drape, and modern essentials designed to wear your own way.",
-          materialSpec:
-            matchingFallback?.materialSpec || "BESPOKE TEXTILES & TAILORING",
-          silhouette: matchingFallback?.silhouette || "ARCHITECTURAL FORM",
+          materialSpec: "BESPOKE TEXTILES & TAILORING",
+          silhouette: "ARCHITECTURAL FORM",
           href: `/shop?department=${encodeURIComponent(
             parent.slug || parent.name.toLowerCase(),
           )}`,
@@ -229,7 +209,7 @@ export const getStorefrontDepartments = unstable_cache(
       });
     } catch (err) {
       console.error("Error in getStorefrontDepartments:", err);
-      return DEPARTMENTS;
+      return [];
     }
   },
   ["storefront-departments"],
@@ -249,10 +229,9 @@ export interface CuratedCollectionCard {
 }
 
 /**
- * Fetches the 2 Curated Collections for the homepage:
- * 1. NEW ARRIVALS: latest product with is_new=true, linking to /new-arrivals.
- * 2. LATEST MEN'S COLLECTION: newest collection created under the "men" department in /admin/categories,
- *    using its uploaded image and description, linking to its dedicated page or shop.
+ * Fetches the Curated Collections for the homepage strictly from Supabase:
+ * 1. NEW ARRIVALS: latest product with is_new=true from Supabase.
+ * 2. LATEST COLLECTION: newest collection created in /admin/categories from Supabase.
  */
 export const getStorefrontCuratedCollections = unstable_cache(
   async (): Promise<CuratedCollectionCard[]> => {
@@ -263,138 +242,101 @@ export const getStorefrontCuratedCollections = unstable_cache(
         getCategoriesHierarchy(),
       ]);
 
-      // 1. CARD 1: NEW ARRIVALS
-      // "وطبعا صورة ال NEW ARRIVALS هتكون اخر منتج اضاف علية علامه ال isnew"
-      const newArrivals = (products || []).filter((p) => p.is_new === true);
-      const latestNewArrivalProduct = newArrivals[0] || (products || [])[0];
-      const latestNewArrivalImage =
-        latestNewArrivalProduct?.images?.[0] ||
-        FEATURED_COLLECTIONS[0]?.imagePrimary ||
-        "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=85&w=1400&auto=format&fit=crop";
+      if (!products || products.length === 0) {
+        return [];
+      }
 
-      const newArrivalsCount = newArrivals.length;
-      const card1: CuratedCollectionCard = {
-        id: "new-arrivals",
-        title: "NEW ARRIVALS",
-        subtitle:
-          newArrivalsCount > 0
-            ? `${newArrivalsCount} EDITIONS AVAILABLE • RECENT SILHOUETTES`
-            : "RECENT EDITIONS & SILHOUETTES",
-        href: "/new-arrivals",
-        imagePrimary: latestNewArrivalImage,
-        season: "AUTUMN / WINTER 2026",
-      };
+      const cards: CuratedCollectionCard[] = [];
 
-      // 2. CARD 2: LATEST COLLECTION UNDER DEPARTMENTS MEN
-      // "اخر سكشن تم اضافته تحت Departments men ... وكل كوليكشن له صورة ووصف هنسخدمها برضو"
-      const menDepartment = hierarchy.find((p) => {
-        const s = (p.slug || "").toLowerCase();
-        const n = (p.name || "").toLowerCase();
-        return s === "men" || s.includes("men") || n === "men" || n.includes("men");
+      // 1. CARD 1: NEW ARRIVALS (from live Supabase products)
+      const newArrivals = products.filter((p) => p.is_new === true);
+      const latestNewArrivalProduct = newArrivals[0] || products[0];
+
+      if (latestNewArrivalProduct) {
+        const latestNewArrivalImage =
+          latestNewArrivalProduct.images?.[0] || "";
+        const newArrivalsCount = newArrivals.length;
+
+        cards.push({
+          id: "new-arrivals",
+          title: "NEW ARRIVALS",
+          subtitle:
+            newArrivalsCount > 0
+              ? `${newArrivalsCount} EDITIONS AVAILABLE • RECENT SILHOUETTES`
+              : "RECENT EDITIONS & SILHOUETTES",
+          href: "/new-arrivals",
+          imagePrimary: latestNewArrivalImage,
+          season: "SEASONAL CAPSULE",
+        });
+      }
+
+      // 2. CARD 2: LATEST COLLECTION IN SUPABASE
+      const allCollections: {
+        id: string;
+        name: string;
+        slug: string;
+        image: string | null;
+        description: string | null;
+        created_at?: string;
+        product_count?: number;
+      }[] = [];
+
+      hierarchy.forEach((parent) => {
+        (parent.collections || []).forEach((c) => {
+          if (c.is_active !== false) {
+            allCollections.push(c);
+          }
+        });
       });
-
-      const menCollections = [...(menDepartment?.collections || [])].filter(
-        (c) => c.is_active !== false,
-      );
 
       // Sort by created_at descending (latest added first)
-      menCollections.sort((a, b) => {
+      allCollections.sort((a, b) => {
         const timeA = new Date(a.created_at || 0).getTime();
         const timeB = new Date(b.created_at || 0).getTime();
-        if (timeB !== timeA) return timeB - timeA;
-        return (b.id || "").localeCompare(a.id || "");
+        return timeB - timeA;
       });
 
-      const latestMenCol = menCollections[0];
+      const latestCol = allCollections[0];
 
-      let card2: CuratedCollectionCard;
-
-      if (latestMenCol) {
-        // Resolve collection image from Supabase storage or external URL
+      if (latestCol) {
         const resolvedColImage = getPublicCategoryImageUrl(
           supabase,
-          latestMenCol.image,
+          latestCol.image,
         );
 
-        // If no image on collection directly, find newest product in that collection
         const colProduct = products.find(
           (p) =>
-            p.category_id === latestMenCol.id ||
-            p.category_slug?.toLowerCase() === latestMenCol.slug?.toLowerCase() ||
-            p.collection?.toLowerCase() === latestMenCol.slug?.toLowerCase(),
+            p.category_id === latestCol.id ||
+            p.category_slug?.toLowerCase() === latestCol.slug?.toLowerCase() ||
+            p.collection?.toLowerCase() === latestCol.slug?.toLowerCase(),
         );
 
         const colImage =
           resolvedColImage ||
           colProduct?.images?.[0] ||
-          FEATURED_COLLECTIONS[1]?.imagePrimary ||
-          "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=85&w=1400&auto=format&fit=crop";
+          "";
 
-        const colCount = latestMenCol.product_count ?? 0;
+        const colCount = latestCol.product_count ?? 0;
         const colSubtitle =
-          latestMenCol.description ||
+          latestCol.description ||
           (colCount > 0
-            ? `${colCount} EDITIONS AVAILABLE • MEN'S ATELIER`
-            : "OBSIDIAN TAILORING & DARK FORM");
+            ? `${colCount} EDITIONS AVAILABLE • ATELIER CAPSULE`
+            : "CURATED ATELIER CAPSULE");
 
-        const colHref =
-          latestMenCol.slug === "men-noir" || latestMenCol.slug === "noir"
-            ? "/shop?department=men&collection=men-noir"
-            : `/shop?collection=${encodeURIComponent(latestMenCol.slug)}`;
-
-        card2 = {
-          id: latestMenCol.slug || latestMenCol.id,
-          title: latestMenCol.name.toUpperCase(),
+        cards.push({
+          id: latestCol.slug || latestCol.id,
+          title: latestCol.name.toUpperCase(),
           subtitle: colSubtitle,
-          href: colHref,
+          href: `/shop?collection=${encodeURIComponent(latestCol.slug)}`,
           imagePrimary: colImage,
-          season: "MEN'S CAPSULE",
-        };
-      } else {
-        // Fallback to MEN NOIR
-        const noirProduct = products.find(
-          (p) =>
-            p.department === "men" &&
-            (p.color?.toLowerCase().includes("black") ||
-              p.tags?.some((t) => t.toLowerCase().includes("noir"))),
-        );
-
-        card2 = {
-          id: "men-noir",
-          title: "MEN NOIR",
-          subtitle: "OBSIDIAN TAILORING & DARK FORM",
-          href: "/shop?department=men&collection=men-noir",
-          imagePrimary:
-            noirProduct?.images?.[0] ||
-            FEATURED_COLLECTIONS[1]?.imagePrimary ||
-            "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=85&w=1400&auto=format&fit=crop",
-          season: "SPECIAL CAPSULE",
-        };
+          season: "ATELIER CAPSULE",
+        });
       }
 
-      return [card1, card2];
+      return cards;
     } catch (err) {
       console.error("Error in getStorefrontCuratedCollections:", err);
-      return [
-        {
-          id: "new-arrivals",
-          title: "NEW ARRIVALS",
-          subtitle: "RECENT EDITIONS & SILHOUETTES",
-          href: "/new-arrivals",
-          imagePrimary:
-            FEATURED_COLLECTIONS[0]?.imagePrimary ||
-            "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=85&w=1400&auto=format&fit=crop",
-        },
-        {
-          id: "men-noir",
-          title: "MEN NOIR",
-          subtitle: "OBSIDIAN TAILORING & DARK FORM",
-          href: "/men-noir-collection",
-          imagePrimary:
-            FEATURED_COLLECTIONS[1]?.imagePrimary ||
-            "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=85&w=1400&auto=format&fit=crop",
-        },
-      ];
+      return [];
     }
   },
   ["storefront-curated-collections"],
@@ -419,7 +361,7 @@ export interface StorefrontSubCategoryCard {
 
 /**
  * Fetches all active sub-categories (collections) organized under parent departments
- * with their images, descriptions, product counts, and filtered shop URLs.
+ * strictly from Supabase.
  */
 export const getAllStorefrontSubCategories = unstable_cache(
   async (): Promise<StorefrontSubCategoryCard[]> => {
@@ -439,7 +381,6 @@ export const getAllStorefrontSubCategories = unstable_cache(
         (parent.collections || []).forEach((col) => {
           if (col.is_active === false) return;
 
-          // Resolve image: direct category image -> product image in this collection -> fallback
           const resolvedImg = getPublicCategoryImageUrl(supabase, col.image);
           const matchingProduct = products.find(
             (p) =>
@@ -451,7 +392,7 @@ export const getAllStorefrontSubCategories = unstable_cache(
           const image =
             resolvedImg ||
             matchingProduct?.images?.[0] ||
-            "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=85&w=1200&auto=format&fit=crop";
+            "";
 
           const count = col.product_count ?? 0;
 
@@ -472,72 +413,6 @@ export const getAllStorefrontSubCategories = unstable_cache(
         });
       });
 
-      // If database has no sub-categories yet, provide clean atelier fallback
-      if (subCategories.length === 0) {
-        return [
-          {
-            id: "sub-men-noir",
-            name: "MEN NOIR",
-            slug: "men-noir",
-            parent_id: "men",
-            parent_name: "MEN",
-            parent_slug: "men",
-            description: "Monochromatic tailoring, raw obsidian textures, and dark form.",
-            image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=85&w=1200&auto=format&fit=crop",
-            product_count: products.filter((p) => p.department === "men").length,
-            href: "/shop?department=men&collection=men-noir",
-          },
-          {
-            id: "sub-raw-denim",
-            name: "RAW SELVEDGE",
-            slug: "raw-denim",
-            parent_id: "men",
-            parent_name: "MEN",
-            parent_slug: "men",
-            description: "14.5oz Japanese shuttle loom raw denim engineered for permanence.",
-            image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=85&w=1200&auto=format&fit=crop",
-            product_count: 8,
-            href: "/shop?department=men&collection=raw-denim",
-          },
-          {
-            id: "sub-tailoring",
-            name: "ARCHITECTURAL TAILORING",
-            slug: "tailoring",
-            parent_id: "men",
-            parent_name: "MEN",
-            parent_slug: "men",
-            description: "Sculpted wool overcoats and sharp columnar silhouettes.",
-            image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=85&w=1200&auto=format&fit=crop",
-            product_count: 12,
-            href: "/shop?department=men&collection=tailoring",
-          },
-          {
-            id: "sub-fluid-poplin",
-            name: "FLUID DRAPE",
-            slug: "fluid-drape",
-            parent_id: "women",
-            parent_name: "WOMEN",
-            parent_slug: "women",
-            description: "High-twist poplin and flowing pleats shaped for kinetic movement.",
-            image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=85&w=1200&auto=format&fit=crop",
-            product_count: products.filter((p) => p.department === "women").length,
-            href: "/shop?department=women&collection=fluid-drape",
-          },
-          {
-            id: "sub-acetate-shades",
-            name: "HAND-CUT ACETATE",
-            slug: "acetate-shades",
-            parent_id: "accessories",
-            parent_name: "ACCESSORIES",
-            parent_slug: "accessories",
-            description: "Custom hand-finished eyewear and architectural lenses.",
-            image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=85&w=1200&auto=format&fit=crop",
-            product_count: 6,
-            href: "/shop?department=accessories&collection=acetate-shades",
-          },
-        ];
-      }
-
       return subCategories;
     } catch (err) {
       console.error("Error in getAllStorefrontSubCategories:", err);
@@ -550,3 +425,173 @@ export const getAllStorefrontSubCategories = unstable_cache(
     tags: ["categories", "storefront-categories", "products"],
   },
 );
+
+/* -------------------------------------------------------------------------- */
+/* Dynamic Supabase Category Resolution & SEO Helpers                          */
+/* -------------------------------------------------------------------------- */
+
+export interface ResolvedCategory {
+  id: string;
+  key: string;
+  slug: string;
+  name: string;
+  arabicName: string;
+  description: string;
+  image: string;
+  parentSlug?: string | null;
+  parentName?: string | null;
+}
+
+/**
+ * Resolves a category dynamically from Supabase categories table by slug or ID.
+ * Returns null if category does not exist in Supabase.
+ */
+export async function getStorefrontCategoryBySlug(
+  slug: string
+): Promise<ResolvedCategory | null> {
+  const clean = decodeURIComponent(slug).toLowerCase().trim();
+
+  try {
+    const supabase = createAdminClient();
+
+    // 1. Fetch category directly from Supabase
+    const { data: cat, error } = await supabase
+      .from("categories")
+      .select("id, name, slug, parent_id, description, image, is_active")
+      .or(`slug.ilike.${clean},id.eq.${clean}`)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (error || !cat) {
+      return null;
+    }
+
+    // 2. If it has a parent_id, resolve parent info from Supabase
+    let parentSlug: string | null = null;
+    let parentName: string | null = null;
+    if (cat.parent_id) {
+      const { data: parentCat } = await supabase
+        .from("categories")
+        .select("name, slug")
+        .eq("id", cat.parent_id)
+        .maybeSingle();
+      if (parentCat) {
+        parentSlug = parentCat.slug;
+        parentName = parentCat.name.toUpperCase();
+      }
+    }
+
+    // 3. Resolve category image
+    let resolvedImage = getPublicCategoryImageUrl(supabase, cat.image);
+
+    // If category has no image attached, find image of newest product in that category
+    if (!resolvedImage) {
+      const { data: productInCat } = await supabase
+        .from("products")
+        .select(`
+          id,
+          product_images (
+            image_url,
+            is_primary,
+            sort_order
+          )
+        `)
+        .eq("category_id", cat.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (
+        productInCat &&
+        Array.isArray(productInCat.product_images) &&
+        productInCat.product_images.length > 0
+      ) {
+        const sorted = [...productInCat.product_images].sort(
+          (a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0)
+        );
+        resolvedImage = getPublicCategoryImageUrl(
+          supabase,
+          sorted[0]?.image_url ?? null
+        );
+      }
+    }
+
+    const fallbackDescription = `تشكيلة ${cat.name} الفاخرة — تصميم وأقمشة حصرية من دار ليفارو LÉVARO للأزياء في مصر.`;
+
+    return {
+      id: cat.id,
+      key: cat.slug,
+      slug: cat.slug,
+      name: cat.name,
+      arabicName: `قسم ${cat.name} — دار ليفارو`,
+      description: cat.description?.trim() || fallbackDescription,
+      image: resolvedImage || "",
+      parentSlug,
+      parentName,
+    };
+  } catch (err) {
+    console.error(`Error in getStorefrontCategoryBySlug(${slug}):`, err);
+    return null;
+  }
+}
+
+/**
+ * Returns all active category slugs directly from Supabase for sitemap and static params.
+ */
+export async function getStorefrontCategorySlugs(): Promise<{ slug: string }[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("categories")
+      .select("slug")
+      .eq("is_active", true);
+
+    if (error || !data) return [];
+    return data
+      .filter((c) => Boolean(c.slug))
+      .map((c) => ({ slug: c.slug }));
+  } catch (err) {
+    console.error("Error in getStorefrontCategorySlugs:", err);
+    return [];
+  }
+}
+
+/**
+ * Filters storefront products belonging to a resolved category dynamically based on Supabase relations.
+ */
+export function filterProductsByCategory(
+  products: ProductItem[],
+  category: ResolvedCategory
+): ProductItem[] {
+  const targetSlug = category.slug.toLowerCase().trim();
+  const targetId = category.id;
+
+  return products.filter((p: ProductItem) => {
+    // 1. Match direct category ID in Supabase
+    if (p.category_id && p.category_id === targetId) return true;
+
+    // 2. Match parent category ID (if category is a parent department, match child products)
+    if (p.category_parent_id && p.category_parent_id === targetId) return true;
+
+    // 3. Match category slug or department slug
+    if (p.category_slug && p.category_slug.toLowerCase() === targetSlug) return true;
+    if (p.department && p.department.toLowerCase() === targetSlug) return true;
+    if (p.collection && p.collection.toLowerCase() === targetSlug) return true;
+    if (p.category && p.category.toLowerCase() === targetSlug) return true;
+
+    // 4. Match tags from Supabase
+    const tagsList: string[] = Array.isArray(p.tags) ? (p.tags as string[]) : [];
+    if (
+      tagsList.some(
+        (t: string) =>
+          t.toLowerCase() === targetSlug ||
+          t.toLowerCase() === category.name.toLowerCase()
+      )
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+}

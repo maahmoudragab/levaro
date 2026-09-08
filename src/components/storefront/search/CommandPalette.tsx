@@ -4,13 +4,26 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, X, ArrowUpRight, CornerDownLeft, Sparkles, Loader2 } from "lucide-react";
-import { SHOP_PRODUCTS } from "@/data/storefront";
 import { searchStorefrontProductsAction } from "@/services/storefront/actions";
 import type { ProductItem } from "@/types/storefront";
 
 const QUICK_TAGS = [
   "RAW DENIM",
   "VIRGIN WOOL",
+  "GIZA COTTON",
+  "TAILORING",
+];
+
+const RECENT_SEARCHES = [
+  "BLAZER",
+  "PARKA",
+  "SELVEDGE",
+  "T-SHIRT",
+  "HOODIE",
+  "TROUSERS",
+];
+
+const SEARCH_DISCIPLINES = [
   "MOTION",
   "SHIFT",
   "OUTERWEAR",
@@ -23,7 +36,7 @@ export function CommandPalette() {
   const [prevIsOpen, setPrevIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [liveProducts, setLiveProducts] = useState<ProductItem[]>(SHOP_PRODUCTS);
+  const [liveProducts, setLiveProducts] = useState<ProductItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -75,8 +88,6 @@ export function CommandPalette() {
         if (isSubscribed) {
           if (results && results.length > 0) {
             setLiveProducts(results);
-          } else if (!query.trim()) {
-            setLiveProducts(SHOP_PRODUCTS.slice(0, 6));
           } else {
             setLiveProducts([]);
           }

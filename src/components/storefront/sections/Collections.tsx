@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
 import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
-import { FEATURED_COLLECTIONS } from "@/data/storefront";
 import type { CuratedCollectionCard } from "@/services/storefront/categories";
 
 interface CollectionsProps {
@@ -11,17 +10,11 @@ interface CollectionsProps {
 }
 
 export function Collections({ collections }: CollectionsProps) {
-  const collectionsData =
-    collections && collections.length > 0
-      ? collections
-      : FEATURED_COLLECTIONS.map((col) => ({
-          id: col.id,
-          title: col.title,
-          subtitle: col.subtitle,
-          href: col.href,
-          imagePrimary: col.imagePrimary,
-          season: col.season,
-        }));
+  const collectionsData = collections || [];
+
+  if (collectionsData.length === 0) {
+    return null;
+  }
 
   return (
     <section

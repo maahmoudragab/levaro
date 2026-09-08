@@ -6,9 +6,14 @@ import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
 import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 
+import { SITE_URL } from "@/lib/seo";
+
 export const metadata: Metadata = {
-  title: "PRIVACY POLICY — DATA GOVERNANCE — LÉVARO",
-  description: "Data privacy policy, technical collection governance, and ethical digital practices of LÉVARO.",
+  title: "PRIVACY",
+  description: "سياسة الخصوصية وحوكمة البيانات لدار ليفارو LÉVARO للأزياء الفاخرة.",
+  alternates: {
+    canonical: `${SITE_URL}/privacy`,
+  },
 };
 
 export default function PrivacyPolicyPage() {

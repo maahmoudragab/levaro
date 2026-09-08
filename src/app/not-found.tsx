@@ -7,7 +7,7 @@ import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 
 export const metadata: Metadata = {
-  title: "404 — ARCHIVE VOID | LÉVARO",
+  title: "404 — NOT FOUND",
   description: "The requested coordinate is unavailable or has returned to the atelier archive.",
 };
 

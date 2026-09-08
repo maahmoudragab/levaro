@@ -44,7 +44,7 @@ export function ProductCard({
         <div className="relative w-full h-full overflow-hidden">
           <Image
             src={primaryImage}
-            alt={product.name}
+            alt={`${product.name} — LÉVARO Atelier`}
             fill
             priority={priority}
             fetchPriority={priority ? "high" : "auto"}

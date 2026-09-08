@@ -6,9 +6,14 @@ import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
 import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 
+import { SITE_URL } from "@/lib/seo";
+
 export const metadata: Metadata = {
-  title: "TERMS & CONDITIONS — ATELIER USAGE — LÉVARO",
-  description: "Terms and conditions governing the digital exhibition, intellectual property, and archival showcase of LÉVARO Atelier.",
+  title: "TERMS",
+  description: "الشروط والأحكام المنظمة لمعرض وتجارة دار ليفارو LÉVARO للأزياء الفاخرة.",
+  alternates: {
+    canonical: `${SITE_URL}/terms`,
+  },
 };
 
 export default function TermsPage() {
