@@ -21,6 +21,9 @@ export function LuxuryCursor({ isMenuOpen = false }: LuxuryCursorProps) {
     const inner = innerRef.current;
     if (!cursor || !inner) return;
 
+    // Center the cursor box precisely on the pointer arrow tip
+    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+
     // High-performance GSAP quickTo for 144fps tracking without layout thrashing
     const xTo = gsap.quickTo(cursor, "x", { duration: 0.25, ease: "power3.out" });
     const yTo = gsap.quickTo(cursor, "y", { duration: 0.25, ease: "power3.out" });
@@ -32,11 +35,11 @@ export function LuxuryCursor({ isMenuOpen = false }: LuxuryCursorProps) {
       if (visible === isVisible) return;
       isVisible = visible;
       if (isVisible) {
-        cursor.classList.remove("opacity-0", "scale-50");
-        cursor.classList.add("opacity-100", "scale-100");
+        cursor.classList.remove("opacity-0");
+        cursor.classList.add("opacity-100");
       } else {
-        cursor.classList.remove("opacity-100", "scale-100");
-        cursor.classList.add("opacity-0", "scale-50");
+        cursor.classList.remove("opacity-100");
+        cursor.classList.add("opacity-0");
       }
     };
 
@@ -64,12 +67,16 @@ export function LuxuryCursor({ isMenuOpen = false }: LuxuryCursorProps) {
           if (!target) return;
 
           const insideLightSection = !!target.closest(
-            "[data-light-section='true'], .bg-off-white, #departments, #collection"
+            "[data-light-section='true'], .bg-off-white, #departments, #collections, #collection"
           );
           const insideMenu = isMenuOpen || !!target.closest("[data-cursor-menu='true']");
 
           setVisibility(insideMenu || insideLightSection);
-          setHovering(!!target.closest("a, button, [role='button'], input, select"));
+          setHovering(
+            !!target.closest(
+              "a, button, [role='button'], input, select, .cursor-pointer, [data-cursor-interactive='true']"
+            )
+          );
         });
       }
     };
@@ -95,12 +102,12 @@ export function LuxuryCursor({ isMenuOpen = false }: LuxuryCursorProps) {
     <div
       ref={cursorRef}
       aria-hidden="true"
-      className="fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[999] mix-blend-difference select-none transition-all duration-300 ease-out hidden sm:block opacity-0 scale-50"
+      className="fixed top-0 left-0 pointer-events-none z-[999] mix-blend-difference select-none transition-opacity duration-300 ease-out hidden sm:flex items-center justify-center opacity-0"
     >
-      {/* Luxury Inverted Geometric Box */}
+      {/* Luxury Inverted Geometric Box (Centered exactly on cursor arrow) */}
       <div
         ref={innerRef}
-        className="bg-white transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)] w-8 h-8 rounded-none opacity-100 rotate-0"
+        className="bg-white transition-all duration-300 ease-signature w-8 h-8 rounded-none opacity-100 rotate-0"
       />
     </div>
   );

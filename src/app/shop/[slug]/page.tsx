@@ -11,8 +11,7 @@ import {
   getStorefrontProductSlugs,
   getStorefrontProducts,
   getRelatedProductsByTags,
-} from "@/app/services/storefront/products";
-import { SHOP_PRODUCTS } from "@/data/storefront";
+} from "@/services/storefront/products";
 
 interface ProductPageProps {
   params: Promise<{
@@ -63,7 +62,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       <Preloader
         images={product.images}
         title={product.name}
-        tagline={`${product.code} // ATELIER EDITION`}
+        tagline={`${product.code} — ATELIER EDITION`}
       />
 
       {/* 2. Custom Inverted Luxury Cursor */}

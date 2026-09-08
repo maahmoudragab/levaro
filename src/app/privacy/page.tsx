@@ -7,8 +7,8 @@ import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 
 export const metadata: Metadata = {
-  title: "PRIVACY POLICY // DATA GOVERNANCE — LÉVARO",
-  description: "Architectural data governance, privacy protocols, and client confidentiality standards of LÉVARO Atelier.",
+  title: "PRIVACY POLICY — DATA GOVERNANCE — LÉVARO",
+  description: "Data privacy policy, technical collection governance, and ethical digital practices of LÉVARO.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
       {/* Functional Real Asset Preloader */}
       <Preloader
         title="PRIVACY"
-        tagline="DATA GOVERNANCE PROTOCOLS"
+        tagline="GOVERNANCE & DATA ETHICS"
       />
 
       <LuxuryCursor />
@@ -37,15 +37,15 @@ export default function PrivacyPolicyPage() {
                     HOME
                   </Link>
                   <span>/</span>
-                  <span className="text-near-black font-semibold">LEGAL &amp; DATA GOVERNANCE</span>
+                  <span className="text-near-black font-semibold">CLIENT SERVICES &bull; PRIVACY</span>
                 </div>
 
                 <h1 className="text-3xl sm:text-5xl font-display font-light uppercase tracking-tight text-near-black leading-tight">
-                  PRIVACY POLICY
+                  DATA GOVERNANCE &amp; PRIVACY
                 </h1>
 
                 <p className="text-xs uppercase font-mono tracking-[0.18em] text-brand-gray">
-                  REVISED ARCHIVE EDITION &bull; AUTUMN 2026
+                  ETHICAL PROTOCOLS &bull; COOKIE ARCHITECTURE &bull; AUTUMN 2026
                 </p>
               </div>
 
@@ -62,10 +62,10 @@ export default function PrivacyPolicyPage() {
               {/* Policy Sections */}
               <div className="space-y-12 divide-y divide-near-black/10 text-xs sm:text-sm font-sans uppercase tracking-[0.14em] leading-relaxed">
                 
-                {/* 01 // DATA COLLECTION */}
+                {/* 01 — DATA COLLECTION */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    01 // DATA GOVERNANCE &amp; ACQUISITION
+                    01 — DATA GOVERNANCE &amp; ACQUISITION
                   </span>
                   <p className="text-near-black/75">
                     We only collect minimal technical data necessary to deliver high-performance visual experiences, typography rendering, and image decoding. We do not sell, license, or monetize visitor information to advertising brokers or commercial data networks.
@@ -77,40 +77,40 @@ export default function PrivacyPolicyPage() {
                   </ul>
                 </section>
 
-                {/* 02 // COOKIES & STORAGE */}
+                {/* 02 — COOKIES & STORAGE */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    02 // DIGITAL STORAGE &amp; COOKIES
+                    02 — DIGITAL STORAGE &amp; COOKIES
                   </span>
                   <p className="text-near-black/75">
                     Our digital catalog utilizes standard browser local storage and essential session cookies strictly to preserve your selected filter criteria, preferred department views, and smooth scroll states. You may clear your browser cache or disable cookies at any time without compromising visual exploration.
                   </p>
                 </section>
 
-                {/* 03 // NON-COMMERCIAL EXHIBITION */}
+                {/* 03 — NON-COMMERCIAL EXHIBITION */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    03 // THIRD-PARTY INFRASTRUCTURE
+                    03 — THIRD-PARTY INFRASTRUCTURE
                   </span>
                   <p className="text-near-black/75">
                     Our website is powered by world-class edge infrastructure (Supabase, Vercel, Unsplash CDN) adhering to strict enterprise-grade security protocols, end-to-end encryption (TLS/HTTPS), and GDPR/CCPA regulatory standards.
                   </p>
                 </section>
 
-                {/* 04 // VISITOR RIGHTS */}
+                {/* 04 — VISITOR RIGHTS */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    04 // YOUR RIGHTS &amp; DATA FREEDOM
+                    04 — YOUR RIGHTS &amp; DATA FREEDOM
                   </span>
                   <p className="text-near-black/75">
                     Visitors hold unconstrained rights to request information regarding any stored data, demand immediate erasure of correspondence history, or object to digital analytics. We honor all privacy inquiries without delay.
                   </p>
                 </section>
 
-                {/* 05 // CONTACT & INQUIRIES */}
+                {/* 05 — CONTACT & INQUIRIES */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    05 // PRIVACY DESK CONTACT
+                    05 — PRIVACY DESK CONTACT
                   </span>
                   <p className="text-near-black/75">
                     For questions regarding data ethics, archive rights, or confidentiality policies, please reach our administrative team at:
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
                   <div className="p-4 border border-near-black/10 bg-near-black/[0.02] font-mono text-xs uppercase tracking-[0.18em] text-near-black">
                     LÉVARO ATELIER &bull; LEGAL ARCHIVE <br />
                     EMAIL: <span className="text-brand-gray">LEGAL@LEVARO.STORE</span> <br />
-                    CAIRO // PRIVATE APPOINTMENT ARCHIVE
+                    CAIRO &bull; PRIVATE APPOINTMENT ARCHIVE
                   </div>
                 </section>
 

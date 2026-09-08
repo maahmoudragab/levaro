@@ -11,7 +11,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { ProductCard } from "./ProductCard";
-import { fetchStorefrontProductsAction } from "@/app/services/storefront/actions";
+import { fetchStorefrontProductsAction } from "@/services/storefront/actions";
 import { SHOP_PRODUCTS } from "@/data/storefront";
 import type {
   DepartmentKey,
@@ -20,8 +20,8 @@ import type {
   SortOption,
   ProductItem,
 } from "@/types/storefront";
-import type { StorefrontTaxonomies } from "@/app/services/storefront/categories";
-import { COLORS as DASHBOARD_COLORS } from "@/components/dashboard/products/product-utils";
+import type { StorefrontTaxonomies } from "@/services/storefront/categories";
+import { COLORS as DASHBOARD_COLORS } from "@/components/admin/products/product-utils";
 
 const FALLBACK_COLOR_MAP: Record<string, { bg: string; border: string; textDark?: boolean }> = {
   black: { bg: "#0A0A0A", border: "#333333" },
@@ -37,7 +37,7 @@ function resolveColorSwatch(name: string): { bg: string; border: string; textDar
 
   // Check exact or partial match in dashboard colors first
   const dbMatch = DASHBOARD_COLORS.find(
-    (c) => c.name.toLowerCase() === clean || clean.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(clean)
+    (c: { name: string; hex: string }) => c.name.toLowerCase() === clean || clean.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(clean)
   );
   if (dbMatch) {
     const isLight = ["#ffffff", "#f5f5f0", "#fffdd0", "#e5e7eb", "#bae6fd", "#98ff98", "#e6e6fa"].includes(dbMatch.hex.toLowerCase());
@@ -100,9 +100,18 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
   // Build dynamic categories list from Supabase taxonomies or products
   const dynamicCategories = useMemo(() => {
     if (initialTaxonomies?.categories && initialTaxonomies.categories.length > 0) {
+      const seen = new Set<string>();
+      const uniqueCats: { key: string; label: string }[] = [];
+      initialTaxonomies.categories.forEach((c) => {
+        const k = (c.slug || c.key || "").toLowerCase();
+        if (k && !seen.has(k)) {
+          seen.add(k);
+          uniqueCats.push({ key: c.slug || c.key, label: c.label });
+        }
+      });
       return [
         { key: "all", label: "ALL CATEGORIES" },
-        ...initialTaxonomies.categories.map((c) => ({ key: c.slug || c.key, label: c.label })),
+        ...uniqueCats,
       ];
     }
     // Extract unique categories from products if available
@@ -128,9 +137,19 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
     const subList = initialTaxonomies?.subCategories || initialTaxonomies?.collections;
     if (subList && subList.length > 0) {
       const activeSubs = subList.filter((c) => c.is_active !== false);
+      const seen = new Set<string>();
+      const uniqueSubs: typeof activeSubs = [];
+      activeSubs.forEach((c) => {
+        const k = (c.slug || c.key || "").toLowerCase();
+        if (k && !seen.has(k)) {
+          seen.add(k);
+          uniqueSubs.push(c);
+        }
+      });
+
       return [
         { key: "all", label: "ALL COLLECTIONS", season: "ARCHIVE", parent_slug: null, parent_id: null, id: "all" },
-        ...activeSubs.map((c) => ({
+        ...uniqueSubs.map((c) => ({
           key: c.slug || c.key,
           label: c.label,
           season: "ATELIER",
@@ -290,12 +309,121 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
   const [priceIndex, setPriceIndex] = useState<number>(initialPriceIndex);
   const [sort, setSort] = useState<SortOption>(initialSort);
   const [query, setQuery] = useState<string>(initialQuery);
+
+  // Synchronous pre-filter on initial render based on searchParams (zero flicker on direct links)
+  const initialFilteredProducts = useMemo(() => {
+    const hasActiveParam =
+      (initialDepartment && initialDepartment !== "all") ||
+      (initialCategory && initialCategory !== "all") ||
+      (initialCollection && initialCollection !== "all") ||
+      (initialFit && initialFit !== "all") ||
+      (initialColor && initialColor !== "all") ||
+      initialPriceIndex !== 0 ||
+      (initialSort && initialSort !== "curated") ||
+      (initialQuery && initialQuery.trim() !== "");
+
+    if (!hasActiveParam) {
+      return productsList;
+    }
+
+    const priceRange = PRICE_RANGES[initialPriceIndex] || PRICE_RANGES[0];
+    const qLower = initialQuery.trim().toLowerCase();
+
+    const filtered = productsList.filter((product) => {
+      if (product.is_active === false) return false;
+
+      // Department filter
+      if (initialDepartment !== "all") {
+        const dLower = initialDepartment.toLowerCase();
+        const matchesDept =
+          (product.department && product.department.toLowerCase() === dLower) ||
+          (product.category_parent_slug && product.category_parent_slug.toLowerCase() === dLower) ||
+          (product.category_parent_name && product.category_parent_name.toLowerCase() === dLower) ||
+          (product.category_slug && product.category_slug.toLowerCase() === dLower) ||
+          (product.category_id && product.category_id.toLowerCase() === dLower) ||
+          (product.category_parent_id && product.category_parent_id.toLowerCase() === dLower);
+        if (!matchesDept) return false;
+      }
+
+      // Category filter
+      if (initialCategory !== "all") {
+        const catLower = initialCategory.toLowerCase();
+        const matchesCat =
+          (product.category && product.category.toLowerCase() === catLower) ||
+          (product.category_slug && product.category_slug.toLowerCase() === catLower) ||
+          (product.category_id && product.category_id.toLowerCase() === catLower) ||
+          (product.category_name && product.category_name.toLowerCase() === catLower);
+        if (!matchesCat) return false;
+      }
+
+      // Collection filter
+      if (initialCollection !== "all") {
+        const colLower = initialCollection.toLowerCase();
+        const matchesCol =
+          (product.collection && product.collection.toLowerCase() === colLower) ||
+          (product.category_slug && product.category_slug.toLowerCase() === colLower) ||
+          (product.category_id && product.category_id.toLowerCase() === colLower) ||
+          (product.category_name && product.category_name.toLowerCase() === colLower) ||
+          (product.tags || []).some((t) => t.toLowerCase() === colLower);
+        if (!matchesCol) return false;
+      }
+
+      // Fit filter
+      if (initialFit !== "all") {
+        const fLower = initialFit.toLowerCase();
+        const matchesFit =
+          (product.fit && (product.fit.toLowerCase().includes(fLower) || fLower.includes(product.fit.toLowerCase()))) ||
+          (product.silhouette && (product.silhouette.toLowerCase().includes(fLower) || fLower.includes(product.silhouette.toLowerCase()))) ||
+          (product.tags || []).some((t) => t.toLowerCase().includes(fLower) || fLower.includes(t.toLowerCase()));
+        if (!matchesFit) return false;
+      }
+
+      // Color filter
+      if (initialColor !== "all") {
+        const cLower = initialColor.toLowerCase();
+        const matchesColor =
+          (product.color && (product.color.toLowerCase().includes(cLower) || cLower.includes(product.color.toLowerCase()))) ||
+          (product.colors || []).some((c) => c.toLowerCase().includes(cLower) || cLower.includes(c.toLowerCase()));
+        if (!matchesColor) return false;
+      }
+
+      // Price range filter
+      if (product.price < priceRange.min || product.price > priceRange.max) {
+        return false;
+      }
+
+      // Search query filter
+      if (qLower) {
+        const haystack = `${product.name} ${product.code} ${product.material} ${product.silhouette} ${product.description}`.toLowerCase();
+        if (!haystack.includes(qLower)) return false;
+      }
+
+      return true;
+    });
+
+    if (initialSort === "price-asc") filtered.sort((a, b) => a.price - b.price);
+    else if (initialSort === "price-desc") filtered.sort((a, b) => b.price - a.price);
+    else if (initialSort === "code") filtered.sort((a, b) => a.code.localeCompare(b.code));
+
+    return filtered;
+  }, [
+    productsList,
+    initialDepartment,
+    initialCategory,
+    initialCollection,
+    initialFit,
+    initialColor,
+    initialPriceIndex,
+    initialSort,
+    initialQuery,
+  ]);
+
   const [displayedProducts, setDisplayedProducts] = useState<ProductItem[]>(() => {
-    return productsList.slice(0, PRODUCTS_PER_PAGE);
+    return initialFilteredProducts.slice(0, PRODUCTS_PER_PAGE);
   });
-  const [totalCount, setTotalCount] = useState<number>(productsList.length);
+  const [totalCount, setTotalCount] = useState<number>(initialFilteredProducts.length);
   const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(productsList.length > PRODUCTS_PER_PAGE);
+  const [hasMore, setHasMore] = useState<boolean>(initialFilteredProducts.length > PRODUCTS_PER_PAGE);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [isFiltering, setIsFiltering] = useState<boolean>(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -316,7 +444,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
   const isFirstRender = useRef(true);
   const pageRef = useRef(1);
   const isLoadingMoreRef = useRef(false);
-  const hasMoreRef = useRef(productsList.length > PRODUCTS_PER_PAGE);
+  const hasMoreRef = useRef(initialFilteredProducts.length > PRODUCTS_PER_PAGE);
 
   useEffect(() => {
     pageRef.current = page;
@@ -343,6 +471,8 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
 
       return (
         (mainId && (p.category_id === mainId || p.category_parent_id === mainId)) ||
+        (p.category_parent_slug && p.category_parent_slug.toLowerCase() === mainSlug) ||
+        (p.category_parent_name && p.category_parent_name.toLowerCase() === mainSlug) ||
         p.category_slug?.toLowerCase() === mainSlug ||
         p.department?.toLowerCase() === mainSlug
       );
@@ -408,6 +538,17 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
     });
 
     if (activeCollectionsWithProducts.length > 0) {
+      const seenKeys = new Set<string>();
+      const uniqueActive: typeof activeCollectionsWithProducts = [];
+
+      activeCollectionsWithProducts.forEach((col) => {
+        const normKey = (col.key || "").toLowerCase().trim();
+        if (normKey && !seenKeys.has(normKey)) {
+          seenKeys.add(normKey);
+          uniqueActive.push(col);
+        }
+      });
+
       return [
         {
           key: "all",
@@ -417,7 +558,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
           parent_id: null,
           id: "all",
         },
-        ...activeCollectionsWithProducts,
+        ...uniqueActive,
       ];
     }
 
@@ -426,6 +567,12 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
 
   // Sync state and fetch Page 1 whenever URL search parameters change
   useEffect(() => {
+    // On initial mount, synchronous initialFilteredProducts already populated page 1 seamlessly
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const urlDept = (searchParams.get("department") as DepartmentKey) || "all";
     const urlCat = (searchParams.get("category") as CategoryKey) || "all";
     const urlCol = (searchParams.get("collection") as CollectionKey) || "all";
@@ -434,23 +581,6 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
     const urlPriceIndex = Number(searchParams.get("priceIndex") || 0);
     const urlSort = (searchParams.get("sort") as SortOption) || "curated";
     const urlQuery = searchParams.get("q") || "";
-
-    setDepartment(urlDept);
-    setCategory(urlCat);
-    setCollection(urlCol);
-    setFit(urlFit);
-    setColor(urlColor);
-    setPriceIndex(urlPriceIndex);
-    setSort(urlSort);
-    setQuery(urlQuery);
-
-    // On initial mount, if URL has no search params, initial SSR products already cover page 1
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!searchParams.toString()) {
-        return;
-      }
-    }
 
     // Server-side fetch for Page 1 on filter/search change
     let isCancelled = false;
@@ -470,6 +600,14 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
     })
       .then((result) => {
         if (!isCancelled) {
+          setDepartment(urlDept);
+          setCategory(urlCat);
+          setCollection(urlCol);
+          setFit(urlFit);
+          setColor(urlColor);
+          setPriceIndex(urlPriceIndex);
+          setSort(urlSort);
+          setQuery(urlQuery);
           setDisplayedProducts(result.products);
           setTotalCount(result.totalCount);
           setPage(1);
@@ -727,17 +865,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
       const haystack = `${product.name} ${product.code} ${product.department} ${product.category} ${product.collection} ${product.material} ${product.silhouette} ${product.description} ${(product.colors || []).join(" ")}`.toLowerCase();
       return haystack.includes(cleanQ);
     });
-  }, [query]);
-
-  // Current active main category metadata
-  const activeMain = useMemo(() => {
-    return dynamicDepartments.find(
-      (d) =>
-        d.key.toLowerCase() === department.toLowerCase() ||
-        (d.slug && d.slug.toLowerCase() === department.toLowerCase()) ||
-        d.id === department
-    );
-  }, [dynamicDepartments, department]);
+  }, [query, productsList]);
 
 
   return (
@@ -808,7 +936,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
                     </span>
                   )}
                   <ChevronDown
-                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-500 ease-signature ${
                       isFilterDrawerOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -821,11 +949,11 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
           {availableCollections.length > 1 && (
             <div className="flex items-center gap-4 overflow-x-auto scrollbar-none pt-2 mt-1 border-t border-near-black/5 text-[9.5px] sm:text-[10px] uppercase font-mono tracking-[0.18em] sm:tracking-[0.2em]">
               <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
-                {availableCollections.map((col) => {
+                {availableCollections.map((col, colIndex) => {
                   const isSelected = collection === col.key;
                   return (
                     <button
-                      key={col.key}
+                      key={`${col.key}-${col.id || colIndex}`}
                       type="button"
                       onClick={() => handleCollectionChange(col.key)}
                       className={`transition-colors cursor-pointer py-0.5 shrink-0 ${
@@ -844,7 +972,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
 
           {/* Dynamic Inline Filter Dropdown Panel with signature transition */}
           <div
-            className={`w-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] border border-near-black/10 bg-[#F4F2ED] ${
+            className={`w-full overflow-hidden transition-all duration-500 ease-signature border border-near-black/10 bg-[#F4F2ED] ${
               isFilterDrawerOpen
                 ? "max-h-[950px] opacity-100 p-4 sm:p-6 mt-3"
                 : "max-h-0 opacity-0 py-0 border-0 pointer-events-none mt-0"
@@ -1324,20 +1452,30 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
                     FREQUENT ATELIER INQUIRIES
                   </span>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {dynamicCategories
-                      .filter((c) => c.key !== "all")
-                      .slice(0, 5)
-                      .concat(allCollections.filter((c) => c.key !== "all").slice(0, 3))
-                      .map((item) => (
+                    {(() => {
+                      const tags = dynamicCategories
+                        .filter((c) => c.key !== "all")
+                        .slice(0, 5)
+                        .concat(allCollections.filter((c) => c.key !== "all").slice(0, 3));
+                      const seen = new Set<string>();
+                      const unique = tags.filter((t) => {
+                        const k = (t.key || "").toLowerCase();
+                        if (seen.has(k)) return false;
+                        seen.add(k);
+                        return true;
+                      });
+
+                      return unique.map((item, itemIdx) => (
                         <button
-                          key={item.key}
+                          key={`${item.key}-${itemIdx}`}
                           type="button"
                           onClick={() => handleQueryChange(item.label)}
                           className="px-3.5 py-1.5 border border-near-black/15 hover:border-near-black text-xs font-mono uppercase tracking-[0.18em] transition-colors cursor-pointer"
                         >
                           {item.label}
                         </button>
-                      ))}
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
@@ -1367,7 +1505,7 @@ export function ShopCatalog({ initialProducts, initialTaxonomies }: ShopCatalogP
                 <div ref={sentinelRef} className="mt-16 sm:mt-24 py-8 min-h-[100px] flex flex-col items-center justify-center gap-3">
                   {isLoadingMore ? (
                     <div className="flex items-center gap-2.5 text-xs font-mono tracking-[0.24em] uppercase text-near-black py-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-near-black animate-ping" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-near-black" />
                       <span>UNVEILING NEXT EDITIONS...</span>
                     </div>
                   ) : (

@@ -7,7 +7,7 @@ import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 
 export const metadata: Metadata = {
-  title: "TERMS & CONDITIONS // ATELIER USAGE — LÉVARO",
+  title: "TERMS & CONDITIONS — ATELIER USAGE — LÉVARO",
   description: "Terms and conditions governing the digital exhibition, intellectual property, and archival showcase of LÉVARO Atelier.",
 };
 
@@ -62,50 +62,50 @@ export default function TermsPage() {
               {/* Sections */}
               <div className="space-y-12 divide-y divide-near-black/10 text-xs sm:text-sm font-sans uppercase tracking-[0.14em] leading-relaxed">
                 
-                {/* 01 // DIGITAL ARCHIVE STATUS */}
+                {/* 01 — DIGITAL ARCHIVE STATUS */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    01 // DIGITAL ARCHIVE NATURE
+                    01 — DIGITAL ARCHIVE NATURE
                   </span>
                   <p className="text-near-black/75">
                     This website serves as an artistic and structural portfolio of limited garment editions, bespoke fabric compositions, and sculptural tailoring. The display of editions, codes, or textile studies does not constitute an automated commercial offering or binding public sales contract.
                   </p>
                 </section>
 
-                {/* 02 // INTELLECTUAL PROPERTY */}
+                {/* 02 — INTELLECTUAL PROPERTY */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    02 // INTELLECTUAL PROPERTY &amp; ATELIER PATENTS
+                    02 — INTELLECTUAL PROPERTY &amp; ATELIER PATENTS
                   </span>
                   <p className="text-near-black/75">
                     All visual materials, lookbook photography, editorial compositions, graphic typography, code architectures, and bespoke silhouettes appearing under the LÉVARO brand are exclusive intellectual property protected under domestic and international copyright laws. Reproduction, commercial harvesting, or unauthorized editorial mirroring without formal written consent is strictly prohibited.
                   </p>
                 </section>
 
-                {/* 03 // SPECIFICATION INTEGRITY */}
+                {/* 03 — SPECIFICATION INTEGRITY */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    03 // ATELIER SPECIFICATION INTEGRITY
+                    03 — ATELIER SPECIFICATION INTEGRITY
                   </span>
                   <p className="text-near-black/75">
                     We exert extreme rigor to depict fabric weights (GSM), Japanese shuttle-loom weaves, raw selvedge textures, and tailoring proportions with complete photographic fidelity. However, as our editions incorporate artisan dyeing and raw textiles, slight natural variations in tone and texture are celebrated characteristics of bespoke craft.
                   </p>
                 </section>
 
-                {/* 04 // LIMITATION OF LIABILITY */}
+                {/* 04 — LIMITATION OF LIABILITY */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    04 // LIMITATION OF LIABILITY
+                    04 — LIMITATION OF LIABILITY
                   </span>
                   <p className="text-near-black/75">
                     LÉVARO shall not be held liable for incidental, indirect, or consequential damages arising from the use of this digital showcase, intermittent downtime during architectural updates, or network latencies beyond our direct control.
                   </p>
                 </section>
 
-                {/* 05 // JURISDICTION */}
+                {/* 05 — JURISDICTION */}
                 <section className="pt-8 space-y-4">
                   <span className="text-xs uppercase font-mono tracking-[0.24em] text-near-black font-semibold block">
-                    05 // GOVERNING LAW &amp; ATELIER JURISDICTION
+                    05 — GOVERNING LAW &amp; ATELIER JURISDICTION
                   </span>
                   <p className="text-near-black/75">
                     These conditions and all related matters shall be governed exclusively by the laws governing fashion house archives and intellectual property registries in Cairo, Egypt, without giving effect to conflicts of law principles.

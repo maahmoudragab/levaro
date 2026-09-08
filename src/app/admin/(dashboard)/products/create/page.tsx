@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { ProductForm } from "@/components/dashboard/products/ProductForm";
+import { ProductForm } from "@/components/admin/products/ProductForm";
 
 export const metadata = {
   title: "Add Product | LÉVARO Admin",

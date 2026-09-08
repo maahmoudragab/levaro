@@ -1,6 +1,6 @@
-import { getProducts } from "@/app/services/admin/products";
-import { getActiveCategoriesList } from "@/app/services/admin/categories";
-import ProductsClient from "@/components/dashboard/products/ProductsClient";
+import { getProducts } from "@/services/admin/products";
+import { getActiveCategoriesList } from "@/services/admin/categories";
+import ProductsClient from "@/components/admin/products/ProductsClient";
 
 export const metadata = {
   title: "Products | LÉVARO Admin",

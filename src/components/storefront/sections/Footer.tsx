@@ -60,6 +60,11 @@ export function Footer() {
             </span>
             <ul className="flex flex-col gap-2.5 text-off-white/80">
               <li>
+                <Link href="/new-arrivals" className="hover:text-off-white transition-colors">
+                  NEW ARRIVALS
+                </Link>
+              </li>
+              <li>
                 <Link href="/shop?department=men" className="hover:text-off-white transition-colors">
                   MEN
                 </Link>
@@ -94,13 +99,18 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/shop?collection=motion" className="hover:text-off-white transition-colors">
-                  MOTION (AW26)
+                <Link href="/new-arrivals" className="hover:text-off-white transition-colors">
+                  NEW ARRIVALS
                 </Link>
               </li>
               <li>
-                <Link href="/shop?collection=shift" className="hover:text-off-white transition-colors">
-                  SHIFT (W26)
+                <Link href="/men-noir-collection" className="hover:text-off-white transition-colors">
+                  MEN NOIR COLLECTION
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections" className="hover:text-off-white transition-colors">
+                  COLLECTIONS &amp; SUB-CATEGORIES
                 </Link>
               </li>
               <li>

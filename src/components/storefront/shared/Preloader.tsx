@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
 
 interface PreloaderProps {
   onComplete?: () => void;
@@ -30,6 +32,21 @@ export function Preloader({
 
     if (!container || !counter || !line || !brand) return;
 
+    registerSignatureEase();
+
+    gsap.set(container, {
+      transformOrigin: "top center",
+      force3D: true,
+    });
+
+    const mainEl = document.querySelector("main") as HTMLElement | null;
+    if (mainEl) {
+      // Position the underlying section directly beneath the curtain
+      gsap.set(mainEl, { y: () => window.innerHeight, force3D: true });
+    }
+    window.__lenis?.stop();
+    document.body.style.overflow = "hidden";
+
     let isMounted = true;
     const progress = { value: 0 };
     let targetProgress = 12; // Initial state
@@ -55,7 +72,7 @@ export function Preloader({
     // 1. Collect all critical images (explicit prop + page hero + DOM images)
     const allImagesToLoad = new Set<string>(images);
     if (typeof window !== "undefined" && window.location.pathname === "/") {
-      allImagesToLoad.add("/images/hero background.jpg");
+      allImagesToLoad.add("/images/hero-background.jpg");
     }
     if (typeof document !== "undefined") {
       const domImages = document.querySelectorAll("img[src]");
@@ -164,30 +181,9 @@ export function Preloader({
 
       progressTween.kill();
 
-      const finishTl = gsap.timeline({
-        onComplete: () => {
-          // Luxury curtain reveal once 100% is reached
-          gsap.to(container, {
-            yPercent: -100,
-            duration: 0.85,
-            ease: "power4.inOut",
-            force3D: true,
-            onStart: () => {
-              window.dispatchEvent(new CustomEvent("preloaderCurtainLifting"));
-            },
-            onComplete: () => {
-              if (typeof window !== "undefined") {
-                (window as unknown as { __preloaderDone: boolean }).__preloaderDone = true;
-              }
-              window.dispatchEvent(new CustomEvent("preloaderComplete"));
-              setIsFinished(true);
-              onComplete?.();
-            },
-          });
-        },
-      });
+      const finishTl = gsap.timeline();
 
-      // Rapid smooth completion to 100%
+      // 1. Rapid smooth completion to 100%
       finishTl.to(progress, {
         value: 100,
         duration: 0.25,
@@ -195,23 +191,92 @@ export function Preloader({
         onUpdate: () => updateUI(progress.value),
       });
 
-      // Fade out brand text right before curtain lifts
+      // 2. Brief visual hold on 100%
+      finishTl.to({}, { duration: 0.08 });
+
+      // 3. Fade out progress line & counter
+      finishTl.to([counter, line], {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+      });
+
+      // 4. Fire curtain lifting event right before push begins
+      finishTl.add(() => {
+        window.dispatchEvent(new CustomEvent("preloaderCurtainLifting"));
+      });
+
+      // 5. THE MASTER SHRINK & PUSH REVEAL:
+      // The top of the curtain remains pinned at top: 0.
+      // The bottom of the curtain collapses/shrinks upwards onto the top (scaleY: 0),
+      // while the section below rises from 100vh to 0vh in exact physical synchrony.
+      const pushDuration = 1.15;
+
+      // Curtain collapses/shrinks upwards to top edge
       finishTl.to(
-        [brand, counter],
+        container,
+        {
+          scaleY: 0,
+          duration: pushDuration,
+          ease: SIGNATURE_EASE,
+          force3D: true,
+        },
+        "push"
+      );
+
+      // Section below pushes upwards in exact lockstep
+      if (mainEl) {
+        finishTl.to(
+          mainEl,
+          {
+            y: 0,
+            duration: pushDuration,
+            ease: SIGNATURE_EASE,
+            force3D: true,
+          },
+          "push"
+        );
+      }
+
+      // Brand title fades cleanly as the curtain compresses into the ceiling
+      finishTl.to(
+        brand,
         {
           opacity: 0,
-          y: -15,
-          duration: 0.2,
+          y: -25,
+          duration: pushDuration * 0.45,
           ease: "power2.in",
           force3D: true,
         },
-        "-=0.1"
+        "push"
       );
+
+      // 6. Complete and clean up
+      finishTl.add(() => {
+        if (mainEl) {
+          gsap.set(mainEl, { clearProps: "transform" });
+        }
+        document.body.style.overflow = "";
+        if (typeof window !== "undefined") {
+          (window as unknown as { __preloaderDone: boolean }).__preloaderDone = true;
+          window.__lenis?.start();
+          gsap.registerPlugin(ScrollTrigger);
+          ScrollTrigger.refresh();
+        }
+        window.dispatchEvent(new CustomEvent("preloaderComplete"));
+        setIsFinished(true);
+        onComplete?.();
+      });
     });
 
     return () => {
       isMounted = false;
       progressTween.kill();
+      if (mainEl) {
+        gsap.set(mainEl, { clearProps: "transform" });
+      }
+      document.body.style.overflow = "";
+      window.__lenis?.start();
     };
   }, [images, onComplete]);
 
@@ -220,7 +285,7 @@ export function Preloader({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[100] bg-near-black text-off-white flex flex-col justify-between p-8 md:p-20 select-none gpu"
+      className="fixed inset-0 z-[100] bg-near-black text-off-white flex flex-col justify-between p-8 md:p-20 select-none gpu border-b border-off-white/15 shadow-2xl origin-top overflow-hidden"
       style={{ willChange: "transform" }}
     >
       {/* Top telemetry */}

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import SettingsClient from "@/components/dashboard/settings/SettingsClient";
+import SettingsClient from "@/components/admin/settings/SettingsClient";
 
 export const metadata = {
   title: "Settings | LÉVARO Admin",

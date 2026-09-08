@@ -1,0 +1,149 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { logout } from "@/app/admin/login/actions";
+import {
+  Settings,
+  Package,
+  LayoutGrid,
+  Menu,
+  X,
+  CircleHelp,
+  Tags,
+  LogOut,
+  BarChart3,
+} from "lucide-react";
+
+/* -------------------------------------------------------------------------- */
+/* Navigation Configuration                                                   */
+/* -------------------------------------------------------------------------- */
+
+const navItems = [
+  { label: "Overview", href: "/admin", icon: LayoutGrid },
+  { label: "Inventory", href: "/admin/inventory", icon: BarChart3 },
+  { label: "Products", href: "/admin/products", icon: Package },
+  { label: "Categories", href: "/admin/categories", icon: Tags },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+/**
+ * Responsive Admin Dashboard Sidebar.
+ * Supports mobile drawer toggle and sticky desktop navigation.
+ */
+export default function Sidebar() {
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* -------------------------------------------------------------------- */}
+      {/* Mobile Top Bar Header                                                */}
+      {/* -------------------------------------------------------------------- */}
+      <header className="flex items-center justify-between bg-[#f7f8f9] p-4 lg:hidden border-b border-black/5">
+        <h1 className="font-bodoni text-2xl font-extrabold text-primary">
+          LÉVARO
+        </h1>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          aria-label="Open mobile menu"
+        >
+          <Menu className="size-6 text-zinc-700" />
+        </button>
+      </header>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Mobile Drawer Overlay                                                */}
+      {/* -------------------------------------------------------------------- */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Sidebar (Desktop Sticky + Mobile Drawer)                              */}
+      {/* -------------------------------------------------------------------- */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 min-w-72 max-w-72 shrink-0 flex flex-col justify-between bg-[#f7f8f9] p-4 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:overflow-y-auto border-r border-black/5 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="space-y-8">
+          {/* Logo & Close Button */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-bodoni text-4xl font-extrabold text-primary">
+                LÉVARO
+              </h1>
+              <p className="mt-1 text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase">
+                Admin Dashboard
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden"
+              aria-label="Close mobile menu"
+            >
+              <X className="size-6 text-zinc-600" />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-2">
+            {navItems.map(({ label, href, icon: Icon }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 transition-all ${
+                    isActive
+                      ? "bg-zinc-200/60 text-primary font-semibold"
+                      : "text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`size-5 transition-colors ${isActive ? "text-primary" : "text-zinc-500"}`} />
+                    <span className="text-sm">{label}</span>
+                  </div>
+                  {isActive && (
+                    <div className="h-7 w-1 rounded-full bg-primary" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Footer Links (Support & Logout) */}
+        <div className="mt-12 space-y-3 pt-6 border-t border-black/5">
+          <a
+            href="mailto:support@levaro.com?subject=LEVARO%20Admin%20Support"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center justify-between rounded-xl px-4 py-2.5 transition-colors text-zinc-600 hover:bg-zinc-200/40 hover:text-zinc-900 font-medium"
+          >
+            <div className="flex items-center gap-3">
+              <CircleHelp className="size-5 text-zinc-500" />
+              <span className="text-sm">Support & Help</span>
+            </div>
+          </a>
+
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="flex w-full items-center gap-3 px-4 py-2.5 font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl transition-colors"
+          >
+            <LogOut className="size-5 text-rose-600" />
+            <span className="text-sm">Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}

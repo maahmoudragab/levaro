@@ -33,10 +33,10 @@ export function ProductCard({
 
   return (
     <div className="group flex flex-col transition-all duration-300">
-      {/* 1. EDITORIAL IMAGE CONTAINER (Explicit aspect-[3/4] prevents CLS) */}
+      {/* 1. EDITORIAL IMAGE CONTAINER (Explicit aspect-3/4 prevents CLS) */}
       <Link
         href={productHref}
-        className={`relative w-full aspect-[3/4] overflow-hidden transition-colors duration-500 mb-3 block cursor-pointer ${
+        className={`relative w-full aspect-3/4 overflow-hidden transition-colors duration-500 mb-3 block cursor-pointer ${
           isLight ? "bg-[#F0EEEA]" : "bg-charcoal"
         }`}
         aria-label={`View ${product.name}`}
@@ -50,7 +50,7 @@ export function ProductCard({
             fetchPriority={priority ? "high" : "auto"}
             quality={75}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover object-top brightness-[0.98] group-hover:brightness-100 group-hover:scale-[1.02] transition-all duration-700 ease-signature"
+            className="object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity duration-500 ease-signature"
           />
         </div>
       </Link>

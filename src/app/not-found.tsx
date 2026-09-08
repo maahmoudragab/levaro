@@ -18,7 +18,7 @@ export default function NotFound() {
       <Preloader
         title="404"
         tagline="ARCHIVE VOID"
-        images={["/images/hero background.jpg"]}
+        images={["/images/hero-background.jpg"]}
       />
 
       <LuxuryCursor />

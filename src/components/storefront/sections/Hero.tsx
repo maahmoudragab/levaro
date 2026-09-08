@@ -5,45 +5,43 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
-import { registerGyroscope } from "@/lib/gyroscope";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     registerSignatureEase();
 
-    const container = containerRef.current;
-    const img = imageRef.current;
     const content = contentRef.current;
-    if (!container || !img) return;
+    const bottomBar = bottomBarRef.current;
+
+    if (!content) return;
 
     let hasRevealed = false;
 
-    // 1. Initial State: Content starts hidden
-    if (content) gsap.set(content.children, { y: 22, opacity: 0 });
+    const animatedElements = [
+      ...Array.from(content.children),
+      bottomBar,
+    ].filter(Boolean);
 
-    // 2. Smooth reveal when preloader curtain lifts
+    // Initial state
+    gsap.set(animatedElements, { y: 16, opacity: 0 });
+
     const revealEntrance = () => {
       if (hasRevealed) return;
       hasRevealed = true;
 
-      if (content) {
-        gsap.to(content.children, {
-          y: 0,
-          opacity: 1,
-          duration: 0.85,
-          stagger: 0.07,
-          ease: SIGNATURE_EASE,
-          force3D: true,
-        });
-      }
+      gsap.to(animatedElements, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.08,
+        ease: SIGNATURE_EASE,
+        force3D: true,
+      });
     };
 
     const isPreloaderDone = (window as unknown as { __preloaderDone?: boolean }).__preloaderDone;
@@ -54,67 +52,9 @@ export function Hero() {
       window.addEventListener("preloaderComplete", revealEntrance, { once: true });
     }
 
-    // 3. Scroll-driven parallax scrub
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(max-width: 767px)", () => {
-        gsap.to(img, {
-          yPercent: 4,
-          ease: "none",
-          scrollTrigger: {
-            trigger: container,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-        });
-      });
-
-      if (content) {
-        gsap.to(content, {
-          y: -20,
-          opacity: 0.25,
-          ease: "none",
-          scrollTrigger: {
-            trigger: container,
-            start: "center top",
-            end: "bottom top",
-            scrub: 1.0,
-          },
-        });
-      }
-
-      // 4. Subtle, butter-smooth mobile gyroscope parallax
-      let isVisible = true;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          isVisible = entry.isIntersecting;
-        },
-        { threshold: 0.05 }
-      );
-      observer.observe(container);
-
-      const heroX = gsap.quickTo(img, "x", { duration: 0.3, ease: "power2.out" });
-      const heroY = gsap.quickTo(img, "y", { duration: 0.3, ease: "power2.out" });
-
-      const unregisterGyro = registerGyroscope(({ normX, normY }) => {
-        if (!isVisible) return;
-        heroX(normX * 24);
-        heroY(normY * 18);
-      });
-
-      return () => {
-        mm.revert();
-        observer.disconnect();
-        unregisterGyro();
-      };
-    }, container);
-
     return () => {
       window.removeEventListener("preloaderCurtainLifting", revealEntrance);
       window.removeEventListener("preloaderComplete", revealEntrance);
-      ctx.revert();
     };
   }, []);
 
@@ -122,74 +62,98 @@ export function Hero() {
     <section
       id="hero"
       ref={containerRef}
-      className="relative w-full min-h-screen md:h-screen flex flex-col justify-between bg-near-black text-off-white site-padding-x overflow-hidden"
+      className="relative w-full min-h-[80vh] flex flex-col justify-between bg-near-black text-off-white site-padding-x pt-28 sm:pt-32 md:pt-36 pb-8 sm:pb-10 overflow-hidden border-b border-off-white/10"
     >
-      {/* 1. Full-Bleed High-Fashion Photography */}
+      {/* 1. Photography Backdrop (Same image with clear, atmospheric lighting) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div
-          ref={imageRef}
-          className="absolute -top-24 -bottom-16 -left-12 -right-12 md:inset-0 z-0 gpu will-change-transform"
-        >
-          <Image
-            src="/images/hero background.jpg"
-            alt="LÉVARO — Move Your Way"
-            fill
-            priority
-            quality={90}
-            sizes="100vw"
-            className="object-cover object-top md:object-[center_top]"
-          />
-          {/* Responsive Atmospheric Gradients */}
-          <div className="absolute inset-0 bg-near-black/25" />
-          <div className="absolute inset-0 bg-linear-to-t from-near-black via-near-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-b from-near-black/60 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-r from-near-black/40 via-transparent to-transparent hidden md:block" />
+        <Image
+          src="/images/hero-background.jpg"
+          alt="LÉVARO"
+          fill
+          priority
+          quality={90}
+          sizes="100vw"
+          className="object-cover object-top md:object-[center_top] brightness-[0.88] contrast-[1.05]"
+        />
+        {/* Soft, clean gradient overlays for optimal text clarity */}
+        <div className="absolute inset-0 bg-near-black/30" />
+        <div className="absolute inset-0 bg-linear-to-t from-near-black via-near-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-near-black/60 via-transparent to-transparent" />
+      </div>
+
+      {/* 2. Main Hero Content (Fluid, spacious, responsive) */}
+      <div
+        ref={contentRef}
+        className="relative z-20 w-full site-container my-auto py-6 sm:py-8 flex flex-col items-start gap-4 sm:gap-6"
+      >
+        {/* Brand Wordmark & Slogan */}
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-light uppercase tracking-[0.04em] sm:tracking-[0.08em] leading-[0.92] text-off-white">
+            LÉVARO
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm font-sans tracking-[0.22em] uppercase">
+            <span className="text-off-white font-medium">MODERN LUXURY</span>
+            <span className="text-brand-gray/40">&bull;</span>
+            <span className="text-brand-gray">TAILORED FOR MOVEMENT</span>
+          </div>
+        </div>
+
+        {/* Concise Description */}
+        <p className="text-xs sm:text-sm uppercase font-sans tracking-[0.14em] text-off-white/80 max-w-lg leading-relaxed font-light">
+          Sculpted silhouettes and bespoke textiles engineered for the body in transit.
+        </p>
+
+        {/* Action Buttons & Quick Access (Comfortable mobile wrapping) */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-3 w-full sm:w-auto">
+          {/* Main CTA */}
+          <Link
+            href="/shop"
+            className="group inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-off-white text-near-black text-xs uppercase font-sans tracking-[0.2em] font-semibold hover:bg-white transition-all duration-300 shadow-lg cursor-pointer"
+          >
+            <span>SHOP COLLECTION</span>
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+
+          {/* Quick Department Shortcuts */}
+          <div className="flex items-center justify-start gap-2 pt-1 sm:pt-0 sm:pl-3 sm:border-l sm:border-off-white/20">
+            <Link
+              href="/shop?department=men"
+              className="px-3.5 py-2 text-[11px] uppercase font-sans tracking-[0.18em] text-off-white/85 hover:text-off-white border border-off-white/20 hover:border-off-white/50 bg-near-black/40 transition-colors"
+            >
+              MEN
+            </Link>
+            <Link
+              href="/shop?department=women"
+              className="px-3.5 py-2 text-[11px] uppercase font-sans tracking-[0.18em] text-off-white/85 hover:text-off-white border border-off-white/20 hover:border-off-white/50 bg-near-black/40 transition-colors"
+            >
+              WOMEN
+            </Link>
+            <Link
+              href="/shop?department=accessories"
+              className="px-3.5 py-2 text-[11px] uppercase font-sans tracking-[0.18em] text-off-white/85 hover:text-off-white border border-off-white/20 hover:border-off-white/50 bg-near-black/40 transition-colors"
+            >
+              ACCESSORIES
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* 2. Responsive Top Clearance */}
-      <div className="pt-24 sm:pt-28 md:pt-32" />
-      <div className="my-auto py-2 sm:py-4" />
-
-      {/* 3. Main Editorial Composition */}
+      {/* 3. Clean, Spacious Bottom Spec Bar */}
       <div
-        ref={contentRef}
-        className="relative z-20 w-full site-container pb-12 sm:pb-14 lg:pb-16 flex flex-col justify-end"
+        ref={bottomBarRef}
+        className="relative z-20 w-full site-container pt-4 sm:pt-6 border-t border-off-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] sm:text-xs font-sans uppercase tracking-[0.18em] text-brand-gray"
       >
-        {/* Master Headline: MOVE YOUR WAY. (Solid, No Italic) */}
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-light uppercase tracking-[-0.03em] leading-[0.88] text-off-white mb-6 sm:mb-8">
-          MOVE YOUR <br />
-          <span className="font-light text-off-white">
-            WAY.
-          </span>
-        </h1>
+        <div className="flex items-center gap-2.5">
+          <span className="text-off-white font-medium">AUTUMN / WINTER 2026</span>
+          <span className="text-brand-gray/50">&bull;</span>
+          <span>ATELIER ARCHIVE</span>
+        </div>
 
-        {/* Supporting Statement & Direct Actions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-end pt-5 sm:pt-6 border-t border-off-white/15">
-          {/* Supporting text */}
-          <div className="lg:col-span-7">
-            <p className="text-xs sm:text-sm md:text-base uppercase tracking-[0.16em] text-off-white/85 leading-relaxed font-sans max-w-sm sm:max-w-md lg:max-w-lg font-medium">
-              Contemporary fashion made for people in motion.
-            </p>
-          </div>
-
-          {/* Action Links */}
-          <div className="lg:col-span-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-start lg:justify-end gap-4 sm:gap-6 md:gap-8">
-            <Link
-              href="#departments"
-              className="group inline-flex items-center justify-between sm:justify-start gap-3 text-xs uppercase tracking-[0.24em] sm:tracking-[0.26em] text-off-white hover:text-brand-gray transition-colors border-b border-off-white pb-1 font-sans font-semibold cursor-pointer"
-            >
-              <span>EXPLORE DEPARTMENTS</span>
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-
-            <Link
-              href="#collections"
-              className="inline-flex items-center justify-center sm:justify-start gap-2 text-xs uppercase tracking-[0.22em] sm:tracking-[0.24em] text-brand-gray hover:text-off-white transition-colors border-b border-transparent hover:border-off-white pb-1 font-sans cursor-pointer"
-            >
-              <span>EXPLORE COLLECTIONS</span>
-            </Link>
-          </div>
+        <div className="hidden md:flex items-center gap-2.5 text-[10px] sm:text-[11px] text-off-white/70">
+          <span>RAW JAPANESE SELVEDGE</span>
+          <span className="text-brand-gray/50">&bull;</span>
+          <span>TUSCAN VIRGIN WOOL</span>
         </div>
       </div>
     </section>

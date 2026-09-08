@@ -41,6 +41,13 @@ export interface CuratedProduct {
   whatsappMessage?: string;
 }
 
+export interface MenuSubLink {
+  code?: string;
+  label: string;
+  href: string;
+  isAction?: boolean;
+}
+
 export interface MenuItem {
   id: string;
   label: string;
@@ -49,6 +56,9 @@ export interface MenuItem {
   number: string;
   category: string;
   season: string;
+  narrative?: string;
+  specs?: { label: string; value: string }[];
+  sublinks?: MenuSubLink[];
 }
 
 export interface ManifestoItem {
@@ -121,6 +131,8 @@ export interface ProductItem {
   category_name?: string | null;
   category_slug?: string | null;
   category_parent_id?: string | null;
+  category_parent_slug?: string | null;
+  category_parent_name?: string | null;
   color?: string | null;
   stock?: { size: string; stock: number }[] | Record<string, number> | null;
   whatsappMessage?: string;

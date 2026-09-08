@@ -33,8 +33,8 @@ export function UnifiedLoading({
         {/* Main spinning ring */}
         <div className="absolute size-10 rounded-full border-2 border-transparent border-t-primary animate-spin" />
 
-        {/* Center refined pulse dot */}
-        <div className="absolute size-2 rounded-full bg-primary/60 animate-pulse" />
+        {/* Center refined dot */}
+        <div className="absolute size-2 rounded-full bg-primary/60" />
       </div>
 
       {/* Brand & Loading Status Typography */}

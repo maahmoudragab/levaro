@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search, X, ArrowUpRight, CornerDownLeft, Sparkles } from "lucide-react";
+import { Search, X, ArrowUpRight, CornerDownLeft, Sparkles, Loader2 } from "lucide-react";
 import { SHOP_PRODUCTS } from "@/data/storefront";
+import { searchStorefrontProductsAction } from "@/services/storefront/actions";
 import type { ProductItem } from "@/types/storefront";
 
 const QUICK_TAGS = [
@@ -19,9 +20,20 @@ const QUICK_TAGS = [
 
 export function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [liveProducts, setLiveProducts] = useState<ProductItem[]>(SHOP_PRODUCTS);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (!isOpen) {
+      setQuery("");
+      setSelectedIndex(0);
+    }
+  }
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -51,50 +63,54 @@ export function CommandPalette() {
     };
   }, [isOpen]);
 
+  // Query live archive editions whenever palette opens or query changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isSubscribed = true;
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const results = await searchStorefrontProductsAction(query, 12);
+        if (isSubscribed) {
+          if (results && results.length > 0) {
+            setLiveProducts(results);
+          } else if (!query.trim()) {
+            setLiveProducts(SHOP_PRODUCTS.slice(0, 6));
+          } else {
+            setLiveProducts([]);
+          }
+        }
+      } catch (err) {
+        console.error("Live search failed, falling back to local archive:", err);
+      } finally {
+        if (isSubscribed) setIsLoading(false);
+      }
+    }, 120);
+
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timer);
+    };
+  }, [isOpen, query]);
+
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
+      return () => clearTimeout(timer);
     } else {
       document.body.style.overflow = "";
-      setQuery("");
-      setSelectedIndex(0);
     }
   }, [isOpen]);
 
-  // Filter products based on search query
+  // Filtered or live products list
   const filteredProducts = useMemo(() => {
-    const trimmed = query.trim().toLowerCase();
-    if (!trimmed) {
-      // Return featured or all up to 6
-      return SHOP_PRODUCTS.slice(0, 6);
-    }
-
-    return SHOP_PRODUCTS.filter((product) => {
-      const matchName = product.name?.toLowerCase().includes(trimmed);
-      const matchSku = product.sku?.toLowerCase().includes(trimmed);
-      const matchCode = product.code?.toLowerCase().includes(trimmed);
-      const matchDept = product.department?.toLowerCase().includes(trimmed);
-      const matchCat = product.category?.toLowerCase().includes(trimmed);
-      const matchCol = product.collection?.toLowerCase().includes(trimmed);
-      const matchMat = product.material?.toLowerCase().includes(trimmed);
-      const matchTags = product.tags?.some((t) => t.toLowerCase().includes(trimmed));
-
-      return (
-        matchName ||
-        matchSku ||
-        matchCode ||
-        matchDept ||
-        matchCat ||
-        matchCol ||
-        matchMat ||
-        matchTags
-      );
-    }).slice(0, 10);
-  }, [query]);
+    return liveProducts;
+  }, [liveProducts]);
 
   // Handle item selection / navigation
   const navigateToProduct = useCallback(
@@ -153,7 +169,11 @@ export function CommandPalette() {
       >
         {/* 1. SEARCH INPUT ROW */}
         <div className="relative flex items-center gap-3 px-5 py-4.5 border-b border-off-white/10">
-          <Search className="w-5 h-5 text-brand-gray shrink-0" />
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin text-brand-gray shrink-0" />
+          ) : (
+            <Search className="w-5 h-5 text-brand-gray shrink-0" />
+          )}
           <input
             ref={inputRef}
             type="text"

@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Product } from "@/app/services/admin/products";
+import type { Product } from "@/services/admin/products";
 
 interface DeleteProductDialogProps {
   product: Product | null;

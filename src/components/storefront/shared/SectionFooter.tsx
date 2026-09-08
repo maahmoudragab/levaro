@@ -43,17 +43,23 @@ export const SectionFooter = forwardRef<HTMLDivElement, SectionFooterProps>(
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    if (!nextSection && !action && !showBackToTop) {
+      return null;
+    }
+
     return (
       <div
         ref={ref}
-        className={`site-container flex flex-col sm:flex-row sm:items-center justify-between pt-5 sm:pt-6 border-t gap-4 shrink-0 transition-colors duration-300 ${
+        className={`site-container flex flex-col sm:flex-row sm:items-center ${
+          nextSection ? "justify-between" : "justify-end"
+        } pt-5 sm:pt-6 border-t gap-4 shrink-0 transition-colors duration-300 ${
           isLight
             ? "border-near-black/15 text-near-black"
             : "border-off-white/15 text-off-white"
         } ${className}`}
       >
         {/* Left: Next Section Jump Navigation */}
-        {nextSection ? (
+        {nextSection && (
           <Link
             href={nextSection.href}
             className={`group/next inline-flex items-center gap-2.5 text-[10px] sm:text-xs uppercase font-sans tracking-[0.24em] font-medium transition-colors duration-300 cursor-pointer w-fit ${
@@ -65,8 +71,6 @@ export const SectionFooter = forwardRef<HTMLDivElement, SectionFooterProps>(
             <span>{nextSection.label}</span>
             <ArrowDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover/next:translate-y-1" />
           </Link>
-        ) : (
-          <div />
         )}
 
         {/* Right: Actions (Secondary CTA and/or Back to Top) */}

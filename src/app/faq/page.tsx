@@ -72,7 +72,7 @@ export default function FaqPage() {
     <>
       <Preloader
         title="INQUIRIES"
-        tagline="ATELIER CLIENT ARCHIVE // FAQ"
+        tagline="ATELIER CLIENT ARCHIVE — FAQ"
       />
 
       <LuxuryCursor />
@@ -124,7 +124,6 @@ export default function FaqPage() {
               <div className="space-y-3 divide-y divide-near-black/10">
                 {FAQ_ITEMS.map((item) => {
                   const isOpen = openItems[item.id];
-                  const Icon = item.icon;
 
                   return (
                     <div key={item.id} className="pt-4 first:pt-0">
@@ -135,7 +134,7 @@ export default function FaqPage() {
                       >
                         <div className="flex items-center gap-3.5 sm:gap-5 pr-4">
                           <span className="text-[11px] font-mono text-brand-gray font-semibold shrink-0">
-                            {item.number} //
+                            {item.number} —
                           </span>
                           <span className="text-xs sm:text-sm uppercase font-display font-medium tracking-[0.14em] text-near-black group-hover:opacity-70 transition-opacity">
                             {item.question}
@@ -144,7 +143,7 @@ export default function FaqPage() {
 
                         <div className="p-1 border border-near-black/15 group-hover:border-near-black transition-colors shrink-0">
                           <ChevronDown
-                            className={`w-4 h-4 text-near-black transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                            className={`w-4 h-4 text-near-black transition-transform duration-500 ease-signature ${
                               isOpen ? "rotate-180" : ""
                             }`}
                           />
@@ -152,7 +151,7 @@ export default function FaqPage() {
                       </button>
 
                       <div
-                        className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                        className={`overflow-hidden transition-all duration-500 ease-signature ${
                           isOpen ? "max-h-[350px] opacity-100 pb-5" : "max-h-0 opacity-0"
                         }`}
                       >

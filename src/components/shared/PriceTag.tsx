@@ -1,4 +1,4 @@
-import type { Product } from "@/app/services/admin/products";
+import type { Product } from "@/services/admin/products";
 import { cn } from "@/lib/utils";
 
 export interface PriceTagProps {

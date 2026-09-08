@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tag = searchParams.get("tag");
   const path = searchParams.get("path");
+  const secret = searchParams.get("secret");
+  const expectedSecret = process.env.REVALIDATION_SECRET;
+
+  if (expectedSecret && secret !== expectedSecret) {
+    return NextResponse.json(
+      { message: "Invalid revalidation secret token" },
+      { status: 401 },
+    );
+  }
 
   if (!tag && !path) {
     return NextResponse.json(

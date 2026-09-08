@@ -1,5 +1,5 @@
-import { getProducts } from "@/app/services/admin/products";
-import InventoryClient from "@/components/dashboard/inventory/InventoryClient";
+import { getProducts } from "@/services/admin/products";
+import InventoryClient from "@/components/admin/inventory/InventoryClient";
 
 export const metadata = {
   title: "Inventory | LÉVARO Admin",

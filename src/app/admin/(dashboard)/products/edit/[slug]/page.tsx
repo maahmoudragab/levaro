@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getProductBySlug } from "@/app/services/admin/products";
-import { ProductForm } from "@/components/dashboard/products/ProductForm";
+import { getProductBySlug } from "@/services/admin/products";
+import { ProductForm } from "@/components/admin/products/ProductForm";
 
 export const metadata = {
   title: "Edit Product | LÉVARO Admin",

@@ -18,18 +18,25 @@ export function EditorialLightbox({
   initialIndex = 0,
 }: EditorialLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  // Sync initialIndex when opened
-  useEffect(() => {
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setCurrentIndex(initialIndex);
+    }
+  }
+
+  // Manage body scroll and Lenis smoothly
+  useEffect(() => {
+    if (isOpen) {
       document.body.style.overflow = "hidden";
       window.__lenis?.stop();
     } else {
       document.body.style.overflow = "";
       window.__lenis?.start();
     }
-  }, [isOpen, initialIndex]);
+  }, [isOpen]);
 
   const handlePrev = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);

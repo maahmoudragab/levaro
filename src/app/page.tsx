@@ -8,23 +8,28 @@ import { Collections } from "@/components/storefront/sections/Collections";
 import { BrandStory } from "@/components/storefront/sections/BrandStory";
 import { SelectedEditions } from "@/components/storefront/sections/SelectedEditions";
 import { Footer } from "@/components/storefront/sections/Footer";
-import { getStorefrontProducts } from "@/app/services/storefront/products";
-import { getStorefrontTaxonomies } from "@/app/services/storefront/categories";
+import { getStorefrontProducts } from "@/services/storefront/products";
+import {
+  getStorefrontDepartments,
+  getStorefrontCuratedCollections,
+} from "@/services/storefront/categories";
 import { DEPARTMENTS } from "@/data/storefront";
 
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [products] = await Promise.all([
+  const [products, departments, curatedCollections] = await Promise.all([
     getStorefrontProducts(),
-    getStorefrontTaxonomies(),
+    getStorefrontDepartments(),
+    getStorefrontCuratedCollections(),
   ]);
 
   // Preload critical above-the-fold assets strictly to ensure instant, fluid entrance
   const criticalImages = [
-    "/images/hero background.jpg",
-    products[0]?.images[0] || DEPARTMENTS[0].image,
-  ];
+    "/images/hero-background.jpg",
+    departments[0]?.image || products[0]?.images[0] || DEPARTMENTS[0].image,
+    curatedCollections[0]?.imagePrimary || "",
+  ].filter(Boolean);
 
   return (
     <>
@@ -43,13 +48,13 @@ export default async function Home() {
           {/* 1. HERO */}
           <Hero />
 
-          {/* 2. DEPARTMENTS & DISCIPLINES (LOCKED) */}
-          <Departments />
+          {/* 2. DEPARTMENTS & DISCIPLINES (LIVE FROM SUPABASE) */}
+          <Departments departments={departments} />
 
-          {/* 3. COLLECTIONS */}
-          <Collections />
+          {/* 3. COLLECTIONS (LIVE NEW ARRIVALS & LATEST MEN'S CAPSULE) */}
+          <Collections collections={curatedCollections} />
 
-          {/* 5. SELECTED EDITIONS (CURATED PIECES FROM SUPABASE) */}
+          {/* 4. FEATURED EDITIONS (LIVE FROM SUPABASE) */}
           <SelectedEditions products={products} />
 
           {/* 4. BRAND STORY & MANIFESTO */}

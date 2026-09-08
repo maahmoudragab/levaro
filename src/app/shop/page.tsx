@@ -6,11 +6,11 @@ import { LuxuryCursor } from "@/components/storefront/shared/LuxuryCursor";
 import { Preloader } from "@/components/storefront/shared/Preloader";
 import { Footer } from "@/components/storefront/sections/Footer";
 import { ShopCatalog } from "@/components/storefront/shop/ShopCatalog";
-import { getStorefrontProducts } from "@/app/services/storefront/products";
-import { getStorefrontTaxonomies } from "@/app/services/storefront/categories";
+import { getStorefrontProducts } from "@/services/storefront/products";
+import { getStorefrontTaxonomies } from "@/services/storefront/categories";
 
 export const metadata: Metadata = {
-  title: "CATALOG ARCHIVE // ALL EDITIONS — LÉVARO",
+  title: "CATALOG ARCHIVE — ALL EDITIONS — LÉVARO",
   description:
     "Explore the complete catalogue of LÉVARO editions. Filter by discipline, seasonal collection, raw selvedge denim, sculptural tailoring, and minimal objects.",
 };
@@ -31,7 +31,7 @@ function ShopCatalogSkeleton() {
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-3.5 sm:gap-x-8 gap-y-8 sm:gap-y-16">
         {Array.from({ length: 9 }).map((_, i) => (
           <div key={i} className="flex flex-col">
-            <div className="w-full aspect-[3/4] bg-[#F0EEEA] mb-3 animate-pulse" />
+            <div className="w-full aspect-3/4 bg-[#F0EEEA] mb-3" />
             <div className="flex items-baseline justify-between pt-1 mb-1">
               <div className="h-3.5 bg-near-black/5 w-1/2" />
               <div className="h-3.5 bg-near-black/5 w-16" />
@@ -61,7 +61,7 @@ export default async function ShopPage() {
       <Preloader
         images={criticalImages}
         title="CATALOG"
-        tagline="ARCHIVE CATALOG // ALL EDITIONS"
+        tagline="ARCHIVE CATALOG — ALL EDITIONS"
       />
 
       {/* 2. Custom Inverted Luxury Cursor */}

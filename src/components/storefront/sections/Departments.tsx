@@ -1,177 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { registerSignatureEase, SIGNATURE_EASE } from "@/lib/motion";
 import { SectionHeader } from "@/components/storefront/shared/SectionHeader";
-import { SectionFooter } from "@/components/storefront/shared/SectionFooter";
-import { registerGyroscope } from "@/lib/gyroscope";
 import { DEPARTMENTS } from "@/data/storefront";
+import type { DepartmentChapter } from "@/types/storefront";
 
-gsap.registerPlugin(ScrollTrigger);
+interface DepartmentsProps {
+  departments?: DepartmentChapter[];
+}
 
-export function Departments() {
+export function Departments({ departments = DEPARTMENTS }: DepartmentsProps) {
+  const items = departments && departments.length > 0 ? departments : DEPARTMENTS;
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
-  const activeChapter = DEPARTMENTS[activeChapterIndex];
+  const activeChapter = items[activeChapterIndex] || items[0];
 
-  const sectionRef = useRef<HTMLElement>(null);
-  const portalRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-  const trackContainerRef = useRef<HTMLDivElement>(null);
-  const parallaxLayersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const isVisibleRef = useRef(false);
-  const activeChapterIndexRef = useRef(activeChapterIndex);
-  activeChapterIndexRef.current = activeChapterIndex;
-
-  // Auto-advance active department button every 5 seconds ONLY when section is visible in viewport
+  // Auto-advance active department button every 5 seconds
   useEffect(() => {
+    if (items.length <= 1) return;
     const timer = setInterval(() => {
-      if (!isVisibleRef.current) return;
-      setActiveChapterIndex((prev) => (prev + 1) % DEPARTMENTS.length);
+      setActiveChapterIndex((prev) => (prev + 1) % items.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
-
-  // 144Hz Smooth Multi-Axis Parallax Engine + Scroll Entrance
-  useEffect(() => {
-    registerSignatureEase();
-
-    const portal = portalRef.current;
-    const section = sectionRef.current;
-    if (!portal || !section) return;
-
-    const ctx = gsap.context(() => {
-      // 1. Subtle, Pure Scroll Entrance Reveal
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top 82%",
-          once: true,
-        },
-      });
-
-      if (headerRef.current) {
-        tl.fromTo(
-          headerRef.current,
-          { y: 16, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.75, ease: SIGNATURE_EASE }
-        );
-      }
-
-      tl.fromTo(
-        portal,
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: SIGNATURE_EASE },
-        "-=0.55"
-      );
-
-      if (trackContainerRef.current && trackContainerRef.current.children.length > 0) {
-        tl.fromTo(
-          Array.from(trackContainerRef.current.children),
-          { y: 16, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.65, stagger: 0.08, ease: SIGNATURE_EASE },
-          "-=0.5"
-        );
-      }
-
-      if (footerRef.current) {
-        tl.fromTo(
-          footerRef.current,
-          { y: 14, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.65, ease: SIGNATURE_EASE },
-          "-=0.4"
-        );
-      }
-
-      // 2. Scroll-Driven Vertical Parallax Scrub (-4% -> +4%)
-      parallaxLayersRef.current.forEach((layer) => {
-        if (!layer) return;
-        gsap.fromTo(
-          layer,
-          { yPercent: -4 },
-          {
-            yPercent: 4,
-            ease: "none",
-            scrollTrigger: {
-              trigger: section,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1.2,
-            },
-          }
-        );
-      });
-
-      // 3. Viewport observer to pause off-screen computations
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          isVisibleRef.current = entry.isIntersecting;
-        },
-        { threshold: 0.05 }
-      );
-      observer.observe(section);
-
-      const xSetters = parallaxLayersRef.current.map((layer) =>
-        layer ? gsap.quickTo(layer, "x", { duration: 0.3, ease: "power2.out" }) : null
-      );
-      const ySetters = parallaxLayersRef.current.map((layer) =>
-        layer ? gsap.quickTo(layer, "y", { duration: 0.3, ease: "power2.out" }) : null
-      );
-
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!isVisibleRef.current) return;
-        const rect = portal.getBoundingClientRect();
-        const normX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-        const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-
-        const activeIdx = activeChapterIndexRef.current;
-        xSetters[activeIdx]?.(normX * 22);
-        ySetters[activeIdx]?.(normY * 16);
-      };
-
-      const handleMouseLeave = () => {
-        const activeIdx = activeChapterIndexRef.current;
-        xSetters[activeIdx]?.(0);
-        ySetters[activeIdx]?.(0);
-      };
-
-      const unregisterGyro = registerGyroscope(({ normX, normY }) => {
-        if (!isVisibleRef.current) return;
-        const activeIdx = activeChapterIndexRef.current;
-        xSetters[activeIdx]?.(normX * 26);
-        ySetters[activeIdx]?.(normY * 20);
-      });
-
-      portal.addEventListener("mousemove", handleMouseMove, { passive: true });
-      portal.addEventListener("mouseleave", handleMouseLeave);
-
-      return () => {
-        observer.disconnect();
-        portal.removeEventListener("mousemove", handleMouseMove);
-        portal.removeEventListener("mouseleave", handleMouseLeave);
-        unregisterGyro();
-      };
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
+  }, [items.length]);
 
   return (
     <section
       id="departments"
-      ref={sectionRef}
       data-light-section="true"
-      className="relative w-full min-h-screen flex flex-col justify-between bg-off-white text-near-black site-padding-x section-py transition-colors duration-500 overflow-hidden"
+      className="relative w-full flex flex-col justify-between bg-off-white text-near-black site-padding-x section-py transition-colors duration-500 overflow-hidden"
     >
       {/* 1. COMPACT 100VH HEADER */}
       <SectionHeader
-        ref={headerRef}
         title="EXPLORE"
         titleAccent="LÉVARO"
         subtitle="Essential disciplines shaped for daily movement."
@@ -181,39 +44,31 @@ export function Departments() {
 
       {/* 2. FIXED CINEMATIC AD-BANNER STAGE */}
       <div className="site-container my-auto py-2 sm:py-3 flex-none">
-        <div
-          ref={portalRef}
-          className="relative w-full aspect-[2.1/1] sm:aspect-[2.3/1] md:aspect-[2.4/1] max-h-[420px] bg-near-black border border-near-black/20 shadow-[0_20px_50px_rgba(0,0,0,0.14)] overflow-hidden group cursor-crosshair"
-        >
-          {DEPARTMENTS.map((ch, index) => {
+        <div className="relative w-full aspect-[2.1/1] sm:aspect-[2.3/1] md:aspect-[2.4/1] max-h-105 bg-near-black border border-near-black/20 shadow-[0_20px_50px_rgba(0,0,0,0.14)] overflow-hidden group">
+          {items.map((ch, index) => {
             const isCurrent = activeChapterIndex === index;
             return (
               <div
                 key={ch.id}
-                className={`absolute inset-0 transition-opacity duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                className={`absolute inset-0 transition-opacity duration-700 ease-signature ${
                   isCurrent ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                 }`}
               >
-                {/* Parallax Image Shell */}
-                <div
-                  ref={(el) => {
-                    parallaxLayersRef.current[index] = el;
-                  }}
-                  className="absolute -top-16 -bottom-16 -left-16 -right-16 w-[calc(100%+128px)] h-[calc(100%+128px)] will-change-transform gpu"
-                >
+                {/* Static Image Shell */}
+                <div className="absolute inset-0 overflow-hidden">
                   <Image
                     src={ch.image}
                     alt={ch.title}
                     fill
                     priority={index === 0}
-                    quality={95}
+                    quality={90}
                     sizes="(max-width: 768px) 100vw, 1400px"
-                    className="object-cover object-[center_35%] filter grayscale contrast-115 brightness-90 scale-105"
+                    className="object-cover object-[center_35%] filter grayscale contrast-115 brightness-90"
                   />
                 </div>
-                
+
                 {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-near-black/90 via-near-black/35 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-near-black/90 via-near-black/35 to-transparent pointer-events-none" />
               </div>
             );
           })}
@@ -242,9 +97,19 @@ export function Departments() {
         </div>
       </div>
 
-      {/* 3. 100VH BOTTOM 3-CHAPTER TRACK */}
-      <div ref={trackContainerRef} className="site-container grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 shrink-0 pb-3 sm:pb-4">
-        {DEPARTMENTS.map((ch, index) => {
+      {/* 3. 100VH BOTTOM CHAPTER TRACK */}
+      <div
+        className={`site-container grid grid-cols-1 ${
+          items.length === 2
+            ? "sm:grid-cols-2"
+            : items.length === 4
+            ? "sm:grid-cols-2 lg:grid-cols-4"
+            : items.length > 4
+            ? "sm:grid-cols-3 lg:grid-cols-4"
+            : "sm:grid-cols-3"
+        } gap-3 sm:gap-4 shrink-0 pb-3 sm:pb-4`}
+      >
+        {items.map((ch, index) => {
           const isCurrent = activeChapterIndex === index;
           return (
             <button
@@ -273,7 +138,7 @@ export function Departments() {
 
               {/* 5-second progress indicator line for active button */}
               {isCurrent && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-off-white/20 overflow-hidden">
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-off-white/20 overflow-hidden">
                   <div
                     key={`bar-${activeChapterIndex}`}
                     className="h-full bg-off-white w-full animate-progress-5s"
@@ -284,17 +149,6 @@ export function Departments() {
           );
         })}
       </div>
-
-      {/* 4. SECTION FOOTER */}
-      <SectionFooter
-        ref={footerRef}
-        theme="light"
-        nextSection={{
-          label: "NEXT: CURATED COLLECTIONS",
-          href: "#collections",
-        }}
-        className="pt-3 sm:pt-4"
-      />
     </section>
   );
 }

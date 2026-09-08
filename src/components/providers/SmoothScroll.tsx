@@ -18,14 +18,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     gsap.registerPlugin(ScrollTrigger);
     registerSignatureEase();
 
-    // Lightweight responsive Lenis: direct tracking while scrolling, smooth glide after release
+    // Ultra-lightweight, snappy Lenis: instant response, zero heavy drag
     const lenis = new Lenis({
-      autoRaf: false,
-      duration: 0.6,
+      autoRaf: true,
+      duration: 0.35,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1.15,
+      wheelMultiplier: 1.0,
       touchMultiplier: 1.0,
+      syncTouch: false,
       allowNestedScroll: true,
     });
 
@@ -35,35 +36,32 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     // Synchronize Lenis with ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
-    const updateLenis = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(updateLenis);
-
-    // Automatically update scroll dimensions and limits when dynamic content expands (e.g. infinite scroll pagination)
-    let resizeTimer: number | null = null;
-    let resizeObserver: ResizeObserver | null = null;
-
-    if (typeof window !== "undefined" && typeof ResizeObserver !== "undefined" && document.body) {
-      resizeObserver = new ResizeObserver(() => {
+    // Refresh ScrollTrigger and resize Lenis as soon as Preloader curtain lifts
+    const onPreloaderDone = () => {
+      setTimeout(() => {
         lenis.resize();
-        if (resizeTimer) cancelAnimationFrame(resizeTimer);
-        resizeTimer = requestAnimationFrame(() => {
-          ScrollTrigger.refresh();
-        });
-      });
-      resizeObserver.observe(document.body);
-    }
+        ScrollTrigger.refresh();
+      }, 100);
+    };
+    window.addEventListener("preloaderComplete", onPreloaderDone);
+
+    // Debounced window resize handler for safe, loop-free recalibration
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const onWindowResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        lenis.resize();
+        ScrollTrigger.refresh();
+      }, 200);
+    };
+    window.addEventListener("resize", onWindowResize);
 
     return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
       if (resizeTimer) {
-        cancelAnimationFrame(resizeTimer);
+        clearTimeout(resizeTimer);
       }
-      gsap.ticker.remove(updateLenis);
+      window.removeEventListener("resize", onWindowResize);
+      window.removeEventListener("preloaderComplete", onPreloaderDone);
       lenis.destroy();
       window.__lenis = undefined;
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ExternalLink, Pencil, ShieldCheck, Star, Trash2 } from "lucide-react";
-import type { Product } from "@/app/services/admin/products";
+import type { Product } from "@/services/admin/products";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";

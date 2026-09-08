@@ -1,5 +1,5 @@
-import { getCategoriesHierarchy } from "@/app/services/admin/categories";
-import CategoriesClient from "@/components/dashboard/categories/CategoriesClient";
+import { getCategoriesHierarchy } from "@/services/admin/categories";
+import CategoriesClient from "@/components/admin/categories/CategoriesClient";
 
 export const metadata = {
   title: "Categories & Collections | LÉVARO Admin",
