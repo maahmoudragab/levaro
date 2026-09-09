@@ -10,10 +10,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const seenUrls = new Set<string>();
   const entries: MetadataRoute.Sitemap = [];
 
-  const addEntry = (entry: MetadataRoute.Sitemap[number]) => {
-    const cleanUrl = entry.url.trim();
+  const addEntry = (
+    entry: MetadataRoute.Sitemap[number],
+  ) => {
+    const cleanUrl = entry.url
+      .trim()
+      .replace(/\/+$/, "");
+
     if (!seenUrls.has(cleanUrl)) {
       seenUrls.add(cleanUrl);
+
       entries.push({
         ...entry,
         url: cleanUrl,
@@ -21,10 +27,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   };
 
-  // 1. Core High-Priority Pages
+  /* ------------------------------------------------------------------------ */
+  /* 1. Core public pages                                                     */
+  /* ------------------------------------------------------------------------ */
+
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: `${SITE_URL}`,
+      url: SITE_URL,
       lastModified: currentDate,
       changeFrequency: "daily",
       priority: 1.0,
@@ -57,57 +66,85 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/faq`,
       lastModified: currentDate,
       changeFrequency: "monthly",
-      priority: 0.7,
+      priority: 0.6,
     },
     {
       url: `${SITE_URL}/privacy`,
       lastModified: currentDate,
       changeFrequency: "yearly",
-      priority: 0.3,
+      priority: 0.2,
     },
     {
       url: `${SITE_URL}/terms`,
       lastModified: currentDate,
       changeFrequency: "yearly",
-      priority: 0.3,
+      priority: 0.2,
     },
   ];
 
   staticRoutes.forEach(addEntry);
 
-  // 2. Dedicated Canonical Category Routes (/shop/[slug])
+  /* ------------------------------------------------------------------------ */
+  /* 2. Dynamic categories                                                    */
+  /* ------------------------------------------------------------------------ */
+
   try {
-    const categorySlugs = await getStorefrontCategorySlugs();
-    for (const cat of categorySlugs) {
-      if (cat.slug) {
-        addEntry({
-          url: `${SITE_URL}/shop/${encodeURIComponent(cat.slug.toLowerCase().trim())}`,
-          lastModified: currentDate,
-          changeFrequency: "weekly",
-          priority: 0.9,
-        });
-      }
+    const categorySlugs =
+      await getStorefrontCategorySlugs();
+
+    for (const category of categorySlugs) {
+      const slug = category.slug
+        ?.trim()
+        .toLowerCase();
+
+      if (!slug) continue;
+
+      addEntry({
+        url: `${SITE_URL}/shop/${encodeURIComponent(slug)}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.9,
+      });
     }
-  } catch (err) {
-    console.error("Error generating category sitemap entries:", err);
+  } catch (error) {
+    console.error(
+      "Error generating category sitemap entries:",
+      error,
+    );
   }
 
-  // 3. Dynamic Product Canonical Pages (/shop/[slug])
+  /* ------------------------------------------------------------------------ */
+  /* 3. Dynamic products                                                      */
+  /* ------------------------------------------------------------------------ */
+
   try {
-    const products = await getStorefrontProducts();
+    const products =
+      await getStorefrontProducts();
+
     for (const product of products) {
-      if (product.slug) {
-        addEntry({
-          url: `${SITE_URL}/shop/${encodeURIComponent(product.slug.trim())}`,
-          lastModified: currentDate,
-          changeFrequency: "weekly",
-          priority: 0.85,
-        });
-      }
+      const slug = product.slug
+        ?.trim()
+        .toLowerCase();
+
+      if (!slug) continue;
+
+      addEntry({
+        url: `${SITE_URL}/shop/${encodeURIComponent(slug)}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.85,
+      });
     }
-  } catch (err) {
-    console.error("Error generating product sitemap entries:", err);
+  } catch (error) {
+    console.error(
+      "Error generating product sitemap entries:",
+      error,
+    );
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* 4. Return unique canonical URLs                                          */
+  /* ------------------------------------------------------------------------ */
 
   return entries;
 }
